@@ -1,0 +1,214 @@
+{
+ "bell_ring": {
+  "dur": 1.6,
+  "peak": 0.0
+ },
+ "blip_0": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_1": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_2": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_3": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_4": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_5": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_6": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_7": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "blip_8": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "chip_0": {
+  "dur": 0.28,
+  "peak": 0.0
+ },
+ "chip_1": {
+  "dur": 0.28,
+  "peak": 0.0
+ },
+ "chip_2": {
+  "dur": 0.28,
+  "peak": 0.0
+ },
+ "click": {
+  "dur": 0.1417,
+  "peak": 0.0
+ },
+ "coin_0": {
+  "dur": 0.9,
+  "peak": 0.0
+ },
+ "coin_1": {
+  "dur": 0.9,
+  "peak": 0.0
+ },
+ "coin_2": {
+  "dur": 0.9,
+  "peak": 0.0
+ },
+ "coin_3": {
+  "dur": 0.9,
+  "peak": 0.0
+ },
+ "ding": {
+  "dur": 1.6,
+  "peak": 0.0
+ },
+ "ding_hi": {
+  "dur": 1.2,
+  "peak": 0.0
+ },
+ "gauge_sweep": {
+  "dur": 1.0,
+  "peak": 0.45
+ },
+ "glitch": {
+  "dur": 0.5,
+  "peak": 0.0
+ },
+ "hit_big": {
+  "dur": 3.279,
+  "peak": 0.0
+ },
+ "hit_med": {
+  "dur": 2.1077,
+  "peak": 0.0
+ },
+ "hit_small": {
+  "dur": 1.1353,
+  "peak": 0.0
+ },
+ "icon_draw": {
+  "dur": 0.32,
+  "peak": 0.15
+ },
+ "lock": {
+  "dur": 1.5435,
+  "peak": 0.0
+ },
+ "out_m": {
+  "dur": 0.9,
+  "peak": 0.27
+ },
+ "out_s": {
+  "dur": 0.5,
+  "peak": 0.15
+ },
+ "out_xs": {
+  "dur": 0.22,
+  "peak": 0.066
+ },
+ "pin_land": {
+  "dur": 1.3556,
+  "peak": 0.0
+ },
+ "ping": {
+  "dur": 1.3,
+  "peak": 0.0
+ },
+ "ping_lo": {
+  "dur": 1.3,
+  "peak": 0.0
+ },
+ "pop": {
+  "dur": 0.4,
+  "peak": 0.0
+ },
+ "reverse_swell": {
+  "dur": 1.1,
+  "peak": 1.1
+ },
+ "rise_up": {
+  "dur": 0.9,
+  "peak": 0.495
+ },
+ "riser": {
+  "dur": 2.0,
+  "peak": 2.0
+ },
+ "riser_short": {
+  "dur": 1.0,
+  "peak": 1.0
+ },
+ "seam": {
+  "dur": 0.6,
+  "peak": 0.57
+ },
+ "shimmer": {
+  "dur": 2.6,
+  "peak": 1.0
+ },
+ "sink_down": {
+  "dur": 1.0,
+  "peak": 0.0
+ },
+ "stamp": {
+  "dur": 2.1892,
+  "peak": 0.0
+ },
+ "swish": {
+  "dur": 0.24,
+  "peak": 0.12
+ },
+ "swish_long": {
+  "dur": 0.55,
+  "peak": 0.275
+ },
+ "tick_0": {
+  "dur": 0.06,
+  "peak": 0.0
+ },
+ "tick_1": {
+  "dur": 0.06,
+  "peak": 0.0
+ },
+ "tick_2": {
+  "dur": 0.06,
+  "peak": 0.0
+ },
+ "wave_swell": {
+  "dur": 3.4,
+  "peak": 1.87
+ },
+ "whoosh_l": {
+  "dur": 1.4,
+  "peak": 0.77
+ },
+ "whoosh_m": {
+  "dur": 0.8,
+  "peak": 0.464
+ },
+ "whoosh_s": {
+  "dur": 0.45,
+  "peak": 0.27
+ },
+ "whoosh_xl": {
+  "dur": 2.4,
+  "peak": 1.248
+ },
+ "whoosh_xs": {
+  "dur": 0.22,
+  "peak": 0.121
+ }
+}

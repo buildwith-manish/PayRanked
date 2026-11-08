@@ -1,0 +1,39 @@
+{
+  "name": "payranked-video1",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio",
+    "still": "remotion still src/index.ts RankReveal-Arkansas out/arkansas.png --frame=450",
+    "stills": "bash scripts/stills.sh",
+    "typecheck": "tsc --noEmit",
+    "render:half": "remotion render src/index.ts Video1 out/video1-half.mp4 --scale=0.5",
+    "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --audio-codec=aac --audio-bitrate=256k",
+    "sfx": "python3 scripts/make_sfx.py",
+    "vo-envelope": "python3 scripts/vo_envelope.py"
+  },
+  "dependencies": {
+    "@react-three/fiber": "8.17.10",
+    "@remotion/cli": "4.0.250",
+    "@remotion/google-fonts": "4.0.250",
+    "@remotion/motion-blur": "4.0.250",
+    "@remotion/noise": "4.0.250",
+    "@remotion/shapes": "4.0.250",
+    "@remotion/three": "4.0.250",
+    "@remotion/transitions": "4.0.250",
+    "d3-geo": "^3.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.250",
+    "three": "0.169.0",
+    "topojson-client": "^3.1.0",
+    "us-atlas": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/d3-geo": "^3.1.0",
+    "@types/react": "^18.3.3",
+    "@types/topojson-client": "^3.1.5",
+    "typescript": "^5.5.4",
+    "@types/three": "0.169.0"
+  }
+}
