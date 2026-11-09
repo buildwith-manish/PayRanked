@@ -2,7 +2,7 @@
 """
 PayRanked music bed, composed and synthesised from scratch (nothing to license).
 
-    python3 scripts/make_music.py        # writes public/music.mp3 (9:02, 48 kHz stereo)
+    python3 scripts/make_music.py        # writes public/music.mp3 (9:02, 48 kHz stereo, 128 kbps)
 
 One piece in D minor at 96 BPM (a bar is 2.5 s, so the 25 / 30 / 35 s reveals are exactly 10 / 12 / 14 bars and every
 reveal starts on a downbeat). The key never changes: the SFX library's note ladders (blips, dings, bells) are all
@@ -541,7 +541,7 @@ def main():
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes((np.clip(mix, -1, 1) * 32767).astype('<i2').tobytes())
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', tmp, '-c:a', 'libmp3lame', '-b:a', '256k', OUT], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', tmp, '-c:a', 'libmp3lame', '-b:a', '128k', OUT], check=True)
     os.remove(tmp)
     print(f'{os.path.relpath(OUT)}  {os.path.getsize(OUT) / 1e6:.1f} MB')
 

@@ -150,7 +150,10 @@ export const Shot5: React.FC = () => {
   });
   // the interrupt: the map punches in and settles back on a glide
   const interruptZoom = 1.45 - 0.45 * tween(f, T.interrupt, 22, glide);
-  const mapScale = (f >= T.interrupt ? interruptZoom : 1) * interpolate(f, [0, SHOT5_FRAMES], [1, 1.03]);
+  // dead-air fix: after the interrupt settles, the map pushes in slowly through the dark hold (85s to 88s), so the
+  // picture is never still while the voice-over rests. It eases out just after the first light, so it never stops dead.
+  const holdPush = 1 + 0.06 * tween(f, T.interrupt + 20, T.lights - T.interrupt + 20, glide);
+  const mapScale = (f >= T.interrupt ? interruptZoom : 1) * holdPush * interpolate(f, [0, SHOT5_FRAMES], [1, 1.03]);
   const inverted = f >= T.interrupt && f < T.interrupt + 6;
 
   // bars phase: the bars are a semantic pair (mint, red); when the gap slams in they step back so it is the one accent

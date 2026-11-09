@@ -14,7 +14,8 @@
  */
 import {byName, gap, NO_WAGE_TAX, BOTTOM_FIVE} from '../data';
 import {coinsFor} from '../components/CoinStack';
-import {COUNT_DUR as REVEAL_COUNT, NAME_STEP, T as TR} from '../components/RankReveal';
+import {NAME_STEP, T as TR} from '../components/RankReveal';
+import {COUNT_DUR as REVEAL_COUNT} from '../timeline';
 import {
   COUNT_DUR as S1_COUNT,
   COUNT_START as S1_COUNT_START,
