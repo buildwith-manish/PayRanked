@@ -1,0 +1,206 @@
+name: Render & Upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      quality:
+        description: 'Quality (4K or 1080p)'
+        required: false
+        default: '4K'
+      upload_to_youtube:
+        description: 'Upload to YouTube after render (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Determine frame range for this job
+        id: clips
+        run: |
+          # Total frames: 32400 (16200 design frames × 2 for 60fps)
+          TOTAL=32400
+          GROUP=${{ matrix.group }}
+          NUM_GROUPS=40
+          PER_GROUP=$(( (TOTAL + NUM_GROUPS - 1) / NUM_GROUPS ))
+          START=$(( (GROUP - 1) * PER_GROUP ))
+          END=$(( START + PER_GROUP ))
+          if [ $END -gt $TOTAL ]; then
+            END=$TOTAL
+          fi
+          if [ $START -ge $TOTAL ]; then
+            START=0
+            END=0
+          fi
+          echo "start=$START" >> $GITHUB_OUTPUT
+          echo "end=$END" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "Group $GROUP: frames $START-$END of $TOTAL"
+
+      - name: Render clip
+        run: |
+          START=${{ steps.clips.outputs.start }}
+          END=${{ steps.clips.outputs.end }}
+          QUALITY="${{ inputs.quality }}"
+
+          mkdir -p out/clips
+
+          # Skip empty groups
+          if [ "$START" = "0" ] && [ "$END" = "0" ]; then
+            echo "Group ${{ matrix.group }}: no frames — skipping"
+            ffmpeg -f lavfi -i color=c=black:s=3840x2160:d=1/60 -c:v libx264 -y "out/clips/group-${{ matrix.group }}.mp4" 2>/dev/null
+            exit 0
+          fi
+
+          # Set scale: 4K = 2x (from remotion.config.ts), 1080p = 1x
+          SCALE_FLAG=""
+          if [ "$QUALITY" = "1080p" ]; then
+            SCALE_FLAG="--scale=1"
+          fi
+
+          echo "Rendering frames $START-$END at $QUALITY..."
+          npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
+            --frames=$START-$END \
+            --codec=h264 --crf=16 \
+            --x264-preset=ultrafast \
+            --audio-codec=aac --audio-bitrate=320k \
+            --concurrency=4 \
+            --log=error \
+            $SCALE_FLAG
+
+          echo "Done: $(ls -la out/clips/group-${{ matrix.group }}.mp4)"
+
+      - name: Upload clip
+        uses: actions/upload-artifact@v4
+        with:
+          name: clips-group-${{ matrix.group }}
+          path: out/clips/*.mp4
+          retention-days: 3
+
+  concat-and-upload:
+    needs: render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Download all clip artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-clips
+          pattern: clips-group-*
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Concatenate all clips
+        run: |
+          mkdir -p out/clips
+          if [ -d "all-clips" ]; then
+            find all-clips -type f -name "*.mp4" -exec cp {} out/clips/ \;
+          fi
+          echo "=== clips found ==="
+          ls out/clips/ | wc -l
+          if [ "$(ls out/clips/ | wc -l)" -eq 0 ]; then
+            echo "ERROR: No clips found!"
+            exit 1
+          fi
+
+          # Build concat list in group order (1-40), skip clips < 1s
+          > concat.txt
+          for i in $(seq 1 40); do
+            CLIP="out/clips/group-$i.mp4"
+            if [ -f "$CLIP" ]; then
+              DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$CLIP" 2>/dev/null || echo "0")
+              if (( $(echo "$DURATION > 1.0" | bc -l 2>/dev/null || echo 0) )); then
+                echo "file '$CLIP'" >> concat.txt
+                echo "  group-$i.mp4: ${DURATION}s — included"
+              else
+                echo "  group-$i.mp4: ${DURATION}s — SKIPPED"
+              fi
+            fi
+          done
+
+          echo ""
+          echo "Concatenating..."
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 320k -movflags +faststart final_video.mp4
+          ls -la final_video.mp4
+          ffprobe -v error -show_entries format=duration -of csv=p=0 final_video.mp4
+
+      - name: Upload final video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-video
+          path: final_video.mp4
+          retention-days: 7
+
+      - name: Upload to YouTube
+        if: ${{ inputs.upload_to_youtube == 'true' }}
+        env:
+          CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          TITLE: ${{ secrets.YOUTUBE_TITLE || 'What $100,000 Is Really Worth in Every State | PayRanked' }}
+          DESC: ${{ secrets.YOUTUBE_DESC || 'Where does $100,000 go the furthest? We ranked all 50 states by purchasing power. Comment your state below!' }}
+          TAGS: ${{ secrets.YOUTUBE_TAGS || 'salary,states,ranking,cost of living,purchasing power,us states,finance,data visualization,payranked' }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, os
+          if not os.environ.get('CLIENT_SECRET') or not os.environ.get('REFRESH_TOKEN'):
+              print("YouTube secrets not set — skipping upload (artifact is still available)")
+              exit(0)
+          cs = json.loads(os.environ['CLIENT_SECRET'])
+          info = cs.get("installed", cs.get("web", {}))
+          cid = info.get("client_id", "")
+          csec = info.get("client_secret", "")
+          r = subprocess.run(["curl", "-s", "-X", "POST", "https://oauth2.googleapis.com/token",
+              "-d", f"client_id={cid}", "-d", f"client_secret={csec}",
+              "-d", f"refresh_token={os.environ['REFRESH_TOKEN']}",
+              "-d", "grant_type=refresh_token"], capture_output=True, text=True)
+          at = json.loads(r.stdout).get("access_token", "")
+          if not at:
+              print("No access token"); exit(1)
+          print("Got token")
+          meta = {"snippet":{"title":os.environ['TITLE'],"description":os.environ['DESC'],
+                            "tags":os.environ['TAGS'].split(","),"categoryId":"24"},
+                  "status":{"privacyStatus":"private","selfDeclaredMadeForKids":False}}
+          r1 = subprocess.run(["curl", "-s", "-i", "-X", "POST",
+              "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+              "-H", f"Authorization: Bearer {at}", "-H", "Content-Type: application/json",
+              "-d", json.dumps(meta)], capture_output=True, text=True)
+          uu = None
+          for line in r1.stdout.split("\n"):
+              if line.lower().startswith("location:"): uu = line.split(":",1)[1].strip(); break
+          if not uu:
+              print("No upload URL"); exit(1)
+          print(f"Uploading {os.path.getsize('final_video.mp4')/1e6:.1f}MB...")
+          r2 = subprocess.run(["curl", "-s", "-X", "PUT", "-H", "Content-Type: video/mp4",
+              "--data-binary", "@final_video.mp4", uu], capture_output=True, text=True, timeout=3600)
+          try:
+              vid = json.loads(r2.stdout).get("id", "")
+              if vid: print(f"UPLOADED: https://www.youtube.com/watch?v={vid}")
+              else: print(f"Response: {r2.stdout[:200]}")
+          except: print(f"Response: {r2.stdout[:200]}")
+          PY

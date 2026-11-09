@@ -1,3 +1,7 @@
 node_modules
 out
 .DS_Store
+out/
+*.mp4
+!public/intro.mp4
+!public/music.mp3

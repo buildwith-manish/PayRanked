@@ -8,7 +8,7 @@
     "stills": "bash scripts/stills.sh",
     "typecheck": "tsc --noEmit",
     "render:half": "remotion render src/index.ts Video1 out/video1-half.mp4 --scale=0.5",
-    "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --audio-codec=aac --audio-bitrate=256k",
+    "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
     "sfx": "python3 scripts/make_sfx.py",
     "vo-envelope": "python3 scripts/vo_envelope.py",
     "music": "python3 scripts/make_music.py",
