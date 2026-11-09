@@ -18,9 +18,12 @@ import {COUNT_DUR as REVEAL_COUNT, NAME_STEP, T as TR} from '../components/RankR
 import {
   COUNT_DUR as S1_COUNT,
   COUNT_START as S1_COUNT_START,
+  EXPLAIN_START,
+  HEAD_START,
+  SEAM_START,
   SHAPE_START,
   SLAM as S1_SLAM,
-  SPLIT,
+  valueAt as s1ValueAt,
 } from '../shots/Shot1';
 import {SHOT3_FRAMES, T as T3} from '../shots/Shot3';
 import {T as T5} from '../shots/Shot5';
@@ -104,25 +107,16 @@ export const shot1Cues = (): Cue[] => {
   const k: Cue[] = [];
   const ark = byName('Arkansas');
   const cal = byName('California');
-  const sal = 100000;
-  const dollars = (target: number, startAt: number) => (f: number) => {
-    const v = f < startAt ? sal : sal + (target - sal) * roll(Math.min(1, Math.max(0, (f - startAt) / S1_COUNT)));
-    return coinsFor(v);
-  };
+  const dollars = (target: number, startAt: number) => (f: number) => coinsFor(s1ValueAt(f, target, startAt));
 
-  // 0-2s: grid draws outward, then the single $100,000 rolls up and lands
-  k.push(cue('shimmer', 36, 0.45));
-  k.push(cue('whoosh_xs', 12, 0.35));
-  k.push(...ticks(6, 28, 12, 0.4));
-  k.push(cue('hit_small', 34, 0.6));
-
-  // 2-6s: the number splits in two (squeeze, burst), the seam wipes the frame, the states appear
-  k.push(cue('whoosh_m', SPLIT + 15, 0.6));
-  k.push(cue('seam', SPLIT + 14, 0.5));
+  // 0-1s: a seam draws down the black frame, then the states land on it (the opening sting)
+  k.push(cue('whoosh_xs', 3, 0.3));
+  k.push(cue('seam', SEAM_START + 12, 0.5));
+  k.push(cue('whoosh_m', SEAM_START + 13, 0.6));
   k.push(cue('hit_big', SHAPE_START, 0.8, true));
   k.push(cue('swish', SHAPE_START + 20, 0.45));
 
-  // 6-14s: the counts land and the states climb and sink; coins pour in with them
+  // 1-4s: the payoff. The counts roll and land, the states climb and sink; coins pour in with them
   k.push(cue('rise_up', S1_COUNT_START + 26, 0.5));
   k.push(cue('sink_down', S1_COUNT_START + 16 + 18, 0.42));
   k.push(...ticks(S1_COUNT_START, S1_COUNT, 16, 0.42));
@@ -132,6 +126,10 @@ export const shot1Cues = (): Cue[] => {
   k.push(cue('hit_med', S1_COUNT_START + S1_COUNT, 0.85, true));
   k.push(cue('ding', S1_COUNT_START + S1_COUNT, 0.35));
   k.push(cue('hit_med', S1_COUNT_START + 16 + S1_COUNT, 0.85, true));
+
+  // 4-13s: the claim is written across the top as the second number lands, then one quiet line says why
+  k.push(cue('swish', HEAD_START, 0.35));
+  k.push(cue('swish', EXPLAIN_START, 0.25));
 
   // 14-20s: everything steps back, a riser builds under the drawn bracket, the gap slams in alone
   k.push(cue('out_m', sec(13.4) + 2, 0.5));

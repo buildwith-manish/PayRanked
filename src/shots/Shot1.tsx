@@ -11,68 +11,62 @@ import {Count} from '../components/Count';
 import {Odometer} from '../components/Odometer';
 import {MotionBlur} from '../components/MotionBlur';
 import {Flash, Letters, SourceTag} from '../components/common';
-import {byName, gap, SALARY} from '../data';
-import {anticipate, glide, ramp, roll, slam, snap, tween} from '../motion';
+import {MaskWords} from '../components/MaskText';
+import {byName, fmtUSD, gap, SALARY} from '../data';
+import {glide, ramp, roll, slam, snap, tween} from '../motion';
 import {C, F, H, W, clamp, mix, sec} from '../theme';
 
 export const SHOT1_FRAMES = sec(30);
 
 export const LX = 480; // centre of the left half
 export const RX = 1440; // centre of the right half
-export const COUNT_START = sec(6) + 10;
+export const SEAM_START = 2; // a seam draws down the black frame, then the states land on it
+export const SHAPE_START = 18;
+export const COUNT_START = 30; // the payoff: both numbers roll to their result straight away
 export const COUNT_DUR = 60;
+export const HEAD_START = 78; // the claim, in words, rises as the first number brakes (done by about 4s)
+export const EXPLAIN_START = sec(6.5); // then the one line that explains it
 export const SLAM = sec(14) + 24; // bracket draws first, then the gap slams in
-export const SPLIT = 58; // the one number splits in two
-export const SHAPE_START = 78;
+
+/** Value on a card: 0 to the result in one roll. A pure function of the frame so the odometer can also be given last frame's value, for the blur on its fast wheels. */
+export const valueAt = (f: number, target: number, startAt: number) => target * tween(f, startAt, COUNT_DUR, roll);
 
 /**
- * Value on a card: 0 to $100,000 on the first roll, then on to the result once the counts start. A pure function of
- * the frame so the odometer can also be given last frame's value, for the blur on its fast wheels.
- */
-const valueAt = (f: number, target: number, startAt: number) =>
-  f < startAt ? SALARY * tween(f, 6, 28, roll) : SALARY + (target - SALARY) * tween(f, startAt, COUNT_DUR, roll);
-
-/**
- * One idea at a time. 0-2s: a single $100,000 in the middle of the frame. 2-6s: it splits in two (one number
- * becomes the two states). 6-14s: the counts land and the states climb and sink; coins follow. 14-20s: everything
- * steps back so the gap is the only bright thing on screen. 20-30s: the chips, on a quiet frame.
+ * Payoff first, then the reason. 0-5s: the states land and climb or sink, both numbers roll to their result and the
+ * claim is written across the top ("$115,100 in Arkansas feels bigger than $90,300 in California"). 6.5-13s: one quiet
+ * line says why (same salary, different prices). 14-20s: everything steps back so the gap is the only bright thing
+ * on screen. 20-30s: the chips, on a quiet frame. Nothing from the gap onward moved.
  * Accent rule: mint and red are one semantic pair (cheap and costly) and only exist while the states are the
  * subject; the gap is amber on its own; the chips are neutral except the last.
  */
 const Card: React.FC<{side: -1 | 1; target: number; startAt: number}> = ({side, target, startAt}) => {
   const f = useCurrentFrame();
-  const place = (t: number) => {
-    const sp = tween(t, SPLIT, 34, anticipate); // squeeze together a touch, then burst apart
-    const down = tween(t, SPLIT, 34, glide);
-    return [W / 2 + side * (W / 2 - (side < 0 ? LX : W - RX)) * sp, 450 + 160 * down] as [number, number];
-  };
-  const [x, y] = place(f);
-  const [px, py] = place(f - 1);
-  const enter = tween(f, 4, 22, snap);
+  const enterAt = startAt - 4;
+  const x = side < 0 ? LX : RX;
+  const yAt = (t: number) => 610 + (1 - tween(t, enterAt, 22, snap)) * 50;
+  const y = yAt(f);
+  const py = yAt(f - 1);
+  const enter = tween(f, enterAt, 22, snap);
   const v = valueAt(f, target, startAt);
   const pv = valueAt(f - 1, target, startAt);
-  const firstLand = 6 + 28;
-  const secondLand = startAt + COUNT_DUR;
-  const since = f >= secondLand ? f - secondLand : f - firstLand;
-  const tone = clamp((f - sec(5.5)) / 10);
-  const color = tone > 0 ? mix(C.text, side < 0 ? C.mint : C.red, tone) : C.text;
-  const apart = f >= SPLIT + 12;
-  if (side > 0 && f < SPLIT + 2) return null; // the second card only exists once the number splits
+  const since = f - (startAt + COUNT_DUR);
+  const sideColor = side < 0 ? C.mint : C.red;
+  const color = mix(C.text, sideColor, clamp((f - (startAt + 24)) / 16));
   return (
-    <MotionBlur dx={x - px} dy={y - py} shutter={0.6} cap={46} style={{position: 'absolute', left: x - 320, top: y + Math.sin(f / 22 + side) * 3, width: 640, height: 180, pointerEvents: 'none'}}>
+    <MotionBlur dx={0} dy={y - py} shutter={0.6} cap={46} style={{position: 'absolute', left: x - 320, top: y + Math.sin(f / 22 + side) * 3, width: 640, height: 180, pointerEvents: 'none'}}>
       <Glass
         radius={28}
-        tint={apart ? (side < 0 ? C.mint : C.red) : C.text}
+        tint={sideColor}
         strength={1.1}
-        glow={apart ? 26 : 10}
+        glow={26}
         style={{
           width: 640,
           height: 180,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: ramp(f, 4, 12, glide),
-          transform: `scale(${0.86 + 0.14 * enter}) translateY(${(1 - enter) * 50}px)`,
+          opacity: ramp(f, enterAt, enterAt + 8, glide),
+          transform: `scale(${0.86 + 0.14 * enter})`,
         }}
       >
         <Odometer value={v} prevValue={pv} sinceLanding={since} size={112} color={color} prefix="$" />
@@ -94,15 +88,15 @@ export const Shot1: React.FC = () => {
   const sy = Math.cos(f * 3.1) * shake * 0.7;
   const punch = f >= SLAM ? 1 + 0.06 * Math.exp(-(f - SLAM) / 10) : 1;
 
-  // 0-2s: grid lines draw outward from the centre
-  const gridP = tween(f, 0, 40, glide);
-  const gridOpacity = interpolate(f, [30, 90], [0.3, 0.06], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  // 0-1s: grid lines draw outward from the centre, quickly, as texture rather than as the subject
+  const gridP = tween(f, 0, 30, glide);
+  const gridOpacity = interpolate(f, [20, 80], [0.3, 0.06], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const lines: number[] = [];
   for (let k = -6; k <= 6; k++) lines.push(k * 160);
 
-  // 2-6s: seam wipes the screen into a split
-  const seamP = tween(f, 60, 18, glide);
-  const splitTint = clamp((f - 70) / 20) * 0.1;
+  // 0-1s: a seam wipes the black frame into a split, and the states land on it
+  const seamP = tween(f, SEAM_START, SHAPE_START - SEAM_START, glide);
+  const splitTint = clamp((f - SHAPE_START) / 20) * 0.1;
 
   // beats: states step back for the gap (14-20s), then everything but the chips steps back (20s on)
   const rest = ramp(f, sec(13.4), sec(14.4), glide);
@@ -130,7 +124,7 @@ export const Shot1: React.FC = () => {
             {/* split tints and seam */}
             <div style={{position: 'absolute', left: 0, top: 0, width: W / 2, height: H, background: C.emerald, opacity: splitTint * (1 - rest)}} />
             <div style={{position: 'absolute', left: W / 2, top: 0, width: W / 2, height: H, background: C.red, opacity: splitTint * (1 - rest)}} />
-            {f >= 60 && (
+            {f >= SEAM_START && (
               <div
                 style={{
                   position: 'absolute',
@@ -140,7 +134,7 @@ export const Shot1: React.FC = () => {
                   height: H * seamP,
                   background: '#fff',
                   boxShadow: `0 0 40px 10px ${C.mint}`,
-                  opacity: interpolate(f, [78, 120], [1, 0.25], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) * (1 - rest),
+                  opacity: interpolate(f, [SHAPE_START, SHAPE_START + 42], [1, 0.25], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) * (1 - rest),
                 }}
               />
             )}
@@ -170,7 +164,7 @@ export const Shot1: React.FC = () => {
                 </>
               )}
 
-              {/* one $100,000 that splits into the two cards */}
+              {/* the payoff: both results, at once */}
               <Card side={-1} target={ark.display} startAt={COUNT_START} />
               <Card side={1} target={cal.display} startAt={COUNT_START + 16} />
 
@@ -185,6 +179,22 @@ export const Shot1: React.FC = () => {
                   </div>
                 </>
               )}
+            </div>
+
+            {/* 1-5s: the claim, written across the top. The two results take the data colours (mint cheap, red costly). */}
+            <div style={{position: 'absolute', left: 0, right: 0, top: 44, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.text, whiteSpace: 'nowrap'}}>
+              <MaskWords
+                text={`${fmtUSD(ark.display)} in Arkansas feels bigger than ${fmtUSD(cal.display)} in California`}
+                start={HEAD_START}
+                step={3}
+                leaveAt={sec(13.2)}
+                wordStyle={(_, i) => (i <= 2 ? {color: C.mint} : i >= 6 ? {color: C.red} : undefined)}
+              />
+            </div>
+
+            {/* 6.5-13s: the one-line reason, quiet and neutral, then it drops behind its line before the gap */}
+            <div style={{position: 'absolute', left: 0, right: 0, top: 830, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 44, color: C.muted}}>
+              <MaskWords text={`Same ${fmtUSD(SALARY)} salary. Different prices.`} start={EXPLAIN_START} step={5} leaveAt={sec(13)} />
             </div>
 
             {/* 14-20s: the gap is the only bright thing on the frame. Amber, alone. */}
@@ -229,11 +239,11 @@ export const Shot1: React.FC = () => {
           </AbsoluteFill>
         </Background>
 
-        <SourceTag opacity={clamp((f - 40) / 15)} />
+        <SourceTag opacity={clamp((f - 60) / 15)} />
         <Flash at={SLAM} duration={8} peak={0.6} />
         <Flash at={SHAPE_START} duration={6} peak={0.5} />
         {/* fade in from black at the start; hard cut to black at the end */}
-        <AbsoluteFill style={{background: '#000', opacity: f >= SHOT1_FRAMES - 4 ? 1 : interpolate(f, [0, 18], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none'}} />
+        <AbsoluteFill style={{background: '#000', opacity: f >= SHOT1_FRAMES - 4 ? 1 : interpolate(f, [0, 8], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none'}} />
       </AbsoluteFill>
     </Aberration>
   );
