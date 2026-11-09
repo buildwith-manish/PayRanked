@@ -8,7 +8,7 @@ npm install
 npm run vo-envelope      # once vo.wav is in public/: measures the voice so music and effects can duck against it
 npm run dev              # every composition now plays with sound. Try Shot1-ColdOpen and RankReveal-Arkansas first
 ```
-You still supply `intro.mp4`, `vo.wav` and `music.mp3` (see `public/README.txt`). While one is missing, set `vo` or
+You still supply `intro.mp4` and `vo.wav` (see `public/README.txt`). `music.mp3` is already in `public/`. While one is missing, set `vo` or
 `music` to `false` in `src/audio/config.ts`. Everything else is in the project already.
 
 Listen first: `audio-previews/` has the effects on their own (no voice, no music), cut from the real cue sheet.
@@ -67,3 +67,17 @@ music pump, a 3-frame look-ahead (the music is already down when the first word 
   library as a strong first pass: audition `audio-previews/`, then tell me which sounds feel wrong (too thin, too long,
   wrong pitch) and I will change the synthesis. If the full render clips, lower `sfxLevel`.
 - `music.mp3` is not looped, so it has to cover the whole video.
+
+## Music (`scripts/make_music.py` -> `public/music.mp3`, `npm run music`)
+Composed and synthesised from scratch, 9:02, nothing to license. One piece in D minor at 96 BPM: a bar is 2.5 s, so the
+25 / 30 / 35 s reveals are exactly 10 / 12 / 14 bars and every reveal starts on a downbeat. The key never changes, and
+every note the SFX ladders play (blips, dings, bells) sits inside D natural minor, so effects cannot clash with it.
+- Shot 1: ticking and sparse, builds under the counts, a snare roll into the gap slam, thin and alone under the amber number, groove for the chips.
+- 0:30 to 0:33: silent for your intro.
+- Shot 3: calm pad and plucks, a pulse that wakes at the formula, a build into the countdown.
+- Countdown: one engine that grows with each reveal (kick and bass, then hats, clap and arps, then the bell motif, then everything for #1).
+- Shot 5: airy wave, steady groove for the rows, a build, a one-beat drop-out on the interrupt (bar 34 starts exactly on it), bright while the states light up, then it settles.
+- Shot 6: warm recap, stripped for the next-video card, pad and arps on the end screen.
+Layers: detuned-saw pads, pulse bass, plucks through a ping-pong delay, FM bell motif, kick, clap, snare, hats, risers; pads, bass and plucks
+are sidechained to the kick. Final level about -16 dBFS RMS, peak -2.7 dBFS. `audio-previews/music-only-*.mp3` are excerpts.
+It is a synthesised bed, not a human-played recording: tell me what feels thin, too busy or off-mood and I will change the arrangement or sounds. Not yet heard by ear, and not yet mixed against a real voice-over.
