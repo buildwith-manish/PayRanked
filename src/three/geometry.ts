@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {toCreasedNormals} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {geoOf} from '../components/USMap';
 import {STATES} from '../data';
 import {toWorld} from './camera';
@@ -101,6 +102,34 @@ const decimate = (r: P[], min = 0.7): P[] => {
   return out;
 };
 
+/**
+ * Relaxes the pixel stair-steps out of a coastline: each point moves toward the midpoint of its neighbours
+ * ([1 2 1] / 4, two passes), except at corners and on long straight borders. Neighbouring states share the same border points, and the kernel is symmetric, so
+ * shared borders come out identical on both sides and no gaps open up between states.
+ */
+const smoothRing = (r: P[], passes = 2): P[] => {
+  // Corners and long straight borders must not move: only relax points on short, gently turning runs (a coastline).
+  const fixed = r.map((p, i) => {
+    const a = r[(i - 1 + r.length) % r.length];
+    const b = r[(i + 1) % r.length];
+    const la = Math.hypot(p[0] - a[0], p[1] - a[1]);
+    const lb = Math.hypot(b[0] - p[0], b[1] - p[1]);
+    if (Math.max(la, lb) > 4) return true;
+    const turn = Math.abs(Math.atan2(p[0] - a[0], p[1] - a[1]) - Math.atan2(b[0] - p[0], b[1] - p[1]));
+    return Math.min(turn, 2 * Math.PI - turn) > 1.25; // sharper than about 70 degrees is a real corner
+  });
+  let cur = r;
+  for (let k = 0; k < passes; k++) {
+    cur = cur.map((p, i) => {
+      if (fixed[i]) return p;
+      const a = cur[(i - 1 + cur.length) % cur.length];
+      const b = cur[(i + 1) % cur.length];
+      return [0.25 * a[0] + 0.5 * p[0] + 0.25 * b[0], 0.25 * a[1] + 0.5 * p[1] + 0.25 * b[1]] as P;
+    });
+  }
+  return cur;
+};
+
 export type StateGeo = {
   name: string;
   /** world z of the top face at full height */
@@ -126,7 +155,7 @@ export const stateGeo = (name: string): StateGeo | null => {
   if (cache.has(name)) return cache.get(name) ?? null;
   const g = geoOf(name);
   const rings = parseRings(g.d)
-    .map((r) => decimate(r))
+    .map((r) => smoothRing(decimate(r)))
     .filter((r) => r.length >= 3 && Math.abs(area(r)) >= 6)
     .sort((a, b) => Math.abs(area(b)) - Math.abs(area(a)));
   if (!rings.length) {
@@ -155,16 +184,38 @@ export const stateGeo = (name: string): StateGeo | null => {
   const top = topOf(name);
   const bottom = FLOOR;
   const depth = Math.max(2, top - bottom - 2 * BEVEL_THICK);
-  const geometry = new THREE.ExtrudeGeometry(shapes, {
+  const raw = new THREE.ExtrudeGeometry(shapes, {
     depth,
     bevelEnabled: true,
     bevelSize: BEVEL_SIZE,
     bevelOffset: -BEVEL_SIZE,
     bevelThickness: BEVEL_THICK,
-    bevelSegments: 2,
+    bevelSegments: 3,
     curveSegments: 1,
     steps: 1,
   });
+  // Smooth the shading along coastlines. ExtrudeGeometry gives every wall facet its own flat normal, so a jagged
+  // coast catches the light as vertical stripes. Blending normals across angles under 50 degrees removes the banding
+  // while the 90 degree edges (top face to wall) and real corners (state borders) stay crisp.
+  const geometry = toCreasedNormals(raw, Math.PI * (50 / 180)) as THREE.ExtrudeGeometry;
+  raw.dispose();
+  // Flat faces (the top and bottom caps) must stay exactly flat: averaging them with the bevel next to them made
+  // fan-shaped streaks across the big top faces. Reset every cap triangle to its true face normal.
+  {
+    const P = geometry.getAttribute('position');
+    const Nn = geometry.getAttribute('normal');
+    const a = new THREE.Vector3();
+    const b = new THREE.Vector3();
+    const c = new THREE.Vector3();
+    for (let i = 0; i + 2 < P.count; i += 3) {
+      a.fromBufferAttribute(P, i);
+      b.fromBufferAttribute(P, i + 1);
+      c.fromBufferAttribute(P, i + 2);
+      const n = b.sub(a).cross(c.sub(a)).normalize();
+      if (Math.abs(n.z) > 0.999) for (let k = 0; k < 3; k++) Nn.setXYZ(i + k, 0, 0, Math.sign(n.z));
+    }
+    Nn.needsUpdate = true;
+  }
 
   // rim outline, sitting on the wall-to-bevel edge (local z = depth)
   const pos: number[] = [];
