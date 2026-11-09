@@ -1,9 +1,10 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {C, F} from '../theme';
 import {glide, ramp, snap, trail, tween} from '../motion';
 import {Glass} from './Glass';
 import {MotionBlur} from './MotionBlur';
+import {useDesignFrame} from '../clock';
 
 /**
  * Glass chip. The box arrives on a `snap` curve (crisp, tiny overshoot) with directional motion blur while it travels;
@@ -23,7 +24,7 @@ export const Chip: React.FC<{
   /** colour of the rim and glow; defaults to the text colour. Pass the neutral text colour for a quiet chip. */
   tint?: string;
 }> = ({text, delay = 0, from = 'bottom', color = C.text, size = 40, pulse = false, tilt = 0, icon, tint}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const dist = 140;
   const dx = from === 'left' ? -dist : from === 'right' ? dist : 0;
   const dy = from === 'bottom' ? dist : from === 'top' ? -dist : 0;

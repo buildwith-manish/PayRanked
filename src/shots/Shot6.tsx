@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {AbsoluteFill} from 'remotion';
 import {Background} from '../components/Background';
 import {Glass} from '../components/Glass';
 import {MaskWords} from '../components/MaskText';
@@ -9,6 +9,7 @@ import {DrawIcon, IconKind} from '../components/Icons';
 import {SourceTag, win} from '../components/common';
 import {byName, fmtUSD, gap} from '../data';
 import {C, F, H, W, clamp, sec, tabular} from '../theme';
+import {useDesignFrame} from '../clock';
 
 export const SHOT6_FRAMES = sec(75); // 7:45 to 9:00
 
@@ -25,7 +26,7 @@ export const T = {
 export const BUTTON = {x: 1500, y: 560};
 
 export const Shot6: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const ark = byName('Arkansas');
   const cal = byName('California');
   const g = gap('Arkansas', 'California');

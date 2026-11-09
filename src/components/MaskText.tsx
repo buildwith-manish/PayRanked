@@ -1,6 +1,7 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {ramp, rise, stagger} from '../motion';
+import {K, useDesignFrame} from '../clock';
 
 /**
  * Mask reveal: the text starts below an invisible line and rises into view from behind it, with a slight skew that
@@ -18,14 +19,14 @@ export const MaskLine: React.FC<{
   /** also hide again: frame at which the text leaves back behind the line */
   leaveAt?: number;
 }> = ({children, start, dur = 18, from = 'up', skew = 5, style, leaveAt}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const inP = ramp(f, start, start + dur, rise);
   const outP = leaveAt === undefined ? 0 : ramp(f, leaveAt, leaveAt + Math.round(dur * 0.7), rise);
   const p = inP * (1 - outP);
   const dir = from === 'up' ? 1 : -1;
   // vertical blur while the line is travelling fast
   const prev = ramp(f - 1, start, start + dur, rise) * (1 - (leaveAt === undefined ? 0 : ramp(f - 1, leaveAt, leaveAt + Math.round(dur * 0.7), rise)));
-  const blur = Math.min(2.6, Math.abs(p - prev) * 90);
+  const blur = Math.min(2.6, Math.abs(p - prev) * (90 / K));
   return (
     <span style={{display: 'inline-block', overflow: 'hidden', verticalAlign: 'top', paddingTop: '0.12em', paddingBottom: '0.2em', marginTop: '-0.12em', marginBottom: '-0.2em', ...style}}>
       <span
@@ -89,7 +90,7 @@ export const MaskChars: React.FC<{
 
 /** A thin rule that draws from the left with the same curve, to sit under a masked line. */
 export const MaskRule: React.FC<{start: number; dur?: number; height?: number; color: string; style?: React.CSSProperties}> = ({start, dur = 22, height = 6, color, style}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const p = ramp(f, start, start + dur, rise);
   return <div style={{height, width: '100%', background: color, borderRadius: height / 2, transformOrigin: '0 50%', transform: `scaleX(${p})`, ...style}} />;
 };

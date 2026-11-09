@@ -1,6 +1,7 @@
 import React from 'react';
-import {useCurrentFrame, interpolate} from 'remotion';
+import {interpolate} from 'remotion';
 import {C} from '../theme';
+import {useDesignFrame} from '../clock';
 
 /** Vertical bracket between two y positions at x. Draws itself over `duration` frames. */
 export const Bracket: React.FC<{
@@ -12,7 +13,7 @@ export const Bracket: React.FC<{
   color?: string;
   depth?: number;
 }> = ({x, y1, y2, start = 0, duration = 20, color = C.amber, depth = 36}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const p = interpolate(frame, [start, start + duration], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const d = `M ${x} ${y1} q ${depth} 0 ${depth} ${depth} L ${x + depth} ${(y1 + y2) / 2 - depth} q 0 ${depth} ${depth} ${depth} q -${depth} 0 -${depth} ${depth} L ${x + depth} ${y2 - depth} q 0 ${depth} -${depth} ${depth}`;
   return (

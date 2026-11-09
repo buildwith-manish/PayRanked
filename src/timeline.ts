@@ -8,7 +8,7 @@ import {sec} from './theme';
  * timing that depends on when the count finishes.
  * (Formerly COUNT_DUR lived in RankReveal.tsx — moved here in fix/timing-colocation.)
  */
-export const COUNT_DUR = 54; // 54 frames = 1.8 s at 30 fps
+export const COUNT_DUR = 54; // 54 design frames = 1.8 s (all timings are on the 30 fps design clock, see clock.ts)
 
 /** Shortest reveal, in seconds (a normal single-state reveal). Ties and #1 add to it.
  *  RankReveal.tsx checks its beats (the dollar count at COUNT_DUR, the hand-over at T.panelOut/T.mapOut) against this

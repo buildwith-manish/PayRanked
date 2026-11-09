@@ -1,6 +1,7 @@
 import React, {useId} from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {blurLength} from '../motion';
+import {useDesignFrame} from '../clock';
 
 const safeId = (s: string) => 'mb' + s.replace(/[^a-zA-Z0-9_-]/g, '_');
 
@@ -41,7 +42,7 @@ export const MotionBlur: React.FC<{
  * the frame), and this returns how far it moved since the frame before: feed it straight into <MotionBlur>.
  */
 export const useVelocity = (pos: (frame: number) => [number, number]) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const [x1, y1] = pos(frame);
   const [x0, y0] = pos(frame - 1);
   return {dx: x1 - x0, dy: y1 - y0};

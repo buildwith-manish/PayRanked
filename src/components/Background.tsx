@@ -1,6 +1,7 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, random, useVideoConfig} from 'remotion';
 import {C, W, H} from '../theme';
+import {K, useDesignFrame} from '../clock';
 
 /** Navy gradient, drifting grid, pulsing emerald glow, vignette and film grain. Layers move at different speeds. */
 export const Background: React.FC<{
@@ -13,9 +14,9 @@ export const Background: React.FC<{
   /** Camera position in px (world units). Layers behind the action slide the opposite way at different rates, for parallax. */
   parallax?: [number, number];
 }> = ({glowX = W / 2, glowY = H / 2, glowColor = C.emerald, tint = 0, children, drift = true, parallax = [0, 0]}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const {durationInFrames} = useVideoConfig();
-  const camera = drift ? interpolate(frame, [0, durationInFrames], [1, 1.04], {extrapolateRight: 'clamp'}) : 1;
+  const camera = drift ? interpolate(frame, [0, durationInFrames / K], [1, 1.04], {extrapolateRight: 'clamp'}) : 1;
   const gridShift = (frame * 0.25) % 80;
   const pulse = 0.28 + 0.07 * Math.sin(frame / 14);
   return (

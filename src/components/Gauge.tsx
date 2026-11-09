@@ -1,7 +1,8 @@
 import React from 'react';
-import {interpolate, useCurrentFrame} from 'remotion';
+import {interpolate} from 'remotion';
 import {C, F, tabular} from '../theme';
 import {anticipate, glide, tween} from '../motion';
+import {useDesignFrame} from '../clock';
 
 const MIN = 80;
 const MAX = 120;
@@ -16,7 +17,7 @@ export const Gauge: React.FC<{
   label?: string;
   jitter?: boolean;
 }> = ({value, size = 640, tint = C.text, drawFrames = 30, label, jitter = false}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const r = size / 2 - 40;
   const cx = size / 2;
   const cy = size / 2;
@@ -76,7 +77,7 @@ export const Gauge: React.FC<{
  * across, overshoots and settles (the `anticipate` curve), instead of one spring preset for every move.
  */
 export const useNeedle = (targets: {at: number; value: number}[], startValue = MIN) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   let from = startValue;
   let current = startValue;
   for (const t of targets) {
@@ -91,7 +92,7 @@ export const useNeedle = (targets: {at: number; value: number}[], startValue = M
 
 /** Small gauge for BEA score chips. */
 export const MiniGauge: React.FC<{value: number; size?: number; color?: string; delay?: number}> = ({value, size = 150, color = C.mint, delay = 0}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const p = tween(frame, delay, 40, anticipate);
   return <Gauge value={MIN + (value - MIN) * p} size={size * 2} tint={color} drawFrames={20} />;
 };

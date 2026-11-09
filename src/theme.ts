@@ -1,12 +1,14 @@
 import {loadFont as loadPoppins} from '@remotion/google-fonts/Poppins';
 import {loadFont as loadInter} from '@remotion/google-fonts/Inter';
+import {DESIGN_FPS} from './clock';
+
+export {DESIGN_FPS, FPS} from './clock';
 
 export const poppins = loadPoppins('normal', {weights: ['500', '700']});
 export const inter = loadInter('normal', {weights: ['500']});
 
 export const W = 1920;
 export const H = 1080;
-export const FPS = 30;
 export const MARGIN = 96;
 
 export const C = {
@@ -32,7 +34,8 @@ export const springIn = {damping: 15, stiffness: 150, mass: 1};
 
 export const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 
-export const sec = (s: number) => Math.round(s * FPS);
+/** Seconds -> design frames (the 30 fps clock every timing is written in; see clock.ts). */
+export const sec = (s: number) => Math.round(s * DESIGN_FPS);
 
 export const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 

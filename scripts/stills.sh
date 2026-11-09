@@ -4,10 +4,11 @@
 set -euo pipefail
 mkdir -p out/stills
 
-still() { # still <composition> <frame...>
+K=2 # the video renders at 60 fps; the frame numbers below are 30 fps design frames (see src/clock.ts)
+still() { # still <composition> <design-frame...>
   local comp="$1"; shift
   for fr in "$@"; do
-    npx remotion still src/index.ts "$comp" "out/stills/${comp}-f${fr}.png" --frame="$fr"
+    npx remotion still src/index.ts "$comp" "out/stills/${comp}-f${fr}.png" --frame="$((fr * K))"
   done
 }
 

@@ -1,6 +1,7 @@
 import React, {useId, useMemo} from 'react';
-import {AbsoluteFill, random, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, random} from 'remotion';
 import {H, W} from '../theme';
+import {useDesignFrame} from '../clock';
 
 /** Turn the soft bloom off if renders are too slow; it is the most expensive part of the grade. */
 const BLOOM = true;
@@ -51,7 +52,7 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
 
 /** Faint out-of-focus dust and two aperture ghosts drifting at different speeds, plus a slow warm light leak. */
 export const LensDust: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const specks = useMemo(
     () =>
       Array.from({length: 24}, (_, i) => ({
@@ -106,7 +107,7 @@ export const LensDust: React.FC = () => {
  * channels split sideways by up to `peak` px and settle back over about 12 frames. Costs nothing when idle.
  */
 export const Aberration: React.FC<{at: number[]; peak?: number; children: React.ReactNode}> = ({at, peak = 9, children}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const id = safe('ca' + useId());
   let amt = 0;
   for (const a of at) if (f >= a && f < a + 14) amt += peak * Math.exp(-(f - a) / 4);

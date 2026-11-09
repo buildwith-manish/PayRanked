@@ -1,8 +1,9 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {C, F, MARGIN} from '../theme';
 import {glide, ramp, slam, stagger, trail, tween} from '../motion';
 import {Glass} from './Glass';
+import {useDesignFrame} from '../clock';
 
 export type RailEntry = {label: string; names: string[]; lockAt: number};
 
@@ -29,7 +30,7 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
   width = 370,
   open = 1,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const rowH = 72;
   const w = lerpN(SLIM, width, open);
   const byRank = new Map<number, RailEntry>();

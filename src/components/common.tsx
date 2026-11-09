@@ -1,16 +1,16 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, spring} from 'remotion';
 import {C, F, MARGIN, springIn} from '../theme';
 import {presence} from '../motion';
 import {MaskChars} from './MaskText';
+import {DESIGN_FPS, useDesignFrame} from '../clock';
 
 /** 0 -> 1 -> 0 visibility window in frames (fade in at start, fade out at end). */
 export const win = (f: number, start: number, end: number, fade = 10) => presence(f, start, end, fade, fade);
 
 export const useSpr = (delay = 0, config: {damping: number; stiffness: number; mass?: number} = springIn) => {
-  const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  return spring({frame: f - delay, fps, config});
+  const f = useDesignFrame();
+  return spring({frame: f - delay, fps: DESIGN_FPS, config});
 };
 
 /** Text that rises letter by letter from behind a mask line (was a fade + slide). */
@@ -20,7 +20,7 @@ export const Letters: React.FC<{text: string; start?: number; stagger?: number; 
 
 /** Short light flash that decays from frame `at`. */
 export const Flash: React.FC<{at: number; duration?: number; color?: string; peak?: number}> = ({at, duration = 8, color = '#ffffff', peak = 0.85}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   if (f < at) return null;
   const o = interpolate(f, [at, at + duration], [peak, 0], {extrapolateRight: 'clamp'});
   return <AbsoluteFill style={{background: color, opacity: o, pointerEvents: 'none'}} />;

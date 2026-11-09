@@ -16,6 +16,7 @@
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
 /** Cubic bezier easing, the same maths as CSS cubic-bezier() and After Effects' easy-ease handles. */
+import {K} from './clock';
 export const bezier = (x1: number, y1: number, x2: number, y2: number) => {
   const cx = 3 * x1;
   const bx = 3 * (x2 - x1) - cx;
@@ -152,7 +153,7 @@ export const speedOf = (fn: (frame: number) => number, frame: number) => Math.ab
  * Below `floor` px nothing is drawn, so slow moves stay perfectly sharp and cost nothing.
  */
 export const blurLength = (distancePx: number, shutter = 0.5, cap = 60, floor = 1.2) => {
-  const b = Math.abs(distancePx) * shutter;
+  const b = (Math.abs(distancePx) * shutter) / K; // distance is per 30 fps design frame; the shutter is open for one render frame
   return b < floor ? 0 : Math.min(cap, b);
 };
 

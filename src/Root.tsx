@@ -8,6 +8,7 @@ import {Shot5, SHOT5_FRAMES} from './shots/Shot5';
 import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
 import {C, FPS, H, W} from './theme';
+import {toReal} from './clock';
 import {COUNTDOWN_TOTAL, START, timeline} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
@@ -15,7 +16,7 @@ import {MasterAudio, SfxTrack} from './audio/Sfx';
 const Countdown: React.FC = () => (
   <AbsoluteFill>
     {timeline.map((t, i) => (
-      <Sequence key={t.label} from={t.from} durationInFrames={t.dur} name={`${t.label} ${t.names.join(' + ')}`}>
+      <Sequence key={t.label} from={toReal(t.from)} durationInFrames={toReal(t.dur)} name={`${t.label} ${t.names.join(' + ')}`}>
         <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} />
         <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
       </Sequence>
@@ -41,25 +42,25 @@ const Video1: React.FC = () => (
   <AbsoluteFill style={{backgroundColor: C.navy3}}>
     {/* voice-over and music bed (ducked by the voice, dipped on impacts); every sound effect is inside its shot's Sequence */}
     <MasterAudio />
-    <Sequence from={START.shot1} durationInFrames={SHOT1_FRAMES} name="Shot 1 Cold open">
+    <Sequence from={toReal(START.shot1)} durationInFrames={toReal(SHOT1_FRAMES)} name="Shot 1 Cold open">
       <Shot1 />
       <SfxTrack cues={CUES.shot1} offset={START.shot1} />
     </Sequence>
-    <Sequence from={START.shot2} durationInFrames={SHOT2_FRAMES} name="Shot 2 Intro">
+    <Sequence from={toReal(START.shot2)} durationInFrames={toReal(SHOT2_FRAMES)} name="Shot 2 Intro">
       <Shot2 />
     </Sequence>
-    <Sequence from={START.shot3} durationInFrames={SHOT3_FRAMES} name="Shot 3 Method">
+    <Sequence from={toReal(START.shot3)} durationInFrames={toReal(SHOT3_FRAMES)} name="Shot 3 Method">
       <Shot3 />
       <SfxTrack cues={CUES.shot3} offset={START.shot3} />
     </Sequence>
-    <Sequence from={START.shot4} durationInFrames={COUNTDOWN_TOTAL} name="Shot 4 Countdown">
+    <Sequence from={toReal(START.shot4)} durationInFrames={toReal(COUNTDOWN_TOTAL)} name="Shot 4 Countdown">
       <Countdown />
     </Sequence>
-    <Sequence from={START.shot5} durationInFrames={SHOT5_FRAMES} name="Shot 5 Reality check">
+    <Sequence from={toReal(START.shot5)} durationInFrames={toReal(SHOT5_FRAMES)} name="Shot 5 Reality check">
       <Shot5 />
       <SfxTrack cues={CUES.shot5} offset={START.shot5} />
     </Sequence>
-    <Sequence from={START.shot6} durationInFrames={SHOT6_FRAMES} name="Shot 6 Outro">
+    <Sequence from={toReal(START.shot6)} durationInFrames={toReal(SHOT6_FRAMES)} name="Shot 6 Outro">
       <Shot6 />
       <SfxTrack cues={CUES.shot6} offset={START.shot6} />
     </Sequence>
@@ -80,19 +81,19 @@ const common = {width: W, height: H, fps: FPS};
 
 export const Root: React.FC = () => (
   <>
-    <Composition id="Video1" component={Video1} durationInFrames={16200} {...common} />
-    <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={SHOT1_FRAMES} {...common} />
-    <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={SHOT2_FRAMES} {...common} />
-    <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={SHOT3_FRAMES} {...common} />
-    <Composition id="Shot4-Countdown" component={GradedCountdown} durationInFrames={COUNTDOWN_TOTAL} {...common} />
-    <Composition id="Shot5-RealityCheck" component={GradedShot5} durationInFrames={SHOT5_FRAMES} {...common} />
-    <Composition id="Shot6-Outro" component={GradedShot6} durationInFrames={SHOT6_FRAMES} {...common} />
+    <Composition id="Video1" component={Video1} durationInFrames={toReal(16200)} {...common} />
+    <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
+    <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
+    <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
+    <Composition id="Shot4-Countdown" component={GradedCountdown} durationInFrames={toReal(COUNTDOWN_TOTAL)} {...common} />
+    <Composition id="Shot5-RealityCheck" component={GradedShot5} durationInFrames={toReal(SHOT5_FRAMES)} {...common} />
+    <Composition id="Shot6-Outro" component={GradedShot6} durationInFrames={toReal(SHOT6_FRAMES)} {...common} />
     {timeline.map((t, i) => (
       <Composition
         key={t.label}
         id={`RankReveal-${t.names[0].replace(/\s+/g, '')}`}
         component={GradedReveals[i]}
-        durationInFrames={t.dur}
+        durationInFrames={toReal(t.dur)}
         {...common}
         defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore}}
       />

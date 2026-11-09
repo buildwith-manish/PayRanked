@@ -1,11 +1,12 @@
 import React, {useMemo} from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {ThreeCanvas} from '@remotion/three';
 import * as THREE from 'three';
 import {C, F} from '../theme';
 import {Env, Sync, radialTexture} from '../three/scene';
 import {drop, glide, tween} from '../motion';
 import {MotionBlur} from './MotionBlur';
+import {useDesignFrame} from '../clock';
 
 const COIN_T = 22; // thickness
 const PITCH = 25; // spacing between coins
@@ -41,7 +42,7 @@ export const CoinStack: React.FC<{
   refLineAt?: number;
   width?: number;
 }> = ({count, max = 14, appearAt = 0, color = C.mint, refLineAt, width = 170}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const {w, h} = box(max, width);
   const R = width / 2 - 8;
   const cx = width / 2 - w / 2; // stack sits at the left of the box, label room on the right

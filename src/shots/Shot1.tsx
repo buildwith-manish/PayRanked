@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, interpolate} from 'remotion';
 import {Background} from '../components/Background';
 import {ThreeCanvas} from '@remotion/three';
 import {Aberration} from '../components/Grade';
@@ -15,6 +15,7 @@ import {MaskWords} from '../components/MaskText';
 import {byName, fmtUSD, gap, SALARY} from '../data';
 import {glide, ramp, roll, slam, snap, tween} from '../motion';
 import {C, F, H, W, clamp, mix, sec} from '../theme';
+import {K, useDesignFrame} from '../clock';
 
 export const SHOT1_FRAMES = sec(30);
 
@@ -40,7 +41,7 @@ export const valueAt = (f: number, target: number, startAt: number) => target * 
  * subject; the gap is amber on its own; the chips are neutral except the last.
  */
 const Card: React.FC<{side: -1 | 1; target: number; startAt: number}> = ({side, target, startAt}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const enterAt = startAt - 4;
   const x = side < 0 ? LX : RX;
   const yAt = (t: number) => 610 + (1 - tween(t, enterAt, 22, snap)) * 50;
@@ -76,7 +77,7 @@ const Card: React.FC<{side: -1 | 1; target: number; startAt: number}> = ({side, 
 };
 
 export const Shot1: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const g = gap('Arkansas', 'California');
   const ark = byName('Arkansas');
   const cal = byName('California');
@@ -104,7 +105,7 @@ export const Shot1: React.FC = () => {
   const dimLineP = tween(f, sec(14), 24, glide);
   const gapP = (t: number) => tween(t, SLAM, 22, slam);
   const gapScale = (t: number) => 1 + 1.0 * (1 - gapP(t));
-  const gapBlur = Math.min(14, Math.abs(gapScale(f) - gapScale(f - 1)) * 18);
+  const gapBlur = Math.min(14, Math.abs(gapScale(f) - gapScale(f - 1)) * (18 / K));
 
   return (
     <Aberration at={[SHAPE_START, COUNT_START + COUNT_DUR, COUNT_START + 16 + COUNT_DUR, SLAM]} peak={8}>

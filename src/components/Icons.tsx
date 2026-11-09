@@ -1,6 +1,7 @@
 import React from 'react';
-import {interpolate, useCurrentFrame} from 'remotion';
+import {interpolate} from 'remotion';
 import {C} from '../theme';
+import {useDesignFrame} from '../clock';
 
 export type IconKind = 'pin' | 'percent' | 'tag' | 'bars' | 'buildings' | 'bell';
 
@@ -21,7 +22,7 @@ export const DrawIcon: React.FC<{kind: IconKind; start?: number; size?: number; 
   color = C.text,
   strokeWidth = 3.5,
 }) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{overflow: 'visible'}}>
       {PATHS[kind].map((d, i) => {

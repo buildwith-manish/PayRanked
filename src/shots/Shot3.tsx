@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {AbsoluteFill} from 'remotion';
 import {Background} from '../components/Background';
 import {Gauge, useNeedle} from '../components/Gauge';
 import {Count} from '../components/Count';
@@ -12,6 +12,7 @@ import {MotionBlur} from '../components/MotionBlur';
 import {glide, ramp, snap, tween} from '../motion';
 import {byName, fmtUSD, SALARY} from '../data';
 import {C, F, H, W, sec, tabular} from '../theme';
+import {useDesignFrame} from '../clock';
 
 export const SHOT3_FRAMES = sec(57); // 0:33 to 1:30
 
@@ -27,7 +28,7 @@ export const T = {
 
 /** Label under the gauge: rises from behind a line, holds, then drops back behind it. One label at a time. */
 const PopLabel: React.FC<{text: string; start: number; end: number; color: string}> = ({text, start, end, color}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   if (f < start || f > end + 20) return null;
   return (
     <div
@@ -53,7 +54,7 @@ const PopLabel: React.FC<{text: string; start: number; end: number; color: strin
 const DIRS: [number, number][] = [[-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1, -1], [1, 1], [-1, 1], [0, 1]];
 
 export const Shot3: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const cal = byName('California');
   const ark = byName('Arkansas');
 

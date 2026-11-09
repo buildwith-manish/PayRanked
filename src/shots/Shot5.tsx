@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, interpolate} from 'remotion';
 import {Background} from '../components/Background';
 import {USMap, GEO, MapGeo, geoOf} from '../components/USMap';
 import {Count} from '../components/Count';
@@ -12,6 +12,7 @@ import {exitIn, glide, ramp, slam, snap, stagger, tween} from '../motion';
 import {Flash, SourceTag, win} from '../components/common';
 import {BOTTOM_FIVE, NO_WAGE_TAX, STATES, byName, fmtUSD, gap} from '../data';
 import {C, F, H, MARGIN, W, mix, ordinal, sec, tabular} from '../theme';
+import {K, useDesignFrame} from '../clock';
 
 export const SHOT5_FRAMES = sec(130); // 5:35 to 7:45
 
@@ -36,7 +37,7 @@ const waveColor = (rpp: number) => mix(C.emerald, C.red, (rpp - ark.rpp) / (cal.
 const taxStates = NO_WAGE_TAX.map((name) => ({name, geo: geoOf(name)})).sort((a, b) => a.geo.centroid[0] - b.geo.centroid[0]);
 
 const Row: React.FC<{name: string; i: number}> = ({name, i}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const s = byName(name);
   const d = T.rows + stagger(i, 6);
   const isCal = name === 'California';
@@ -78,7 +79,7 @@ const Row: React.FC<{name: string; i: number}> = ({name, i}) => {
 };
 
 const BarCol: React.FC<{x: number; height: number; color: string; label: string; value: number; delay: number}> = ({x, height, color, label, value, delay}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   // the bar rises on a snap curve (small overshoot); its value follows the top edge and rolls a few frames later
   const p = tween(f, delay, 40, snap);
   const h = height * p;
@@ -99,7 +100,7 @@ const BarCol: React.FC<{x: number; height: number; color: string; label: string;
 };
 
 const InfoCard: React.FC<{start: number; end: number; children: React.ReactNode}> = ({start, end, children}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const inAt = (t: number) => tween(t, start, 24, glide);
   if (f < start || f > end) return null;
   const out = ramp(f, end - 12, end, exitIn);
@@ -125,7 +126,7 @@ const InfoCard: React.FC<{start: number; end: number; children: React.ReactNode}
 };
 
 export const Shot5: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const wa = byName('Washington');
   const tx = byName('Texas');
   const waRank = STATES.filter((s) => s.rpp > wa.rpp).length + 1;
@@ -161,7 +162,7 @@ export const Shot5: React.FC = () => {
   const hCal = hArk * (cal.dollars / ark.dollars);
   const pctAt = (t: number) => tween(t, T.bars + 40, 22, slam);
   const pctScale = (t: number) => 1 + 1.0 * (1 - pctAt(t));
-  const pctBlur = Math.min(14, Math.abs(pctScale(f) - pctScale(f - 1)) * 18);
+  const pctBlur = Math.min(14, Math.abs(pctScale(f) - pctScale(f - 1)) * (18 / K));
   const barsBack = ramp(f, T.bars + 40, T.bars + 58, glide);
 
   // lights phase: a smooth count of how many states have lit, so the number rolls instead of jumping

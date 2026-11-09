@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {AbsoluteFill} from 'remotion';
 import {Background} from './Background';
 import {geoOf} from './USMap';
 import {ThreeCanvas} from '@remotion/three';
@@ -23,6 +23,7 @@ import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
 // COUNT_DUR lives in timeline.ts so revealSeconds() stays in sync with the
 // count duration — changing one frame budget can't drift away from the other.
 import {COUNT_DUR, MIN_REVEAL_SECONDS} from '../timeline';
+import {K, useDesignFrame} from '../clock';
 
 export type RankRevealProps = {
   rankLabel: string; // "#10"
@@ -83,7 +84,7 @@ if (T.dollars + COUNT_DUR > T.panelOut || T.mapOut > sec(MIN_REVEAL_SECONDS)) {
  * roll on odometer wheels; fast moves carry directional motion blur measured from their real speed.
  */
 export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = []}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const states = names.map(byName);
   const tie = states.length > 1;
   const lead = states[0];
@@ -132,7 +133,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const slamScale = (f: number) => 1 + 1.2 * (1 - tween(f, 0, 26, slam));
   const travel = (f: number) => tween(f, T.fly, 46, glide);
   const rankScale = (f: number) => slamScale(f) * lerp(1, 0.2, travel(f));
-  const rankBlur = Math.min(16, Math.abs(rankScale(frame) - rankScale(frame - 1)) * 16);
+  const rankBlur = Math.min(16, Math.abs(rankScale(frame) - rankScale(frame - 1)) * (16 / K));
   const est = 0.65 * 520 * rankLabel.length; // rough width of the big label, to land its left edge on the panel edge
   const rankX = lerp(W / 2, PANEL_X + est * 0.1, travel(frame));
   const rankY = lerp(H / 2, 118, travel(frame));
@@ -404,7 +405,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
 /** TIE stamp: slams down from large with a hard overshoot. Mint, like everything else on the frame. */
 const TieStamp: React.FC<{at: number}> = ({at}) => {
-  const f = useCurrentFrame();
+  const f = useDesignFrame();
   const p = tween(f, at, 16, slam);
   return (
     <div

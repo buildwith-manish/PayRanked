@@ -1,8 +1,9 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+
 import {C} from '../theme';
 import {glide, roll as rollEase} from '../motion';
 import {Odometer} from './Odometer';
+import {useDesignFrame} from '../clock';
 
 /**
  * Number that rolls from `from` to `to` on odometer wheels (used to be a fading text count).
@@ -20,7 +21,7 @@ export const Count: React.FC<{
   glow?: number;
   style?: React.CSSProperties;
 }> = ({from = 0, to, start = 0, duration = 50, prefix = '$', suffix = '', size = 120, color, glow = 0, style}) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const v = countValue(frame, from, to, start, duration);
   const pv = countValue(frame - 1, from, to, start, duration);
   return (

@@ -2,8 +2,10 @@
 # Re-render the style frames and motion tests used in review/ (run on your own machine, from the project root).
 #   npm run review
 mkdir -p review/new && cd "$(dirname "$0")/.."
-still() { npx remotion still src/index.ts "$1" "review/new/$3.png" --frame="$2"; }
-clip()  { npx remotion render src/index.ts "$1" "review/new/$3.mp4" --frames="$2" --crf=18; }
+# Frame numbers below are 30 fps design frames; the video renders at 60 fps (see src/clock.ts), so they are doubled here.
+K=2
+still() { npx remotion still src/index.ts "$1" "review/new/$3.png" --frame="$(($2 * K))"; }
+clip()  { local a="${2%-*}" b="${2#*-}"; npx remotion render src/index.ts "$1" "review/new/$3.mp4" --frames="$((a * K))-$((b * K))" --crf=18; }
 # 1. static style frames
 still Shot1-ColdOpen 50 s1_number
 still Shot1-ColdOpen 140 s2_states
