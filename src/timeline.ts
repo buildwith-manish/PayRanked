@@ -10,10 +10,13 @@ import {sec} from './theme';
  */
 export const COUNT_DUR = 54; // 54 frames = 1.8 s at 30 fps
 
-/** Seconds per reveal: 25 normally, 30 for ties, 35 for #1.
- *  The reveal must be long enough for the dollar count (COUNT_DUR frames) to finish
- *  before the hand-over animation begins, so keep COUNT_DUR in mind if you change these. */
-export const revealSeconds = (names: string[], rank: number) => (rank === 1 ? 35 : names.length > 1 ? 30 : 25);
+/** Shortest reveal, in seconds (a normal single-state reveal). Ties and #1 add to it.
+ *  RankReveal.tsx checks its beats (the dollar count at COUNT_DUR, the hand-over at T.panelOut/T.mapOut) against this
+ *  at load time, so the beats cannot outgrow the reveal without the build failing. */
+export const MIN_REVEAL_SECONDS = 25;
+
+/** Seconds per reveal: 25 normally, 30 for ties, 35 for #1. */
+export const revealSeconds = (names: string[], rank: number) => MIN_REVEAL_SECONDS + (rank === 1 ? 10 : names.length > 1 ? 5 : 0);
 
 /** Every reveal in order, each carrying the rail entries locked in so far. */
 export const timeline = (() => {

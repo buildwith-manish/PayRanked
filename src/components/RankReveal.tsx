@@ -22,7 +22,7 @@ import {anticipate, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} fr
 import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
 // COUNT_DUR lives in timeline.ts so revealSeconds() stays in sync with the
 // count duration — changing one frame budget can't drift away from the other.
-import {COUNT_DUR} from '../timeline';
+import {COUNT_DUR, MIN_REVEAL_SECONDS} from '../timeline';
 
 export type RankRevealProps = {
   rankLabel: string; // "#10"
@@ -58,6 +58,16 @@ export const T = {
   lock: sec(21),
   mapOut: sec(23.2),
 };
+
+// Guard: the dollar count must finish before the hand-over, and every beat must fit inside the shortest reveal
+// (timeline.ts). If you change COUNT_DUR, a beat time above or revealSeconds(), this fails the build instead of
+// letting the rail timing and the audio cues drift apart.
+if (T.dollars + COUNT_DUR > T.panelOut || T.mapOut > sec(MIN_REVEAL_SECONDS)) {
+  throw new Error(
+    `RankReveal timing no longer fits: count ends at frame ${T.dollars + COUNT_DUR}, hand-over starts at ${T.panelOut}, ` +
+      `map leaves at ${T.mapOut}, shortest reveal is ${sec(MIN_REVEAL_SECONDS)} frames (timeline.ts).`,
+  );
+}
 
 /**
  * One countdown reveal, built as one idea at a time. Times (seconds) follow the brief:
