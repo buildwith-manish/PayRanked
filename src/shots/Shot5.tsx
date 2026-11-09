@@ -188,9 +188,9 @@ export const Shot5: React.FC = () => {
                     fontFamily: F.display,
                     fontWeight: 700,
                     fontSize: 22,
-                    color: C.text,
+                    color: C.navy3, // dark on amber: white on amber reads at about 1.5:1, this is about 11:1
                     whiteSpace: 'nowrap',
-                    textShadow: '0 2px 12px rgba(0,0,0,0.85)',
+                    textShadow: 'none',
                   }}
                 >
                   <MaskLine start={d} dur={16}>

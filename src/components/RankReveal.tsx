@@ -193,7 +193,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
               gl={{antialias: true, alpha: true, preserveDrawingBuffer: true}}
               style={{position: 'absolute', inset: 0}}
             >
-              <MapLights glow={{x: wx, y: wy, z: topZ + 150, color: C.mint, amount: dimOthers * 0.8}} />
+              <MapLights glow={{x: wx, y: wy, z: topZ + 150, color: C.mint, amount: dimOthers * 0.55}} />
               <CameraRig target={cam.target} dist={cam.dist} pitch={cam.pitch} yaw={cam.yaw} offsetX={cam.offsetX} />
               <Map3D frame={frame} highlight={names} dim={dimOthers} pop={pop} trace={trace} pulse={pulse} />
               {frame >= sec(2.4) &&
@@ -229,6 +229,17 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             }}
           />
         </AbsoluteFill>
+
+        {/* scrim: a dark falloff behind the text column so mint text never sits on a mint map (contrast) */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `linear-gradient(90deg, rgba(5,14,29,0) 30%, rgba(5,14,29,0.5) 62%, rgba(5,14,29,0.72) 100%)`,
+            opacity: ramp(frame, T.name - 24, T.name + 6, glide) * (1 - panelOut(frame)),
+          }}
+        />
 
         {/* the rank: slams in huge, then shrinks into a small label above the name */}
         <div

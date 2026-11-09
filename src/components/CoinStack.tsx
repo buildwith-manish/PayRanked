@@ -147,7 +147,7 @@ export const CoinStack: React.FC<{
         <div
           style={{
             position: 'absolute',
-            right: 0,
+            right: 150,
             top: labelY - 34,
             fontFamily: F.body,
             fontWeight: 500,
