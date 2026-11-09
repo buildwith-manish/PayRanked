@@ -20,6 +20,9 @@ import {byName, fmtUSD, SALARY} from '../data';
 import {SourceTag} from './common';
 import {anticipate, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} from '../motion';
 import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
+// COUNT_DUR lives in timeline.ts so revealSeconds() stays in sync with the
+// count duration — changing one frame budget can't drift away from the other.
+import {COUNT_DUR} from '../timeline';
 
 export type RankRevealProps = {
   rankLabel: string; // "#10"
@@ -41,9 +44,6 @@ const SMALL_STATE = 130;
 const FOCUS_X = W * 0.4;
 /** Left edge of the info panel. */
 const PANEL_X = W - MARGIN - 760;
-
-/** Frames the dollar count takes to roll (the sound cue sheet reads this too). */
-export const COUNT_DUR = 54;
 
 /** Frame numbers of every beat, in one place. They are the brief's timings, so the voice-over still lands on them. */
 export const T = {
