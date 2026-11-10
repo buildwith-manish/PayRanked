@@ -32,7 +32,10 @@ export const MotionBlur: React.FC<{
     <div style={{...style, filter: `url(#${id})`}}>
       <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
         <defs>
-          <filter id={id} x="-30%" y="-30%" width="160%" height="160%" colorInterpolationFilters="sRGB">
+          {/* Bug fix: old region (x="-30%" width="160%") clipped the blur trail on fast large elements
+              (rank slam, coin stacks, rising bars). 50% margin = 200% total gives enough room for any
+              realistic blur length without meaningfully increasing render cost. */}
+          <filter id={id} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
             <feGaussianBlur stdDeviation={`${bx} ${by}`} />
           </filter>
         </defs>
