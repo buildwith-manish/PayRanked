@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total": 302.5,
+  "total": 342.5,
   "shots": {
     "shot1": {
       "start": 0,
@@ -12,18 +12,18 @@
     },
     "shot3": {
       "start": 18,
-      "dur": 20
+      "dur": 60
     },
     "countdown": {
-      "start": 38,
+      "start": 78,
       "dur": 197.5
     },
     "shot5": {
-      "start": 235.5,
+      "start": 275.5,
       "dur": 44
     },
     "shot6": {
-      "start": 279.5,
+      "start": 319.5,
       "dur": 23
     }
   },
@@ -43,7 +43,10 @@
     "avg": 2.5,
     "toCal": 5,
     "formula": 9.5,
-    "rail": 16.5
+    "rail": 56.5,
+    "categories": 20,
+    "housing": 35,
+    "honesty": 50
   },
   "shot5": {
     "rows": 7,
