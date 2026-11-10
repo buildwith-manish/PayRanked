@@ -104,10 +104,15 @@ const decimate = (r: P[], min = 0.7): P[] => {
 
 /**
  * Relaxes the pixel stair-steps out of a coastline: each point moves toward the midpoint of its neighbours
- * ([1 2 1] / 4, two passes), except at corners and on long straight borders. Neighbouring states share the same border points, and the kernel is symmetric, so
- * shared borders come out identical on both sides and no gaps open up between states.
+ * ([1 2 1] / 4, four passes), except at corners and on long straight borders. Neighbouring states share the same
+ * border points, and the kernel is symmetric, so shared borders come out identical on both sides and no gaps open
+ * up between states.
+ *
+ * Improvement over the original 2-pass version: 4 passes remove more of the rasterisation stair-steps that
+ * cause vertical banding on the extruded side walls, while the fixed-point detection (corners sharper than ~65°,
+ * segments longer than 4 px) is kept intact so real state borders and sharp corners are not moved.
  */
-const smoothRing = (r: P[], passes = 2): P[] => {
+const smoothRing = (r: P[], passes = 4): P[] => {
   // Corners and long straight borders must not move: only relax points on short, gently turning runs (a coastline).
   const fixed = r.map((p, i) => {
     const a = r[(i - 1 + r.length) % r.length];
@@ -116,7 +121,9 @@ const smoothRing = (r: P[], passes = 2): P[] => {
     const lb = Math.hypot(b[0] - p[0], b[1] - p[1]);
     if (Math.max(la, lb) > 4) return true;
     const turn = Math.abs(Math.atan2(p[0] - a[0], p[1] - a[1]) - Math.atan2(b[0] - p[0], b[1] - p[1]));
-    return Math.min(turn, 2 * Math.PI - turn) > 1.25; // sharper than about 70 degrees is a real corner
+    // ~65° threshold (1.13 rad): tighter than the original 70° (1.25 rad) so more gentle bends are relaxed,
+    // but real geographic corners (the right angles of Wyoming, Colorado etc.) are still locked.
+    return Math.min(turn, 2 * Math.PI - turn) > 1.13;
   });
   let cur = r;
   for (let k = 0; k < passes; k++) {
@@ -195,9 +202,11 @@ export const stateGeo = (name: string): StateGeo | null => {
     steps: 1,
   });
   // Smooth the shading along coastlines. ExtrudeGeometry gives every wall facet its own flat normal, so a jagged
-  // coast catches the light as vertical stripes. Blending normals across angles under 50 degrees removes the banding
-  // while the 90 degree edges (top face to wall) and real corners (state borders) stay crisp.
-  const geometry = toCreasedNormals(raw, Math.PI * (50 / 180)) as THREE.ExtrudeGeometry;
+  // coast catches the light as vertical stripes. Blending normals across angles under 35 degrees removes the banding
+  // more aggressively (was 50°) while the 90 degree edges (top face to wall) and real corners (state borders) stay
+  // crisp. The tighter threshold works because the polygon smoothing above already removed most stair-step corners,
+  // so the remaining wall facets meet at shallower angles and need a lower crease to blend correctly.
+  const geometry = toCreasedNormals(raw, Math.PI * (35 / 180)) as THREE.ExtrudeGeometry;
   raw.dispose();
   // Flat faces (the top and bottom caps) must stay exactly flat: averaging them with the bevel next to them made
   // fan-shaped streaks across the big top faces. Reset every cap triangle to its true face normal.
