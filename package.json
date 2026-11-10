@@ -7,6 +7,7 @@
     "still": "remotion still src/index.ts RankReveal-Arkansas out/arkansas.png --frame=900",
     "stills": "bash scripts/stills.sh",
     "typecheck": "tsc --noEmit",
+    "camera-check": "node scripts/camera-check.mjs",
     "render:half": "remotion render src/index.ts Video1 out/video1-half.mp4 --scale=0.5",
     "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
     "sfx": "python3 scripts/make_sfx.py",
