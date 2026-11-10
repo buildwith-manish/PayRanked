@@ -31,14 +31,14 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
               <feGaussianBlur in="hot" stdDeviation="7" result="bloomA" />
               <feGaussianBlur in="hot" stdDeviation="16" result="bloomB" />
               <feComponentTransfer in="bloomA" result="bloomA2">
-                <feFuncR type="linear" slope="0.45" />
-                <feFuncG type="linear" slope="0.45" />
-                <feFuncB type="linear" slope="0.45" />
+                <feFuncR type="linear" slope="0.25" />
+                <feFuncG type="linear" slope="0.25" />
+                <feFuncB type="linear" slope="0.25" />
               </feComponentTransfer>
               <feComponentTransfer in="bloomB" result="bloomB2">
-                <feFuncR type="linear" slope="0.7" />
-                <feFuncG type="linear" slope="0.7" />
-                <feFuncB type="linear" slope="0.7" />
+                <feFuncR type="linear" slope="0.4" />
+                <feFuncG type="linear" slope="0.4" />
+                <feFuncB type="linear" slope="0.4" />
               </feComponentTransfer>
               <feBlend in="SourceGraphic" in2="bloomA2" mode="screen" result="b1" />
               <feBlend in="b1" in2="bloomB2" mode="screen" result="lit" />

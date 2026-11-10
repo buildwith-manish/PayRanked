@@ -18,22 +18,25 @@ const FADE_OUT = 8;  // 0.27 s dissolve to black at the end — smoother than th
  * its first frame, like the slams elsewhere) and a gentle vignette to pull its edges toward the rest of the piece; the
  * whole-video Grade in Root already covers the colour.
  *
- * Transitions: the intro FADES IN from black (matching Shot 1's fade-out so the handoff is seamless — no 0.13 s
+ * Transitions: the intro FADES IN via clip opacity (the main video's navy background shows through — no dead black screen) (matching Shot 1's fade-out so the handoff is seamless — no 0.13 s
  * of dead black, no sudden pop of the intro clip), and FADES OUT to black at the end (matching Shot 3's fade-in
  * from black). The clip's own audio is untouched by both fades.
  */
 export const Shot2: React.FC = () => {
   const f = useDesignFrame();
-  const fadeIn = 1 - ramp(f, 0, FADE_IN, glide);          // 1 -> 0 over FADE_IN frames
-  const dissolve = ramp(f, SHOT2_FRAMES - FADE_OUT, SHOT2_FRAMES, glide);  // 0 -> 1 over FADE_OUT frames
-  const blackOpacity = Math.max(fadeIn, dissolve);         // whichever fade is active
+  // The intro clip fades in/out using its own opacity (not a black overlay), so the main video's
+  // navy background shows through during the transition — no dead black screen.
+  const fadeIn = ramp(f, 0, FADE_IN, glide);               // 0 -> 1 (clip opacity rises)
+  const fadeOut = 1 - ramp(f, SHOT2_FRAMES - FADE_OUT, SHOT2_FRAMES, glide);  // 1 -> 0 (clip opacity falls)
+  const clipOpacity = Math.min(fadeIn, fadeOut);            // whichever fade is active
   return (
-    <AbsoluteFill style={{backgroundColor: '#000'}}>
+    <AbsoluteFill style={{background: 'linear-gradient(160deg, #143A66 0%, #0A1D38 55%, #050E1D 100%)'}}>
       <Aberration at={[0]} peak={7}>
-        <OffthreadVideo src={staticFile('intro.mp4')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+        <AbsoluteFill style={{opacity: clipOpacity}}>
+          <OffthreadVideo src={staticFile('intro.mp4')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+        </AbsoluteFill>
       </Aberration>
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.15) 100%)', pointerEvents: 'none'}} />
-      <AbsoluteFill style={{backgroundColor: '#000', opacity: blackOpacity, pointerEvents: 'none'}} />
+      <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.10) 100%)', pointerEvents: 'none'}} />
     </AbsoluteFill>
   );
 };

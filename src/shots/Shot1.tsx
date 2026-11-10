@@ -387,8 +387,8 @@ export const Shot1: React.FC = () => {
         <SourceTag opacity={clamp((f - 60) / 15)} />
         <Flash at={SLAM} duration={8} peak={0.6} />
         <Flash at={SHAPE_START} duration={6} peak={0.5} />
-        {/* fade in from black at the start; hard cut to black at the end */}
-        <AbsoluteFill style={{background: '#000', opacity: f >= SHOT1_FRAMES - 6 ? 1 : interpolate(f, [0, 8], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none'}} />
+        {/* fade in from black at the start; fade to navy at the end (matches the main background, not dead black) */}
+        <AbsoluteFill style={{opacity: f >= SHOT1_FRAMES - 6 ? 1 : interpolate(f, [0, 8], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none', background: 'linear-gradient(160deg, #143A66 0%, #0A1D38 55%, #050E1D 100%)'}} />
       </AbsoluteFill>
     </Aberration>
   );
