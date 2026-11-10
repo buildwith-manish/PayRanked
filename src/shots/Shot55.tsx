@@ -182,6 +182,7 @@ export const Shot55: React.FC = () => {
             <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 36, color: C.amber, letterSpacing: '0.18em'}}>
               <MaskLine start={T.formula} dur={18}>YOUR TURN</MaskLine>
             </div>
+            {/* two rows, never wrapping: on one line the equation is about 2100 px wide, so flex squeezed it, clipped the "$" and broke "(RPP ÷ 100)" */}
             <div
               style={{
                 fontFamily: F.display,
@@ -189,20 +190,24 @@ export const Shot55: React.FC = () => {
                 fontSize: 80,
                 color: C.text,
                 display: 'flex',
-                alignItems: 'baseline',
-                gap: 22,
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 14,
+                whiteSpace: 'nowrap',
                 ...tabular,
               }}
             >
-              <span style={{color: C.mint, opacity: ramp(f, T.formula + 6, T.formula + 14)}}>
-                <Count to={SALARY} start={T.formula + 6} duration={40} size={80} color={C.mint} prefix="$" />
-              </span>
-              <span style={{color: C.muted, opacity: ramp(f, T.formula + 12, T.formula + 18)}}>÷</span>
-              <span style={{opacity: ramp(f, T.formula + 16, T.formula + 22)}}>(RPP ÷ 100)</span>
-              <span style={{color: C.muted, opacity: ramp(f, T.formula + 22, T.formula + 28)}}>=</span>
-              <span style={{color: C.amber, opacity: ramp(f, T.formula + 28, T.formula + 36)}}>
-                your real buying power
-              </span>
+              <div style={{display: 'flex', alignItems: 'baseline', gap: 26, flexShrink: 0}}>
+                <span style={{color: C.mint, opacity: ramp(f, T.formula + 6, T.formula + 14), flexShrink: 0}}>
+                  <Count to={SALARY} start={T.formula + 6} duration={40} size={80} color={C.mint} prefix="$" />
+                </span>
+                <span style={{color: C.muted, opacity: ramp(f, T.formula + 12, T.formula + 18), flexShrink: 0}}>÷</span>
+                <span style={{opacity: ramp(f, T.formula + 16, T.formula + 22), flexShrink: 0}}>(RPP ÷ 100)</span>
+              </div>
+              <div style={{display: 'flex', alignItems: 'baseline', gap: 26, flexShrink: 0}}>
+                <span style={{color: C.muted, opacity: ramp(f, T.formula + 22, T.formula + 28), flexShrink: 0}}>=</span>
+                <span style={{color: C.amber, opacity: ramp(f, T.formula + 28, T.formula + 36), flexShrink: 0}}>your real buying power</span>
+              </div>
             </div>
             <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 38, color: C.muted, textAlign: 'center', maxWidth: 1200, opacity: ramp(f, T.formula + 36, T.formula + 48)}}>
               Plug in your salary and your state's BEA score. That's what your money actually buys.
