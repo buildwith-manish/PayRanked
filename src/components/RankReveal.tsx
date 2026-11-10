@@ -57,13 +57,19 @@ const FOCUS_X = W * 0.4;
 /** Left edge of the info panel. */
 const PANEL_X = W - MARGIN - 760;
 
-/** Frame numbers of every beat, in one place. They are the brief's timings, so the voice-over still lands on them. */
+/** Frame numbers of every beat, in one place. They are the brief's timings, so the voice-over still lands on them.
+ *
+ * BEA beat (6-10s → 6-8s): shortened from 4 s to 2 s. The chip and gauge read in about 1.5 s; the extra 2 s was
+ * dead air. The freed 2 s moves to the dollar roll (8 s → 10 s start), giving the number and coins more room to
+ * breathe — the dollar count is the actual payoff and previously felt rushed relative to the BEA setup.
+ * The formula line ($100,000 ÷ index) was cut at the same time: it had no visual emphasis (plain MaskLine at the
+ * bottom of the panel) and added no information the chip score and gauge didn't already carry. */
 export const T = {
   slam: 0,
   fly: sec(1),
   name: sec(3),
   bea: sec(6),
-  dollars: sec(10),
+  dollars: sec(8),   // was sec(10): BEA beat shortened by 2 s, time moved here
   fact: sec(15),
   panelOut: sec(20.2),
   railOpen: sec(20.4),
@@ -76,13 +82,14 @@ export const T = {
 /**
  * The same beats, in the same order, in 15 s instead of 25. Used for #10 to #6 so the countdown escalates: the early
  * reveals move, the last ones (#5 to #1) take their full time. Nothing is removed; every gap between beats is shorter.
+ * BEA beat also shortened here by the same ratio (4.2 s → 4.6 s instead of 6.6 s, saving 0.4 s of dead air).
  */
 export const T_FAST: typeof T = {
   slam: 0,
   fly: sec(0.8),
   name: sec(2.6),
   bea: sec(4.2),
-  dollars: sec(6.6),
+  dollars: sec(4.6),  // was sec(6.6): BEA beat shortened, time moved here
   fact: sec(8.8),
   panelOut: sec(12.6),
   railOpen: sec(12.8),
@@ -378,10 +385,16 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 )}
               </div>
 
-              {/* BEA score (6-10s): chip, gauge and formula, the only thing on stage */}
+              {/* BEA score (6-8s): chip and gauge — the only things on stage.
+                  Formula line removed: it was a plain MaskLine at the bottom of the panel with no visual
+                  emphasis; the chip score and gauge already carry the same information with more impact.
+                  Gauge: previously clipped to 240×140 with a translate(-30,-30) offset that pushed it
+                  partially out of its own overflow:hidden box — it was only partially visible. Now rendered
+                  at its natural size (MiniGauge renders Gauge at size*2 = 300px svg, viewBox-fit to 150px
+                  display) with no clip, so the full semicircle and needle read clearly. */}
               {frame >= T.bea && frame < T.dollars + 20 && (
                 <MotionBlur dy={-40 * (beaOut - tween(frame - 1, T.dollars, 18, exitIn))} style={{position: 'absolute', left: 0, top: 410, width: 760, opacity: 1 - beaOut, transform: `translateY(${-40 * beaOut}px)`}}>
-                  <div style={{display: 'flex', alignItems: 'center', gap: 32}}>
+                  <div style={{display: 'flex', alignItems: 'center', gap: 48}}>
                     <MotionBlur dx={90 * (chipP(frame) - chipP(frame - 1)) * -1}>
                       <Glass
                         radius={22}
@@ -403,17 +416,10 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                         BEA {lead.rpp.toFixed(1)}
                       </Glass>
                     </MotionBlur>
-                    {/* the gauge trails the chip by 6 frames */}
-                    <div style={{width: 240, height: 140, overflow: 'hidden', opacity: ramp(frame, T.bea + 10, T.bea + 20, glide)}}>
-                      <div style={{transform: 'translate(-30px, -30px)'}}>
-                        <MiniGauge value={lead.rpp} size={150} delay={T.bea + 10} />
-                      </div>
+                    {/* gauge trails the chip by 6 frames; rendered unclipped so the full semicircle is visible */}
+                    <div style={{opacity: ramp(frame, T.bea + 10, T.bea + 20, glide)}}>
+                      <MiniGauge value={lead.rpp} size={150} delay={T.bea + 10} />
                     </div>
-                  </div>
-                  <div style={{marginTop: 18, fontFamily: F.body, fontWeight: 500, fontSize: 44, color: C.muted, ...tabular}}>
-                    <MaskLine start={T.bea + 12} dur={20}>
-                      {fmtUSD(SALARY)} ÷ {((lead.rppExact ?? lead.rpp) / 100).toFixed(4)}
-                    </MaskLine>
                   </div>
                 </MotionBlur>
               )}
