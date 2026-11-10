@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PayRanked – Channel Intro v5</title>
+<style>
+@font-face{font-family:'Clash Display';src:url('/fonts/fontshare/clash-display/ClashDisplay-Variable.woff2') format('woff2-variations');font-weight:200 700;font-display:swap}
+@font-face{font-family:'Satoshi';src:url('/fonts/fontshare/satoshi/Satoshi-Variable.woff2') format('woff2-variations');font-weight:300 900;font-display:swap}
+</style>
+<style>
+:root{--bg:#eef2f8;--fg:#0b1a2e;--mut:#51637a;--card:#fff;--line:#d5deea;--acc:#0fa86a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#060d18;--fg:#e8eef7;--mut:#8da2bb;--card:#0c1626;--line:#1c2b42;--acc:#3df0a8}}
+:root[data-theme="dark"]{--bg:#060d18;--fg:#e8eef7;--mut:#8da2bb;--card:#0c1626;--line:#1c2b42;--acc:#3df0a8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Satoshi',system-ui,sans-serif;min-height:100vh}
+main{max-width:1100px;margin:0 auto;padding:28px 18px 40px}
+h1{font:700 22px 'Clash Display',system-ui,sans-serif;margin:0 0 4px;letter-spacing:-.3px}
+p.sub{margin:0 0 18px;color:var(--mut);font-size:14px}
+.stage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#050e1d;aspect-ratio:16/9}
+.stage svg{display:block;width:100%;height:100%}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+button{font:600 14px 'Satoshi',system-ui,sans-serif;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#19c37d;color:#04121f}
+button.alt{background:transparent;color:var(--fg);border:1px solid var(--line)}
+input[type=range]{flex:1;min-width:160px;accent-color:#19c37d}
+label{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center}
+#tm{font-variant-numeric:tabular-nums;font-size:13px;color:var(--mut);min-width:84px;text-align:right}
+.tl{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tl div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--mut);line-height:1.45}
+.tl b{display:block;color:var(--fg);font-size:13px;margin-bottom:2px}
+.tl span{color:var(--acc);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>PayRanked intro · motion blur</h1>
+<p class="sub">Real sub-frame motion blur on every moving part, plus a layered sound design. Play with sound.</p>
+<div class="stage">
+<svg id="svg" text-rendering="geometricPrecision" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bgG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1280" y2="720"><stop offset="0" stop-color="#143A66"/><stop offset=".55" stop-color="#0A1D38"/><stop offset="1" stop-color="#050E1D"/></linearGradient>
+<radialGradient id="glE" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="440"><stop offset="0" stop-color="#19C37D" stop-opacity=".27"/><stop offset=".45" stop-color="#19C37D" stop-opacity=".07"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<!-- glB (blue top-left glow) removed — not in PayRanked palette -->
+<linearGradient id="pf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFE3F5"/></linearGradient>
+<linearGradient id="bf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3DF0A8"/><stop offset="1" stop-color="#0FA86A"/></linearGradient>
+<linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#143A66"/><stop offset=".55" stop-color="#0A1D38"/><stop offset="1" stop-color="#050E1D"/></linearGradient>
+<radialGradient id="tg" cx=".8" cy=".85" r=".7"><stop offset="0" stop-color="#19C37D" stop-opacity=".5"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<linearGradient id="wt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D3E5F6"/></linearGradient>
+<linearGradient id="shg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="gR" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="800" y2="0"><stop id="sR0" offset="0" stop-color="#19C37D"/><stop id="sR1" offset="1" stop-color="#4BF5B0"/></linearGradient>
+<linearGradient id="stg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9FFFD6" stop-opacity="0"/><stop offset=".5" stop-color="#EFFFF8" stop-opacity="1"/><stop offset="1" stop-color="#9FFFD6" stop-opacity="0"/></linearGradient>
+<radialGradient id="tg2"><stop offset="0" stop-color="#19C37D" stop-opacity=".55"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<radialGradient id="gmg" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="720"><stop offset=".28" stop-color="#000"/><stop offset="1" stop-color="#fff"/></radialGradient>
+<mask id="gm" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720"><rect width="1280" height="720" fill="url(#gmg)"/></mask>
+<radialGradient id="vg" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="860"><stop offset=".5" stop-color="#02060E" stop-opacity="0"/><stop offset="1" stop-color="#02060E" stop-opacity=".62"/></radialGradient>
+<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" stroke-opacity=".04" stroke-width="1.5"/></pattern>
+<mask id="pm" maskUnits="userSpaceOnUse" x="0" y="0" width="800" height="800"><path id="drw" d="M307 640V206H420A104 104 0 0 1 420 414H330" fill="none" stroke="#fff" stroke-width="150" stroke-linejoin="round" stroke-dasharray="1000" stroke-dashoffset="1000"/></mask>
+<clipPath id="wc"><rect id="wcr" x="0" y="0" width="0" height="300"/></clipPath>
+<radialGradient id="glE2"><stop offset="0" stop-color="#19C37D" stop-opacity=".27"/><stop offset=".45" stop-color="#19C37D" stop-opacity=".07"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<clipPath id="tc"></clipPath>
+<g id="mark">
+<g mask="url(#pm)"><path d="M262 182H420A128 128 0 0 1 420 438H353V618H262ZM353 230H420A80 80 0 0 1 420 390H353Z" fill-rule="evenodd" fill="url(#pf)" stroke="url(#pf)" stroke-width="24" stroke-linejoin="round"/></g>
+<rect id="b0" x="382" width="22" rx="7" fill="url(#bf)" opacity=".62"/>
+<rect id="b1" x="416" width="22" rx="7" fill="url(#bf)" opacity=".82"/>
+<rect id="b2" x="450" width="22" rx="7" fill="url(#bf)"/>
+</g>
+<linearGradient id="tgl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="mb" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="mbs" stdDeviation="0 0"/></filter>
+</defs>
+<g id="cam">
+<rect width="1280" height="720" fill="url(#bgG)"/>
+<circle id="gE" r="460" fill="url(#glE2)" opacity="0"/>
+<!-- gB rect removed with glB gradient -->
+<rect id="gr" width="1280" height="720" fill="url(#grid)" opacity="0" mask="url(#gm)"/>
+<rect width="1280" height="720" fill="url(#vg)"/>
+<circle id="ring" r="115" fill="none" stroke="#3DF0A8" stroke-width="2" opacity="0"/>
+<circle id="tsh" r="210" fill="url(#tg2)" opacity="0"/>
+<g id="tile" opacity="0">
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tl)"/>
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tg)"/>
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tgl)"/>
+<rect x="-114" y="-114" width="228" height="228" rx="47" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+</g>
+<g id="mks"></g>
+<g clip-path="url(#wc)"><g id="wm"></g></g>
+<text id="mP" font-family="'Clash Display',system-ui,sans-serif" font-size="140" letter-spacing="-2" opacity="0">Pay</text><text id="mR" font-family="'Clash Display',system-ui,sans-serif" font-size="140" letter-spacing="-2" opacity="0">Ranked</text>
+<g clip-path="url(#tc)"><rect id="sh" y="250" width="130" height="220" fill="url(#shg)" opacity="0" transform="skewX(-20)"/></g>
+
+<rect id="ul" height="8" rx="4" fill="#19C37D" width="0"/>
+</g>
+</svg>
+</div>
+<div class="ctl">
+<button id="play">▶ Play with sound</button>
+<button id="rep" class="alt">Replay silent</button>
+<input id="scr" type="range" min="0" max="2600" value="0" aria-label="Scrub">
+<span id="fps" style="font-size:13px;color:var(--mut);min-width:54px">– fps</span><span id="tm">0.00 / 2.60s</span>
+<label><input id="snd" type="checkbox" checked> Sound</label>
+<label>Weights <select id="wsel"><option value="700,500">Pay bold · Ranked medium</option><option value="500,700" selected>Pay medium · Ranked bold</option><option value="700,700">Both bold</option></select></label>
+</div>
+<div class="tl">
+<div><b><span>0.10s</span> Bars rise</b>Three bars settle with a gentle overshoot and a soft tick.</div>
+<div><b><span>0.30s</span> P forms</b>The letter traces itself around the bars while a quiet low swell builds.</div>
+<div><b><span>0.70s</span> Settle</b>The mark glides into a softly lit tile as the camera drifts in.</div>
+<div><b><span>1.05s</span> Impact</b>One soft ring, one deep thump and one clean note. Letters rise, then a single sweep turns “Ranked” emerald.</div>
+</div>
+</main>
+<script>
+(function(){
+var DUR=2.6,$=function(i){return document.getElementById(i)};
+var cl=function(x){return Math.min(1,Math.max(0,x))},seg=function(t,a,b){return cl((t-a)/(b-a))};
+var eo3=function(x){return 1-Math.pow(1-x,3)},eio=function(x){return x*x*x*(x*(6*x-15)+10)};
+var eob=function(x){var c=1.5,d=c+1;return 1+d*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+var lr=function(a,b,p){return a+(b-a)*p};
+var mix=function(a,b,k){var r='#';for(var i=1;i<7;i+=2){var v=Math.round(lr(parseInt(a.substr(i,2),16),parseInt(b.substr(i,2),16),k));r+=('0'+v.toString(16)).slice(-2)}return r};
+var BASE=412,L={tcx:213,tx:376,w:800},NS='http://www.w3.org/2000/svg',WT=[500,700],LT=[],lastT=0;
+var K=6,SH=.03,KM=10,SHM=.022,MK=[];
+function TX(par,x,w,fill,op,ch){var e=document.createElementNS(NS,'text');e.setAttribute('x',x);e.setAttribute('y',BASE);e.setAttribute('font-family',"'Clash Display',system-ui,sans-serif");e.setAttribute('font-size',140);e.setAttribute('font-weight',w);if(fill)e.setAttribute('fill',fill);e.setAttribute('opacity',op);e.textContent=ch;par.appendChild(e);return e}
+function meas(str,w){var cx=meas.c||(meas.c=document.createElement('canvas').getContext('2d'));cx.font=w+" 140px 'Clash Display', system-ui, sans-serif";return cx.measureText(str).width-2*str.length}
+function layout(){
+$('mP').setAttribute('font-weight',WT[0]);$('mR').setAttribute('font-weight',WT[1]);
+var wP=0,wR=0;try{wP=$('mP').getComputedTextLength();wR=$('mR').getComputedTextLength()}catch(e){}if(!(wP>50&&wR>50)){wP=meas('Pay',WT[0]);wR=meas('Ranked',WT[1])}var w=wP+wR;if(!(w>100)){w=800;wP=300;wR=500}
+var total=230+48+w,x0=(1280-total)/2;
+L={tcx:x0+115,tx:x0+278,w:w};
+var wm=$('wm'),tc=$('tc');wm.innerHTML='';tc.innerHTML='';LT=[];
+[['mP','Pay',0,WT[0],'url(#wt)'],['mR','Ranked',wP,WT[1],'url(#gR)']].forEach(function(g){
+for(var i=0;i<g[1].length;i++){var cx0=0;try{cx0=$(g[0]).getStartPositionOfChar(i).x}catch(e){cx0=NaN}if(!(cx0>=0)||(i>0&&cx0<1))cx0=meas(g[1].slice(0,i),g[3])+(i?0:0);var x=L.tx+g[2]+cx0;
+var arr=[];for(var q=0;q<K;q++)arr.push(TX(wm,x,g[3],g[4],1/(q+1),g[1][i]));TX(tc,x,g[3],null,1,g[1][i]);LT.push(arr)}});
+var gr=$('gR');gr.setAttribute('x1',L.tx+wP);gr.setAttribute('x2',L.tx+w);
+
+$('ul').setAttribute('x',L.tx+4);$('ul').setAttribute('y',BASE+34);
+var cr=$('wcr');cr.setAttribute('x',L.tx-60);cr.setAttribute('y',BASE-200);cr.setAttribute('width',w+160);cr.setAttribute('height',300);
+$('ring').setAttribute('cx',L.tcx);$('ring').setAttribute('cy',360);
+}
+var H=[34,58,84];for(var q=0;q<KM;q++){var u=document.createElementNS(NS,'use');u.setAttribute('href','#mark');$('mks').appendChild(u);MK.push(u)}
+var eo4=function(x){return 1-Math.pow(1-x,5)},eos=function(x){var c=.45,d=c+1;return 1+d*Math.pow(x-1,3)+c*Math.pow(x-1,2)},IMP=1.05;
+var AC_={};function A(id,k,v){var e=AC_[id]||(AC_[id]=$(id));var key='_'+k;if(e[key]!==v){e[key]=v;e.setAttribute(k,v)}}
+function render(t){
+var g=seg(t,0,.5);
+A('gE','opacity',eo3(g)*(.7+.2*Math.exp(-Math.pow((t-1.12)/.2,2))));
+A('gr','opacity',eo3(g));
+A('cam','transform','translate(640 360) scale('+(1+.035*seg(t,0,DUR))+') translate(-640 -360)');
+for(var i=0;i<3;i++){var p=eos(seg(t,.1+.07*i,.1+.07*i+.4)),h=Math.max(0,H[i]*p),b=$('b'+i);b.setAttribute('y',360-h);b.setAttribute('height',h)}
+A('drw','stroke-dashoffset',1000*(1-eio(seg(t,.3,.8))));
+var m=eio(seg(t,.7,1.1)),mx=lr(640,L.tcx,m),s=lr(.9,.316,m);
+MK.forEach(function(u,q){var tq=Math.max(0,t-SHM*q/(KM-1)),mm=eio(seg(tq,.7,1.1));u.setAttribute('transform','translate('+lr(640,L.tcx,mm).toFixed(2)+' 360) scale('+lr(.9,.316,mm).toFixed(4)+') translate(-405 -400)');u.setAttribute('opacity',1/(q+1))});
+var tp=eo4(seg(t,.72,1.1));
+A('tile','transform','translate('+L.tcx+' 360) scale('+lr(.9,1,tp)+')');
+A('tile','opacity',eo3(seg(t,.7,.95)));
+var r=seg(t,IMP,1.7);
+A('ring','r',lr(118,215,eo4(r)));A('ring','opacity',r>0&&r<1?.34*Math.pow(1-r,1.4):0);
+LT.forEach(function(arr,i){var a=IMP-.05+.035*i;arr.forEach(function(e,q){var tq=t-SH*q/(K-1),p=eo4(seg(tq,a,a+.6));e.setAttribute('transform','translate(0 '+(95*(1-p)).toFixed(2)+')');e.setAttribute('opacity',(eo3(seg(tq,a,a+.2))/(q+1)).toFixed(3))})});
+
+var wk=eo3(seg(t,1.4,1.95));A('sR0','stop-color',mix('#FFFFFF','#19C37D',wk));A('sR1','stop-color',mix('#FFFFFF','#4BF5B0',wk));lastT=t;
+var sh=seg(t,1.4,1.95);
+A('sh','x',(lr(L.tx-300,L.tx+L.w+160,eio(sh)))+(BASE*.364));
+A('sh','opacity',sh>0&&sh<1?.8:0);
+A('ul','width',96*eo3(seg(t,1.6,1.95)));
+A('gE','transform','translate('+mx.toFixed(2)+' 360)');
+var ts=$('tsh');ts.setAttribute('cx',L.tcx);ts.setAttribute('cy',405);ts.setAttribute('opacity',.3*eo3(seg(t,.85,1.25)));
+$('scr').value=Math.round(Math.min(t,DUR)*1000);
+$('tm').textContent=Math.min(t,DUR).toFixed(2)+' / 2.60s';
+}
+var raf=0,t0=0,ac=null;
+function stopAudio(){if(ac){try{ac.close()}catch(e){}ac=null}}
+function run(withSound){
+cancelAnimationFrame(raf);stopAudio();
+var delay=withSound?.07:0;
+if(withSound){try{sfx(delay)}catch(e){}}
+t0=performance.now()+delay*1000;
+(function f(now){
+var t=(now-t0)/1000;
+if(t>=DUR){render(DUR);return}
+render(Math.max(0,t));raf=requestAnimationFrame(f);
+})(performance.now());
+}
+function sfx(delay,ctxIn){
+var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ac=ctxIn||new AC();var c=ac,T=c.currentTime+delay;
+var master=c.createGain(),g0=master.gain;g0.setValueAtTime(.7,T);g0.linearRampToValueAtTime(.45,T+IMP-.01);g0.setValueAtTime(.95,T+IMP);g0.linearRampToValueAtTime(.7,T+IMP+.3);g0.setValueAtTime(.7,T+DUR-.45);g0.linearRampToValueAtTime(0,T+DUR-.02);
+var lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.5;lp.frequency.setValueAtTime(600,T);lp.frequency.exponentialRampToValueAtTime(15000,T+IMP);
+var comp=c.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=3;master.connect(lp);lp.connect(comp);comp.connect(c.destination);
+var n=Math.floor(c.sampleRate*1.9),pd=Math.floor(c.sampleRate*.02),ib=c.createBuffer(2,n,c.sampleRate);
+for(var ch=0;ch<2;ch++){var d=ib.getChannelData(ch),y=0;for(var i=pd;i<n;i++){y=y*.6+(Math.random()*2-1)*.4;d[i]=y*Math.pow(1-i/n,3)}}
+var rv=c.createConvolver();rv.buffer=ib;var rg=c.createGain();rg.gain.value=.5;rv.connect(rg);rg.connect(master);
+var nb=c.createBuffer(1,c.sampleRate,c.sampleRate),nd=nb.getChannelData(0);for(var j=0;j<nd.length;j++)nd[j]=Math.random()*2-1;
+function out(node,pan,wet){var p=c.createStereoPanner();p.pan.value=pan||0;node.connect(p);p.connect(master);if(wet){var s=c.createGain();s.gain.value=wet;p.connect(s);s.connect(rv)}}
+function env(g,st,a,dur,vol){g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(vol,T+st+a);g.gain.exponentialRampToValueAtTime(.0008,T+st+dur)}
+function tone(f,st,dur,vol,o){o=o||{};var os=c.createOscillator(),g=c.createGain();os.type='sine';os.frequency.setValueAtTime(f,T+st);
+if(o.f2)os.frequency.exponentialRampToValueAtTime(o.f2,T+st+(o.fd||dur));env(g,st,o.a||.006,dur,vol);os.connect(g);out(g,o.pan,o.wet);os.start(T+st);os.stop(T+st+dur+.05)}
+function bell(f,st,dur,vol,wet,ratio,idx,pan){var car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();
+car.frequency.value=f;mod.frequency.value=f*ratio;mg.gain.setValueAtTime(f*idx,T+st);mg.gain.exponentialRampToValueAtTime(1,T+st+dur*.5);
+mod.connect(mg);mg.connect(car.frequency);env(g,st,.004,dur,vol);car.connect(g);out(g,pan,wet);car.start(T+st);mod.start(T+st);car.stop(T+st+dur+.05);mod.stop(T+st+dur+.05)}
+function noise(st,dur,ft,f0,f1,vol,pan,Q,rise,wet){var s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();s.buffer=nb;b.type=ft;b.Q.value=Q||1;
+b.frequency.setValueAtTime(f0,T+st);if(f1)b.frequency.exponentialRampToValueAtTime(f1,T+st+dur);
+if(rise){g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(vol*.3,T+st+dur*.6);g.gain.linearRampToValueAtTime(vol,T+st+dur*.95);g.gain.linearRampToValueAtTime(0,T+st+dur)}else env(g,st,.003,dur,vol);
+s.connect(b);b.connect(g);out(g,pan,wet);s.start(T+st);s.stop(T+st+dur+.02)}
+/* build: sub swell, filtered air and soft bar taps, with the whole mix opening up toward the hit */
+tone(48,0,IMP+.05,.26,{a:IMP-.03,f2:60,fd:IMP});
+noise(0,IMP,'bandpass',500,3000,.07,0,.9,true,.3);noise(0,IMP,'lowpass',200,1400,.06,0,.7,true,.2);
+for(var i=0;i<3;i++){var s0=.2+.07*i;noise(s0,.03,'bandpass',1800+300*i,0,.05,-.2+.2*i,2,false,.2);tone(90+14*i,s0,.1,.07,{a:.004})}
+/* impact: layered sub, thump, click, then one clean note with a wide detuned stereo image */
+tone(120,IMP,.6,.8,{f2:42,fd:.3,a:.004});tone(55,IMP,1,.35,{a:.01});
+noise(IMP,.05,'lowpass',1800,0,.16);noise(IMP,.02,'highpass',5000,0,.07);
+bell(659.25,IMP+.01,1.6,.12,.7,2,.9,0);bell(659.25*1.0025,IMP+.01,1.5,.06,.7,2,.9,.45);bell(659.25*.9975,IMP+.01,1.5,.06,.7,2,.9,-.45);tone(329.63,IMP,1.6,.07,{a:.01,wet:.5});
+[164.81,246.94,415.3].forEach(function(f,i){tone(f,IMP+.05,1.7,.035,{a:.35,wet:.6,pan:(i-1)*.4})});
+/* letters: a light tick per letter, rising in pitch like a cascade */
+for(var k=0;k<9;k++)noise(IMP-.05+.035*k+.05,.015,'bandpass',2800+250*k,0,.03,-.35+.09*k,2);
+/* reveal: air sweep with the light, a tiny high resolve note and a fading air tail */
+noise(1.4,.5,'bandpass',2000,7000,.07,0,2.5,true,.5);
+bell(1318.51,1.85,1.2,.05,.8,2,.6,.3);noise(1.65,.7,'highpass',6000,0,.02,.2,1,false,.4);
+}
+$('play').onclick=function(){run($('snd').checked)};
+$('rep').onclick=function(){run(false)};
+$('scr').oninput=function(){cancelAnimationFrame(raf);stopAudio();render(this.value/1000)};
+$('wsel').onchange=function(){WT=this.value.split(',').map(Number);layout();render(lastT)};
+window.__sfxOffline=async function(){var sr=44100,oc=new OfflineAudioContext(2,Math.ceil(sr*DUR),sr);sfx(0,oc);var b=await oc.startRendering();var L=b.getChannelData(0),R=b.getChannelData(1),n=L.length,buf=new ArrayBuffer(44+n*4),v=new DataView(buf);
+function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
+ws(0,'RIFF');v.setUint32(4,36+n*4,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*4,true);
+for(var i=0;i<n;i++){v.setInt16(44+i*4,Math.max(-1,Math.min(1,L[i]))*32767,true);v.setInt16(46+i*4,Math.max(-1,Math.min(1,R[i]))*32767,true)}
+var s='',u=new Uint8Array(buf);for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+window.__FPS=60;window.__frames=Math.round(DUR*60);window.__frame=function(n){render(n/60)};window.__render=render;window.__layout=layout;layout();render(0);
+var go=function(){layout();render(0);run(false)};
+if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();
+})();
+</script>
+</body>
+</html>
