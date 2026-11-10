@@ -2,29 +2,35 @@
 """
 PayRanked music bed, composed and synthesised from scratch (nothing to license).
 
-    python3 scripts/make_music.py        # writes public/music.mp3 (9:02, 48 kHz stereo, 128 kbps)
+    node scripts/export-timing.mjs      # the video's real timeline -> scripts/timing.json (npm run music does both)
+    python3 scripts/make_music.py        # writes public/music.mp3 (48 kHz stereo, 128 kbps), as long as the video
 
-One piece in D minor at 96 BPM (a bar is 2.5 s, so the 25 / 30 / 35 s reveals are exactly 10 / 12 / 14 bars and every
-reveal starts on a downbeat). The key never changes: the SFX library's note ladders (blips, dings, bells) are all
-inside D natural minor, so nothing the effects play can clash with the bed.
+One piece in D minor at 96 BPM (a bar is 2.5 s, so the 15 / 25 / 30 s reveals are exactly 6 / 10 / 12 bars, the two
+countdown breaks are 3 and 4 bars, and every reveal starts on a downbeat). The key never changes: the SFX library's note
+ladders (blips, dings, bells) are all inside D natural minor, so nothing the effects play can clash with the bed.
 
-The arrangement follows the video, section by section, and each section has its own grid starting on its first frame:
+Every section start, reveal and break length, and beat inside a shot comes from scripts/timing.json, which is exported
+from the same TypeScript the video renders with (src/timeline.ts and the shots' own `T` tables). Nothing about the
+timeline is typed in here, so cutting a shot or changing a reveal length and re-running `npm run music` keeps the bed
+in step. Each section has its own grid starting on its first frame:
 
-  Shot 1  0:00  sparse and ticking, builds under the counts, a snare roll into the gap slam, then thin and alone
+  Shot 1  sparse and ticking, builds under the counts, a snare roll into the gap slam, then thin and alone
           under the amber number, then a groove for the chips
-  Shot 2  0:30  silent (the intro carries its own sound)
-  Shot 3  0:33  calm, curious: pad, soft plucks, a pulse that wakes up at the formula, a build into the countdown
-  Shot 4  1:30  the countdown. Nine reveals on one engine that gets bigger every time (level 1 -> 5): kick and bass,
-          then hats, clap and arps, then the bell motif, then everything for #1
-  Shot 5  5:35  moodier: airy wave, a steady groove for the rows, a build, a one-beat drop-out on the interrupt
-          (bar 34 starts exactly on it), a bright groove while the states light up, then it settles
-  Shot 6  7:45  warm recap groove, stripped back for the next-video card, pad and arps on the end screen
+  Shot 2  silent (the intro carries its own sound)
+  Shot 3  calm, curious: pad, soft plucks, a pulse that wakes up at the formula, a build into the countdown
+  Shot 4  the countdown. Nine reveals on one engine that gets bigger every time (level 1 -> 5): kick and bass,
+          then hats, clap and arps, then the bell motif, then everything for #1. The two breaks strip it back to pad
+          and pulse, so the change of picture is also a change of sound
+  Shot 5  moodier: airy wave, a steady groove for the rows, a build, a one-beat drop-out on the interrupt
+          (a new grid starts exactly on it), a bright groove while the states light up, then it settles
+  Shot 6  warm recap groove, stripped back for the next-video card, pad and arps on the end screen
 
 Layers: pad (detuned saws), pulse bass, plucks through a ping-pong delay, FM bell motif, kick, clap/snare, hats, risers.
 Pads, bass and plucks are sidechained to the kick (the pump). Everything shares one stereo room.
 
-Needs numpy, scipy, ffmpeg. Deterministic.
+Needs numpy, scipy, ffmpeg (and node, for the timing export). Deterministic.
 """
+import json
 import os
 import subprocess
 import wave
@@ -37,9 +43,12 @@ BPM = 96
 BEAT = 60 / BPM  # 0.625 s
 BAR = 4 * BEAT  # 2.5 s
 S16 = BEAT / 4
-TOTAL = 542.0
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'public', 'music.mp3')
+with open(os.path.join(ROOT, 'scripts', 'timing.json')) as f:
+    TM = json.load(f)  # written by scripts/export-timing.mjs from the video's own timeline
+S = TM['shots']
+TOTAL = TM['total'] + 3.0  # the last bars ring out a little past the end of the video
 rng = np.random.default_rng(96)
 N = int(TOTAL * SR)
 
@@ -325,104 +334,138 @@ def reveal_end_fx(t_end):
 
 
 # ---------------------------------------------------------------- the arrangement
+def bars_in(dur):
+    return int(dur / BAR + 1e-6)
+
+
 def shot1():
-    t0 = 0.0
-    for b in range(12):
-        t = t0 + b * BAR
-        if b <= 5 or b >= 8:
-            pad_bar(t, b, 0.5 if b < 2 else 0.7)
-        elif b < 8:
-            pad_bar(t, b, 0.4)  # the amber number is alone: only the pad
-        if 1 <= b <= 4:  # ticking data pluck
-            arp(t, b, step=4 if b < 3 else 2, g=0.2 + 0.04 * b)
-        if b in (2, 3):  # heartbeat, then hats
+    t0, dur = S['shot1']['start'], S['shot1']['dur']
+    e = TM['shot1']
+    slam, chips = e['slam'], e['chips']
+    for b in range(int(np.ceil(dur / BAR - 1e-6))):
+        loc = b * BAR
+        t = t0 + loc
+        alone = slam <= loc + BAR / 2 and loc < chips  # the amber number is alone: only the pad
+        pad_bar(t, b, 0.4 if alone else (0.5 if b < 2 else 0.7))
+        if b >= 1 and loc <= slam - 2.0:  # ticking data pluck while the counts roll
+            arp(t, b, step=4 if b < 2 else 2, g=0.2 + 0.04 * b)
+        if b == 1:  # heartbeat
             add_kick(t, 0.5)
             add_kick(t + 2 * BEAT, 0.4)
             add_bass(t, b, 'p', 0.6, d=BEAT * 1.6)
-        if b == 4:
-            groove(t, b, 2, 0.8)
-        if b == 5:  # build into the gap
+        if loc <= slam < loc + BAR:  # build into the gap: kicks, a swell and a snare roll that ends on the slam
             for q in range(4):
-                add_kick(t + q * BEAT, 0.7)
-            add_bass_pulse(t, b, 0.8, True)
-            add_swell(t, 2.3, 0.35)
-            snare_roll(t + BAR / 2, 14.8 - (t + BAR / 2), 0.55)
-        if b == 6 or b == 7:
+                if t + q * BEAT < t0 + slam - 0.05:
+                    add_kick(t + q * BEAT, 0.7)
+            add_swell(t0 + slam - 2.3, 2.3, 0.35)
+            snare_roll(t + 0.02, t0 + slam - (t + 0.02), 0.55)
+        if slam <= loc < chips and b > 0 and loc > slam:
             add_bass(t, b, 'p', 0.5, d=BAR * 0.9)
-        if b >= 8:
-            groove(t, b, 3 if b < 10 else 3, 0.85)
-    put(drums, cached('crash', crash_w), 15.0, 0.5)
-    put(wet, cached('crash', crash_w), 15.0, 0.4)
+        if loc >= chips - 1e-6:  # a groove for the chips
+            groove(t, b, 3, 0.85)
+    put(drums, cached('crash', crash_w), t0 + slam, 0.5)
+    put(wet, cached('crash', crash_w), t0 + slam, 0.4)
 
 
 def shot3():
-    t0 = 33.0
-    n = int((90.0 - t0) // BAR) + 1
-    for b in range(n):
-        t = t0 + b * BAR
-        if t >= 90.0:
-            break
+    t0, dur = S['shot3']['start'], S['shot3']['dur']
+    e = TM['shot3']
+    nb = bars_in(dur)
+    for b in range(nb):
+        loc = b * BAR
+        t = t0 + loc
         g = min(1.0, 0.45 + 0.1 * b) if b < 5 else 0.9
         pad_bar(t, b, g)
-        if b >= 3:
-            arp(t, b, step=4 if b < 8 else 2, g=0.22 + (0.06 if b > 7 else 0))
-        if b >= 2:
+        if b >= 1:
+            arp(t, b, step=4 if b < nb - 3 else 2, g=0.22 + (0.06 if b >= nb - 3 else 0))
+        if b >= 1:
             add_bass(t, b, 'p', 0.55, d=BAR * 0.9)
-        if b >= 4:
+        if loc + BAR > e['toCal']:  # the needle moves: a soft heartbeat
             add_kick(t, 0.38)
             add_kick(t + 2 * BEAT, 0.3)
-        # the formula starts at 52 s (bar 7.6): the pulse wakes up
-        if t >= 52.0:
+        if loc + BAR / 2 >= e['formula']:  # the formula starts: the pulse wakes up
             add_bass_pulse(t, b, 0.62, eighth=False)
             for q in range(4):
                 add_kick(t + q * BEAT, 0.34)
-        if t >= 65.0:  # the three limits (chips)
+        if loc + BAR > e['rail']:  # the leaderboard opens: hats and claps
             for q in range(8):
                 add_hat(t + q * BEAT / 2, 0.11, pan=0.3 if q % 2 else -0.3)
             add_clap(t + BEAT, 0.28)
             add_clap(t + 3 * BEAT, 0.28)
     # last two bars: a build into the countdown (the SFX riser sits on the last 2 s)
-    add_swell(84.0, 6.0, 0.4)
-    snare_roll(85.0, 5.0, 0.55)
+    end = t0 + dur
+    add_swell(end - 6.0, 6.0, 0.4)
+    snare_roll(end - 5.0, 5.0, 0.55)
 
 
 LEVELS = [1, 2, 2, 3, 3, 4, 4, 5, 5]
 
 
-def countdown(timeline_secs):
-    t = 90.0
-    for idx, ln in enumerate(timeline_secs):
-        lv = LEVELS[idx]
-        bars = int(ln / BAR)
-        for b in range(bars):
-            tb = t + b * BAR
-            pad_bar(tb, b, 0.75 + 0.04 * lv)
-            # restraint: the first bar after the slam is lighter, the middle sections hold, the lock-in bar lifts
-            vel = 0.55 if b == 0 else 1.0
-            use = lv if b >= 1 else max(1, lv - 2)
-            if b == bars - 1:
-                use = max(1, lv - 1)
-            groove(tb, b, use, vel)
-        put(drums, cached('crash', crash_w), t, 0.45 + 0.05 * lv)
-        put(wet, cached('crash', crash_w), t, 0.3)
-        reveal_end_fx(t + ln)
-        if idx == len(timeline_secs) - 1:
-            add_swell(t + ln - 5.0, 5.0, 0.3)
-        t += ln
-    return t
+def countdown():
+    """Nine reveals and the breaks between them, laid out exactly as the video has them."""
+    t0 = S['countdown']['start']
+    segs = [('reveal', r) for r in TM['reveals']] + [(b['kind'], b) for b in TM['breaks']]
+    segs.sort(key=lambda x: x[1]['from'])
+    idx = 0
+    end = t0
+    for kind, sg in segs:
+        t = t0 + sg['from']
+        ln = sg['dur']
+        assert abs(t - end) < 1e-6, f'gap or overlap before {kind} at {t}'
+        bars = bars_in(ln)
+        if kind == 'reveal':
+            lv = LEVELS[idx]
+            idx += 1
+            for b in range(bars):
+                tb = t + b * BAR
+                pad_bar(tb, b, 0.75 + 0.04 * lv)
+                # restraint: the first bar after the slam is lighter, the middle sections hold, the lock-in bar lifts
+                vel = 0.55 if b == 0 else 1.0
+                use = lv if b >= 1 else max(1, lv - 2)
+                if b == bars - 1:
+                    use = max(1, lv - 1)
+                groove(tb, b, use, vel)
+            put(drums, cached('crash', crash_w), t, 0.45 + 0.05 * lv)
+            put(wet, cached('crash', crash_w), t, 0.3)
+            reveal_end_fx(t + ln)
+            if idx == len(TM['reveals']):
+                add_swell(t + ln - 5.0, 5.0, 0.3)
+        else:
+            # a break changes the picture, so it changes the sound: the groove drops out and only the pad, a soft
+            # pulse and a few plucks stay. "prices" is the darker turn (no kick at all); both lift into the next reveal.
+            for b in range(bars):
+                tb = t + b * BAR
+                pad_bar(tb, b, 0.7)
+                add_bass(tb, b, 'p', 0.5, d=BAR * 0.9)
+                if kind == 'notHere':
+                    add_kick(tb, 0.35)
+                    add_kick(tb + 2 * BEAT, 0.28)
+                arp(tb, b, step=4, g=0.16 + 0.02 * b)
+            reveal_end_fx(t + ln)
+        end = t + ln
+    return end
 
 
 def shot5():
-    t0 = 335.0
-    for b in range(52):
-        t = t0 + b * BAR
-        s = b * BAR
-        pad_bar(t, b, 0.9 if s < 25 else 0.75)
-        if s < 25:  # airy wave
+    t0, dur = S['shot5']['start'], S['shot5']['dur']
+    e = TM['shot5']
+    cut = e['interrupt']
+    # A: up to the interrupt, on a grid that starts with the shot
+    nA = int(np.ceil(cut / BAR - 1e-6))
+    for b in range(nA):
+        loc = b * BAR
+        t = t0 + loc
+        partial = loc + BAR > cut + 1e-6  # the last bar is cut short by the interrupt
+        pad_bar(t, b, 0.9 if loc < 25 else 0.75)
+        if partial:
+            add_kick(t, 0.6)
+            add_kick(t + BEAT, 0.5)
+            continue
+        if loc + 1.0 < e['rows']:  # airy wave
             arp(t, b, step=4, g=0.16 + 0.01 * b)
-            if b >= 4:
+            if loc >= 5.0:
                 add_bass(t, b, 'p', 0.5, d=BAR * 0.9)
-        elif s < 60:  # rows: a steady half-time groove
+        elif loc + 1.0 < e['bars']:  # rows: a steady half-time groove
             add_kick(t, 0.6)
             add_kick(t + 2.5 * BEAT, 0.45)
             add_bass_pulse(t, b, 0.75, eighth=True)
@@ -431,49 +474,57 @@ def shot5():
                     add_hat(t + q * S16, 0.1 + (0.05 if q % 4 == 2 else 0), pan=0.25 if q % 4 else -0.25)
             add_clap(t + 2 * BEAT, 0.38)
             arp(t, b, step=4, g=0.2)
-        elif s < 85:  # bars: build
-            groove(t, b, 3 if s < 72 else 4, 0.95)
-            if s >= 72:
-                add_swell(t, BAR, 0.1 + 0.02 * (s - 72))
-        elif s < 115:  # the states light up
-            if b == 34:
-                groove(t + 0.0, b, 5, 1.0)
+        else:  # bars: build
+            groove(t, b, 3 if loc < e['bars'] + 4.5 else 4, 0.95)
+            if loc >= e['bars'] + 4.5:
+                add_swell(t, BAR, 0.1 + 0.02 * (loc - e['bars'] - 4.5))
+    # the +27% slams in 40 design frames after the bars appear: a short roll into it, a crash on it
+    pct = e['bars'] + 40 / TM['fps']
+    snare_roll(t0 + e['bars'] + 0.1, pct - e['bars'] - 0.1, 0.4)
+    put(drums, cached('crash', crash_w), t0 + pct, 0.35)
+    # the interrupt: everything stops for the last 0.45 s, then a new grid lands exactly on it
+    mute(t0 + cut - 0.45, t0 + cut)
+    add_swell(t0 + cut - 3.0, 3.0, 0.25)
+    # B: from the interrupt to the end
+    tB = t0 + cut
+    nB = bars_in(dur - cut)
+    settle = e['card1'] - cut - 1.0  # the cards arrive: the groove lets go
+    for b in range(nB):
+        loc = b * BAR
+        t = tB + loc
+        pad_bar(t, nA + b, 0.75)
+        if loc < settle:  # the states light up
+            groove(t, nA + b, 5 if b == 0 else 4, 1.0)
+            if b == 0:
                 put(drums, cached('crash', crash_w), t, 0.55)
-            else:
-                groove(t, b, 4 if s < 100 else 5, 1.0)
         else:  # settle
-            fade = 1 - (s - 115) / 15 * 0.5
-            if b == 46:
-                put(drums, cached('crash', crash_w), t, 0.35)
+            fade = 1 - 0.5 * min(1.0, (loc - settle) / max(1.0, dur - cut - settle))
             add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.3 * fade, pan=-0.3)
             if b % 2 == 0:
                 arp(t, b, step=4, g=0.17 * fade)
-    # the interrupt at 85.0 s: everything stops for the last 0.35 s of bar 33, then lands on the downbeat
-    mute(335 + 85.0 - 0.45, 335 + 85.0)
-    add_swell(335 + 82.0, 3.0, 0.25)
 
 
 def shot6():
-    t0 = 465.0
-    for b in range(30):
-        t = t0 + b * BAR
-        s = b * BAR
-        pad_bar(t, b, 0.85 if s < 55 else 0.95)
-        if s < 25:  # recap cards: warm, full groove
+    t0, dur = S['shot6']['start'], S['shot6']['dur']
+    e = TM['shot6']
+    for b in range(bars_in(dur)):
+        loc = b * BAR
+        t = t0 + loc
+        pad_bar(t, b, 0.85 if loc < e['click'] else 0.95)
+        if loc + 0.5 < e['next']:  # recap cards: warm, full groove
             groove(t, b, 3 if b else 2, 0.9)
             if b == 0:
                 put(drums, cached('crash', crash_w), t, 0.4)
-        elif s < 35:  # next-video build-up: stripped
+        elif loc + 0.5 < e['click']:  # the next-video card and the cursor: stripped
             add_kick(t, 0.5)
             add_bass_pulse(t, b, 0.6, eighth=False)
             arp(t, b, step=4, g=0.2)
-        elif s < 55:  # next video / subscribe
-            groove(t, b, 2 if s < 42.5 else 3, 0.85)
-            if b % 2 == 0:
-                add_bell(t + BEAT * 2, D3 + 24 + chord(b)[0] + 12 if chord(b)[0] < 0 else D3 + 24 + chord(b)[0] + 7, 0.28, pan=0.3)
+        elif loc < e['end'] - 0.5:  # subscribe
+            groove(t, b, 2, 0.85)
+            add_bell(t + BEAT * 2, D3 + 24 + chord(b)[0] + (12 if chord(b)[0] < 0 else 7), 0.28, pan=0.3)
         else:  # end screen: pad and arps, ringing out
-            if b == 22:
-                put(drums, cached('crash', crash_w), t, 0.35)
+            if loc <= e['end'] < loc + BAR:
+                put(drums, cached('crash', crash_w), t0 + e['end'], 0.35)
             arp(t, b, step=4, g=0.2)
             if b % 2 == 0:
                 add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.24, pan=-0.25)
@@ -493,10 +544,8 @@ def main():
     print('arranging...')
     shot1()
     shot3()
-    # reveal lengths from the project timeline: 10 tie 30, then 25s, ..., 3 tie 30, #1 35
-    lens = [30, 25, 25, 25, 25, 25, 30, 25, 35]
-    end = countdown(lens)
-    assert abs(end - 335.0) < 1e-6, end
+    end = countdown()  # reveal and break lengths come from scripts/timing.json
+    assert abs(end - S['shot5']['start']) < 1e-6, end
     shot5()
     shot6()
 

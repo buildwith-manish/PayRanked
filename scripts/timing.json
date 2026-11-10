@@ -1,0 +1,208 @@
+{
+  "fps": 30,
+  "total": 299.5,
+  "shots": {
+    "shot1": {
+      "start": 0,
+      "dur": 15
+    },
+    "shot2": {
+      "start": 15,
+      "dur": 2.6
+    },
+    "shot3": {
+      "start": 18,
+      "dur": 20
+    },
+    "countdown": {
+      "start": 38,
+      "dur": 197.5
+    },
+    "shot5": {
+      "start": 235.5,
+      "dur": 44
+    },
+    "shot6": {
+      "start": 279.5,
+      "dur": 20
+    }
+  },
+  "shot1": {
+    "seam": 0.06666666666666667,
+    "shape": 0.6,
+    "count": 1,
+    "head": 2.2,
+    "explain": 3.4,
+    "head2": 4.8,
+    "rest": 5.6,
+    "bracket": 6,
+    "slam": 6.8,
+    "chips": 10
+  },
+  "shot3": {
+    "avg": 2.5,
+    "toCal": 5,
+    "formula": 9.5,
+    "rail": 16.5
+  },
+  "shot5": {
+    "rows": 7,
+    "bars": 16,
+    "interrupt": 24,
+    "lights": 26,
+    "ring": 30,
+    "card1": 31.5,
+    "card2": 35.5,
+    "card3": 39
+  },
+  "shot6": {
+    "cards": 0.5,
+    "pct": 3,
+    "next": 5.5,
+    "cursor": 8.5,
+    "click": 11,
+    "end": 13
+  },
+  "reveals": [
+    {
+      "label": "#10",
+      "names": [
+        "Kansas",
+        "Nebraska"
+      ],
+      "fast": true,
+      "from": 0,
+      "dur": 15,
+      "name": 2.6,
+      "bea": 4.2,
+      "dollars": 6.6,
+      "lock": 13.4,
+      "mapOut": 14.4
+    },
+    {
+      "label": "#9",
+      "names": [
+        "West Virginia"
+      ],
+      "fast": true,
+      "from": 15,
+      "dur": 15,
+      "name": 2.6,
+      "bea": 4.2,
+      "dollars": 6.6,
+      "lock": 13.4,
+      "mapOut": 14.4
+    },
+    {
+      "label": "#8",
+      "names": [
+        "North Dakota"
+      ],
+      "fast": true,
+      "from": 30,
+      "dur": 15,
+      "name": 2.6,
+      "bea": 4.2,
+      "dollars": 6.6,
+      "lock": 13.4,
+      "mapOut": 14.4
+    },
+    {
+      "label": "#7",
+      "names": [
+        "Alabama"
+      ],
+      "fast": true,
+      "from": 45,
+      "dur": 15,
+      "name": 2.6,
+      "bea": 4.2,
+      "dollars": 6.6,
+      "lock": 13.4,
+      "mapOut": 14.4
+    },
+    {
+      "label": "#6",
+      "names": [
+        "South Dakota"
+      ],
+      "fast": true,
+      "from": 67.5,
+      "dur": 15,
+      "name": 2.6,
+      "bea": 4.2,
+      "dollars": 6.6,
+      "lock": 13.4,
+      "mapOut": 14.4
+    },
+    {
+      "label": "#5",
+      "names": [
+        "Louisiana"
+      ],
+      "fast": false,
+      "from": 82.5,
+      "dur": 25,
+      "name": 3,
+      "bea": 6,
+      "dollars": 10,
+      "lock": 21,
+      "mapOut": 23.2
+    },
+    {
+      "label": "#3",
+      "names": [
+        "Iowa",
+        "Oklahoma"
+      ],
+      "fast": false,
+      "from": 107.5,
+      "dur": 30,
+      "name": 3,
+      "bea": 6,
+      "dollars": 10,
+      "lock": 21,
+      "mapOut": 23.2
+    },
+    {
+      "label": "#2",
+      "names": [
+        "Mississippi"
+      ],
+      "fast": false,
+      "from": 147.5,
+      "dur": 25,
+      "name": 3,
+      "bea": 6,
+      "dollars": 10,
+      "lock": 21,
+      "mapOut": 23.2
+    },
+    {
+      "label": "#1",
+      "names": [
+        "Arkansas"
+      ],
+      "fast": false,
+      "from": 172.5,
+      "dur": 25,
+      "name": 3,
+      "bea": 6,
+      "dollars": 10,
+      "lock": 21,
+      "mapOut": 23.2
+    }
+  ],
+  "breaks": [
+    {
+      "kind": "notHere",
+      "from": 60,
+      "dur": 7.5
+    },
+    {
+      "kind": "prices",
+      "from": 137.5,
+      "dur": 10
+    }
+  ]
+}

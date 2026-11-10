@@ -11,7 +11,9 @@
     "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
     "sfx": "python3 scripts/make_sfx.py",
     "vo-envelope": "python3 scripts/vo_envelope.py",
-    "music": "python3 scripts/make_music.py",
+    "timing": "node scripts/export-timing.mjs",
+    "music": "node scripts/export-timing.mjs && python3 scripts/make_music.py",
+    "vo-cues": "node scripts/export-timing.mjs && python3 scripts/vo_cues.py",
     "review": "bash scripts/review-render.sh"
   },
   "dependencies": {

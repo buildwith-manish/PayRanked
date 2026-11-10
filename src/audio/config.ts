@@ -3,8 +3,12 @@
  * per-cue gains in cues.ts set how loud each sound is *relative to the others*, and these set the buses.
  */
 export const AUDIO = {
-  /** Set false while a track is not in public/ yet, so the render does not stop on the missing file. */
-  vo: true,
+  /**
+   * Set false while a track is not in public/ yet, so the render does not stop on the missing file.
+   * public/vo.wav is not in the repo yet, so this is off. Record it against review/VO-CUES.md, drop it in public/,
+   * run `npm run vo-envelope`, then set this to true.
+   */
+  vo: false,
   music: true,
   sfx: true,
 
