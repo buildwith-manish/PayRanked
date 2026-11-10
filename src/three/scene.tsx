@@ -167,14 +167,20 @@ export const Pin3D: React.FC<{
 }> = ({x, y, z, drop, ring, scale, pinPx, ringPx}) => {
   const s = pinPx * scale;
   const r = ringPx * scale * (0.15 + ring);
-  // white pin with a mint glow: the frame keeps a single accent colour (mint), so the pin is not red
-  const red = useMemo(() => new THREE.Color('#EFFFF8'), []);
-  const glowColor = useMemo(() => new THREE.Color('#3DF0A8'), []);
+  // amber pin: the lit top of a highlighted state is pale mint, so a white/mint pin vanished into it (worse when zoomed out).
+  // Amber is the complement of green and already in the palette (C.amber), so it reads on both the pale top and the dark map.
+  const red = useMemo(() => new THREE.Color('#FF9A1F'), []);
+  const glowColor = useMemo(() => new THREE.Color('#FFB020'), []);
   return (
     <>
+      {/* ripple: a dark under-ring gives the amber ring an edge against the pale state top, then the amber ring on top */}
+      <mesh position={[x, y, z + 0.5]} scale={[r, r, 1]}>
+        <ringGeometry args={[0.8, 1.08, 64]} />
+        <meshBasicMaterial color="#06142B" transparent opacity={0.55 * (1 - ring) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
+      </mesh>
       <mesh position={[x, y, z + 0.6]} scale={[r, r, 1]}>
-        <ringGeometry args={[0.93, 1, 64]} />
-        <meshBasicMaterial color="#3DF0A8" transparent opacity={(1 - ring) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
+        <ringGeometry args={[0.86, 1, 64]} />
+        <meshBasicMaterial color="#FFB020" transparent opacity={Math.min(1, (1 - ring) * 1.4) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
       </mesh>
       <group position={[x, y, z + (1 - drop) * 90 * scale]} scale={[s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5)]}>
         <mesh position={[0, 0, 0.27]} rotation={[-Math.PI / 2, 0, 0]} castShadow>

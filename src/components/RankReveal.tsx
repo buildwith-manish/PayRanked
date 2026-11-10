@@ -195,7 +195,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const pulse = 0.5 + 0.5 * Math.sin(frame / 14);
 
   // pins sit on top of the (rising) states, kept at a steady size on screen whatever the camera distance
-  const pinScreenPx = small ? 76 : 40;
+  const pinScreenPx = small ? 84 : 54; // was 76 / 40: bigger so it still reads when the preview is zoomed out
   const pinDrop = tween(frame, sec(2.4), 22, dropEase);
   const pinRing = ((((frame - sec(2.4) - 10) % 45) + 45) % 45) / 45;
 
