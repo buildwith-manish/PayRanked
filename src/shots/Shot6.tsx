@@ -14,7 +14,7 @@ import {SHOT_SECONDS} from '../timeline';
 
 export const SHOT6_FRAMES = sec(SHOT_SECONDS.shot6); // was 75 s; the payoff has landed, so the outro is a recap, one ask and an end screen
 
-/** Shot-local times (0 = the end of the reality check). End screen: 7 s. */
+/** Shot-local times (0 = the end of the reality check). End screen: 10 s (from `end` to the end of the shot, see SHOT_SECONDS). */
 export const T = {
   cards: sec(0.5),
   pct: sec(3),

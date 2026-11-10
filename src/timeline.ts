@@ -84,7 +84,7 @@ export const SHOT_SECONDS = {
   shot2: 2.6,
   shot3: 20, // method (was 42)
   shot5: 44, // after #1 (was 130)
-  shot6: 20, // outro (was 75)
+  shot6: 23, // outro (was 75): 13 s of recap and the subscribe ask, then a 10 s end screen (was 7 s)
 };
 
 /** Start frames on the master timeline. Each shot starts where the one before it ends, so no gap can open up again. */

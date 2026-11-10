@@ -142,7 +142,8 @@ const InfoCard: React.FC<{start: number; end: number; children: React.ReactNode}
 export const Shot5: React.FC = () => {
   const f = useDesignFrame();
   const wa = byName('Washington');
-  const tx = byName('Texas');
+  // no-wage-tax states inside the countdown's top 10 (data-driven; Texas and Florida were already placed in the "Not on this list" break)
+  const topTax = STATES.filter((x) => x.noWageTax && x.rank <= 10).sort((a, b) => a.rank - b.rank);
   const waRank = STATES.filter((s) => s.rpp > wa.rpp).length + 1;
   const g = gap('Arkansas', 'California');
 
@@ -327,12 +328,20 @@ export const Shot5: React.FC = () => {
             </div>
           </InfoCard>
 
-          {/* Card 2: Texas */}
+          {/* Card 2: how many no-wage-tax states made the top 10. Not Texas: the "Not on this list" break already
+              showed Texas and Florida, so repeating Texas here said the same thing twice. */}
           <InfoCard start={T.card2} end={T.card3 + sec(0.5)}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', ...tabular}}>
               <MaskLine start={T.card2 + 8} dur={22}>
-                {tx.rpp.toFixed(1)} → about <span style={{color: C.amber}}>{fmtUSD(tx.display)}</span>, and no state wage tax
+                {topTax.length === 0
+                  ? `None of the ${NO_WAGE_TAX.length} no-wage-tax states is in the top 10`
+                  : `Only ${topTax.length} of ${NO_WAGE_TAX.length} no-wage-tax states ${topTax.length === 1 ? 'is' : 'are'} in the top 10`}
               </MaskLine>
+              {topTax.length > 0 && (
+                <div style={{marginTop: 10, fontFamily: F.body, fontWeight: 500, fontSize: 36, color: C.amber}}>
+                  <MaskLine start={T.card2 + 22} dur={20}>{topTax.map((x) => `${x.name}, #${x.rank}`).join(' · ')}</MaskLine>
+                </div>
+              )}
             </div>
           </InfoCard>
 
