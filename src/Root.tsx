@@ -13,6 +13,7 @@ import {Shot3, SHOT3_FRAMES} from './shots/Shot3';
 import {Shot5, SHOT5_FRAMES} from './shots/Shot5';
 import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
+import {Watermark} from './components/Watermark';
 import {C, FPS, H, W} from './theme';
 import {toReal} from './clock';
 import {Break} from './components/Break';
@@ -47,6 +48,8 @@ const graded =
       </Grade>
       {cues && <SfxTrack cues={cues} offset={offset} />}
       <MasterAudio offset={offset} />
+      {/* Channel watermark on every standalone composition too, so it appears in Remotion Studio shot previews. */}
+      <Watermark />
     </>
   );
 
@@ -77,6 +80,8 @@ const Video1: React.FC = () => (
       <Shot6 />
       <SfxTrack cues={CUES.shot6} offset={START.shot6} />
     </Sequence>
+    {/* Channel watermark — fades in at 5s, fades out 18s before end. Sits on top of every shot. */}
+    <Watermark />
   </AbsoluteFill>
   </Grade>
 );
