@@ -5,15 +5,15 @@ import {glide, ramp} from '../motion';
 import {sec} from '../theme';
 import {useDesignFrame} from '../clock';
 
-// intro.mp4 is 3.0 s (v9); the shot has to be as long as the clip or its last 0.4 s is cut off
-export const SHOT2_FRAMES = sec(3);
+// intro.mp4 is 3.5 s (extended from 3.0 s: +0.5 s hold + fade-in) (v9); the shot has to be as long as the clip or its last 0.4 s is cut off
+export const SHOT2_FRAMES = sec(3.5);
 
 /** Design frames for the fade in from black (matching Shot 1's fade-out) and the dissolve to black at the end. */
 const FADE_IN = 6;   // 0.2 s fade in from black — matches Shot 1's fade-out so there is no hard cut
 const FADE_OUT = 8;  // 0.27 s dissolve to black at the end — smoother than the old 0.2 s
 
 /**
- * The 3.0 s PayRanked intro. It has its own audio, so the music bed must be muted during this shot.
+ * The 3.5 s PayRanked intro. It has its own audio, so the music bed must be muted during this shot.
  * The clip was built separately, so it goes through the same Aberration wrapper as the other shots (a short fringe on
  * its first frame, like the slams elsewhere) and a gentle vignette to pull its edges toward the rest of the piece; the
  * whole-video Grade in Root already covers the colour.

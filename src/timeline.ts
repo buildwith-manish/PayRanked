@@ -81,7 +81,7 @@ for (const t of timeline) {
 /** Length of each shot in seconds. The shot files turn these into frames; the master schedule below is built from them. */
 export const SHOT_SECONDS = {
   shot1: 15, // cold open: the question, without the answer (was 30)
-  shot2: 3, // the intro clip (v9) is 3.0 s; was 2.6 s plus 0.4 s of air
+  shot2: 3.5, // the intro clip (extended from 3.0 s: +0.5 s hold + fade-in) (v9) is 3.0 s; was 2.6 s plus 0.4 s of air
   shot3: 60, // method (EXTEND-1: restored from 20 s to 60 s; was 42 s originally)
   shot5: 100, // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
   shot55: 110, // EXTEND-4: practical takeaways (was 80 s; extended to 110 s so the body text has 25 s per profile, hits the 8:30 target)

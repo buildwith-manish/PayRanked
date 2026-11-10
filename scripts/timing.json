@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total": 497.5,
+  "total": 498,
   "shots": {
     "shot1": {
       "start": 0,
@@ -8,26 +8,26 @@
     },
     "shot2": {
       "start": 15,
-      "dur": 3
+      "dur": 3.5
     },
     "shot3": {
-      "start": 18,
+      "start": 18.5,
       "dur": 60
     },
     "countdown": {
-      "start": 78,
+      "start": 78.5,
       "dur": 197.5
     },
     "shot5": {
-      "start": 275.5,
+      "start": 276,
       "dur": 100
     },
     "shot55": {
-      "start": 375.5,
+      "start": 376,
       "dur": 110
     },
     "shot6": {
-      "start": 485.5,
+      "start": 486,
       "dur": 12
     }
   },
