@@ -308,18 +308,18 @@ for(var i=0;i<n;i++){v.setInt16(44+i*4,Math.max(-1,Math.min(1,L[i]))*32767,true)
 var s='',u=new Uint8Array(buf);for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 window.__FPS=60;window.__frames=Math.round(DUR*60);window.__frame=function(n){render(n/60)};window.__render=render;window.__layout=layout;layout();render(0);
 var go=function(){layout();render(0);run(false)};
-if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();
+var __frameMode=window.location.search.indexOf('frame=')!==-1;
+if(!__frameMode){if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();}
 
   // === Frame render mode for screenshot automation ===
-  // Reads ?frame=N from URL and renders that specific frame, then signals completion
-  if (window.location.search.includes('frame=')) {
-    const params = new URLSearchParams(window.location.search);
-    const frameNum = parseInt(params.get('frame'), 10);
-    if (!isNaN(frameNum) && window.__frame && window.__layout) {
-      window.__layout();
-      window.__frame(frameNum);
-      // Hide UI chrome for screenshot
-      const stage = document.querySelector('.stage');
+  // When ?frame=N is in the URL, render only that frame and DO NOT auto-play.
+  // This lets render-locally.sh capture exact frames via headless Chrome --screenshot.
+  if (window.location.search.indexOf('frame=') !== -1) {
+    var __params = new URLSearchParams(window.location.search);
+    var __frameNum = parseInt(__params.get('frame'), 10);
+    if (!isNaN(__frameNum) && window.__frame && window.__layout) {
+      // Hide UI chrome first so the screenshot is clean
+      var stage = document.querySelector('.stage');
       if (stage) {
         stage.style.position = 'fixed';
         stage.style.top = '0';
@@ -329,12 +329,25 @@ if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.font
         stage.style.borderRadius = '0';
         stage.style.border = 'none';
       }
-      document.querySelectorAll('main > *:not(.stage)').forEach(el => { el.style.display = 'none'; });
+      var nonStage = document.querySelectorAll('main > *:not(.stage)');
+      for (var i = 0; i < nonStage.length; i++) nonStage[i].style.display = 'none';
       document.body.style.margin = '0';
       document.body.style.overflow = 'hidden';
       document.documentElement.style.background = '#000';
-      // Signal completion
-      window.__FRAME_READY = true;
+      // Wait for fonts, then render the requested frame
+      var __renderFrame = function() {
+        window.__layout();
+        window.__frame(__frameNum);
+        window.__FRAME_READY = true;
+      };
+      if (document.fonts && document.fonts.ready) {
+        Promise.race([
+          document.fonts.ready,
+          new Promise(function(r){ setTimeout(r, 1500); })
+        ]).then(__renderFrame);
+      } else {
+        __renderFrame();
+      }
     }
   }
 })();
