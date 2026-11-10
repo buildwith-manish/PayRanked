@@ -1,0 +1,200 @@
+[
+  {
+    "id": "001_v01_cold_open",
+    "file": "voiceover/clips_wav/001_v01_cold_open.wav",
+    "start": 1.0,
+    "duration": 6.37
+  },
+  {
+    "id": "002_v02_cold_open",
+    "file": "voiceover/clips_wav/002_v02_cold_open.wav",
+    "start": 5.0,
+    "duration": 3.41
+  },
+  {
+    "id": "003_v03_cold_open",
+    "file": "voiceover/clips_wav/003_v03_cold_open.wav",
+    "start": 8.0,
+    "duration": 1.13
+  },
+  {
+    "id": "004_v04_cold_open",
+    "file": "voiceover/clips_wav/004_v04_cold_open.wav",
+    "start": 13.0,
+    "duration": 6.57
+  },
+  {
+    "id": "005_v06_method",
+    "file": "voiceover/clips_wav/005_v06_method.wav",
+    "start": 20.0,
+    "duration": 1.83
+  },
+  {
+    "id": "006_v07_method",
+    "file": "voiceover/clips_wav/006_v07_method.wav",
+    "start": 22.0,
+    "duration": 17.39
+  },
+  {
+    "id": "007_v08_method",
+    "file": "voiceover/clips_wav/007_v08_method.wav",
+    "start": 40.0,
+    "duration": 1.85
+  },
+  {
+    "id": "008_v09_method",
+    "file": "voiceover/clips_wav/008_v09_method.wav",
+    "start": 50.0,
+    "duration": 1.03
+  },
+  {
+    "id": "009_v10_method",
+    "file": "voiceover/clips_wav/009_v10_method.wav",
+    "start": 63.0,
+    "duration": 12.43
+  },
+  {
+    "id": "010_v11_reveal_10",
+    "file": "voiceover/clips_wav/010_v11_reveal_10.wav",
+    "start": 80.0,
+    "duration": 13.33
+  },
+  {
+    "id": "011_v12_reveal_9",
+    "file": "voiceover/clips_wav/011_v12_reveal_9.wav",
+    "start": 95.0,
+    "duration": 4.47
+  },
+  {
+    "id": "012_v13_break",
+    "file": "voiceover/clips_wav/012_v13_break.wav",
+    "start": 109.0,
+    "duration": 8.09
+  },
+  {
+    "id": "013_v14_reveal_6",
+    "file": "voiceover/clips_wav/013_v14_reveal_6.wav",
+    "start": 147.0,
+    "duration": 3.95
+  },
+  {
+    "id": "014_v15_reveal_5",
+    "file": "voiceover/clips_wav/014_v15_reveal_5.wav",
+    "start": 162.0,
+    "duration": 3.49
+  },
+  {
+    "id": "015_v16_reveal_3",
+    "file": "voiceover/clips_wav/015_v16_reveal_3.wav",
+    "start": 187.0,
+    "duration": 6.15
+  },
+  {
+    "id": "016_v17_break",
+    "file": "voiceover/clips_wav/016_v17_break.wav",
+    "start": 217.0,
+    "duration": 3.87
+  },
+  {
+    "id": "017_v18_reveal_2",
+    "file": "voiceover/clips_wav/017_v18_reveal_2.wav",
+    "start": 227.0,
+    "duration": 3.81
+  },
+  {
+    "id": "018_v19_reveal_1",
+    "file": "voiceover/clips_wav/018_v19_reveal_1.wav",
+    "start": 252.0,
+    "duration": 4.89
+  },
+  {
+    "id": "019_v20_reality",
+    "file": "voiceover/clips_wav/019_v20_reality.wav",
+    "start": 277.0,
+    "duration": 3.03
+  },
+  {
+    "id": "020_v21_reality",
+    "file": "voiceover/clips_wav/020_v21_reality.wav",
+    "start": 293.0,
+    "duration": 13.13
+  },
+  {
+    "id": "021_v22_reality",
+    "file": "voiceover/clips_wav/021_v22_reality.wav",
+    "start": 303.0,
+    "duration": 3.23
+  },
+  {
+    "id": "022_v23_reality",
+    "file": "voiceover/clips_wav/022_v23_reality.wav",
+    "start": 308.0,
+    "duration": 3.37
+  },
+  {
+    "id": "023_v24_reality",
+    "file": "voiceover/clips_wav/023_v24_reality.wav",
+    "start": 320.0,
+    "duration": 9.85
+  },
+  {
+    "id": "024_v25_reality",
+    "file": "voiceover/clips_wav/024_v25_reality.wav",
+    "start": 327.0,
+    "duration": 2.03
+  },
+  {
+    "id": "025_v26_reality",
+    "file": "voiceover/clips_wav/025_v26_reality.wav",
+    "start": 335.0,
+    "duration": 7.75
+  },
+  {
+    "id": "026_v27_practical",
+    "file": "voiceover/clips_wav/026_v27_practical.wav",
+    "start": 377.0,
+    "duration": 1.87
+  },
+  {
+    "id": "027_v28_practical",
+    "file": "voiceover/clips_wav/027_v28_practical.wav",
+    "start": 382.0,
+    "duration": 1.37
+  },
+  {
+    "id": "028_v29_practical",
+    "file": "voiceover/clips_wav/028_v29_practical.wav",
+    "start": 407.0,
+    "duration": 1.71
+  },
+  {
+    "id": "029_v30_practical",
+    "file": "voiceover/clips_wav/029_v30_practical.wav",
+    "start": 432.0,
+    "duration": 1.41
+  },
+  {
+    "id": "030_v31_practical",
+    "file": "voiceover/clips_wav/030_v31_practical.wav",
+    "start": 457.0,
+    "duration": 2.53
+  },
+  {
+    "id": "031_v32_practical",
+    "file": "voiceover/clips_wav/031_v32_practical.wav",
+    "start": 477.0,
+    "duration": 3.85
+  },
+  {
+    "id": "032_v33_outro",
+    "file": "voiceover/clips_wav/032_v33_outro.wav",
+    "start": 487.0,
+    "duration": 10.73
+  },
+  {
+    "id": "033_v34_outro",
+    "file": "voiceover/clips_wav/033_v34_outro.wav",
+    "start": 493.0,
+    "duration": 4.67
+  }
+]
