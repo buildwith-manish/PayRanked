@@ -124,23 +124,29 @@ export const Aberration: React.FC<{at: number[]; peak?: number; children: React.
   const id = safe('ca' + uid.current + useId());
   let amt = 0;
   for (const a of at) if (f >= a && f < a + 14) amt += peak * Math.exp(-(f - a) / 4);
-  if (amt < 0.4) return <AbsoluteFill>{children}</AbsoluteFill>;
+  // The tree must keep the same shape whether or not the aberration is active. It used to return a different structure
+  // for the two cases (children one level shallower when idle), so every time the effect switched on or off React
+  // unmounted and re-created the children: for the map's WebGL canvas that is a brand-new GL context and a visible
+  // blink. Children stay at the same place; only the filter and the (empty) <svg> come and go.
+  const active = amt >= 0.4;
   return (
     <AbsoluteFill>
-      <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
-        <defs>
-          <filter id={id} x="-2%" y="0" width="104%" height="100%" colorInterpolationFilters="sRGB">
-            <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
-            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
-            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
-            <feOffset in="r" dx={-amt} dy={0} result="r2" />
-            <feOffset in="b" dx={amt} dy={0} result="b2" />
-            <feBlend in="r2" in2="g" mode="screen" result="rg" />
-            <feBlend in="rg" in2="b2" mode="screen" />
-          </filter>
-        </defs>
-      </svg>
-      <AbsoluteFill style={{filter: `url(#${id})`}}>{children}</AbsoluteFill>
+      <AbsoluteFill style={active ? {filter: `url(#${id})`} : undefined}>{children}</AbsoluteFill>
+      {active && (
+        <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
+          <defs>
+            <filter id={id} x="-2%" y="0" width="104%" height="100%" colorInterpolationFilters="sRGB">
+              <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+              <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+              <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+              <feOffset in="r" dx={-amt} dy={0} result="r2" />
+              <feOffset in="b" dx={amt} dy={0} result="b2" />
+              <feBlend in="r2" in2="g" mode="screen" result="rg" />
+              <feBlend in="rg" in2="b2" mode="screen" />
+            </filter>
+          </defs>
+        </svg>
+      )}
     </AbsoluteFill>
   );
 };
