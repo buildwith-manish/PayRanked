@@ -439,7 +439,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     opacity: 1 - 0.25 * compact,
                   }}
                 >
-                  <div style={{display: 'flex', alignItems: 'flex-end', gap: 30}}>
+                  <div style={{display: 'flex', alignItems: 'flex-end', gap: 18}}>
                     <div>
                       <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? 110 : 128} color={C.mint} glow={14} />
                       {/* follow-through: the gain rises into view once the wheels have settled */}
@@ -451,7 +451,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     </div>
                     {!isVersus && (
                       <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: 'scale(0.85)', transformOrigin: 'bottom left', opacity: coinFade}}>
-                        <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} refLabel="$100K" refSub="US average" />
+                        <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} refLabel="$100K" refSub="US average" width={130} />
                       </div>
                     )}
                   </div>

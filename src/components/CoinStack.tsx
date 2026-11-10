@@ -40,7 +40,7 @@ export const CoinStack: React.FC<{
   appearAt?: number;
   color?: string;
   refLineAt?: number;
-  /** Label for the reference ring: a bold line and an optional smaller line under it. */
+  /** Label for the reference ring: a bold part and an optional smaller part after it, on one line. */
   refLabel?: string;
   refSub?: string;
   width?: number;
@@ -148,22 +148,26 @@ export const CoinStack: React.FC<{
       </ThreeCanvas>
       </MotionBlur>
       {refY !== undefined && (
-        // sits just right of the ring's end (not over the coins), vertically centred on the ring
+        // sits just LEFT of the ring's end, centred on it: in the reveals the stack hugs the right edge of the frame, so there
+        // is no room on its right, while the space above the dollar figure on its left is empty
         <div
           style={{
             position: 'absolute',
-            left: width / 2 + R + 14 + 16,
-            top: labelY - (refSub ? 27 : 15),
+            left: width / 2 - R - 14 - 14,
+            top: labelY - 18,
+            transform: 'translateX(-100%)',
             fontFamily: F.display,
             fontWeight: 700,
+            fontSize: 28,
             color: C.text,
             whiteSpace: 'nowrap',
-            lineHeight: 1.1,
+            lineHeight: '36px',
+            textAlign: 'right',
             opacity: 0.85,
           }}
         >
-          <div style={{fontSize: 30}}>{refLabel}</div>
-          {refSub && <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 20, opacity: 0.8, marginTop: 2}}>{refSub}</div>}
+          {refLabel}
+          {refSub && <span style={{fontFamily: F.body, fontWeight: 500, fontSize: 20, opacity: 0.8, marginLeft: 8}}>{refSub}</span>}
         </div>
       )}
     </div>
