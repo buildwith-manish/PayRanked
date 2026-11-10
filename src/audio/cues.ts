@@ -35,7 +35,7 @@ import {
 import {SHOT3_FRAMES, T as T3} from '../shots/Shot3';
 import {T as T5} from '../shots/Shot5';
 import {T as T55} from '../shots/Shot55'; // EXTEND-4
-import {BUTTON, T as T6} from '../shots/Shot6';
+import {T as T6} from '../shots/Shot6';
 import {glide, ramp, roll, stagger} from '../motion';
 import {sec} from '../theme';
 import {START, timeline} from '../timeline';
@@ -452,32 +452,13 @@ export const shot6Cues = (): Cue[] => {
     k.push(cue('icon_draw', d + 16 + 6, 0.3));
   });
   k.push(cue('rise_up', T6.pct + 20, 0.25)); // the huge ghosted 27% fades up behind the cards
-
-  // cards leave, the next-video card whips in from the right
-  k.push(cue('out_m', T6.next + 4, 0.5));
-  k.push(cue('whoosh_l', T6.next + 8 + 15, 0.7));
-  k.push(cue('hit_med', T6.next + 8 + 26, 0.7));
-
-  // cursor glides to the button, bell draws, click, subscribed, bell rings
-  k.push(cue('icon_draw', T6.cursor, 0.3));
-  k.push(cue('click', T6.click, 0.6, true));
-  k.push(cue('pop', T6.click + 4, 0.6));
-  k.push(cue('ding', T6.click + 4, 0.4));
-  k.push(cue('bell_ring', T6.click + 6, 0.5));
-  void BUTTON;
-
-  // end screen: two empty frames draw in
-  k.push(cue('hit_med', T6.end + 5, 0.7, true));
-  k.push(cue('whoosh_m', T6.end + 10, 0.4));
-  k.push(cue('chip_2', T6.end + 10 + 5, 0.5));
-  k.push(cue('shimmer', T6.end + 40, 0.3));
   return tidy(k);
 };
 
 /** EXTEND-4: Shot 5.5 Practical Takeaways cues.
  *  A hero hit on the hook slam and on the formula reveal. Each profile card gets a whoosh on the way in, a tap when it
  *  settles, a swish for its headline and body, and an exit as the next card takes over. The formula plays as a phrase
- *  (one blip per piece, like Shot 3's formula) and the tease gets a riser and a soft bell. */
+ *  (one blip per piece, like Shot 3's formula) */
 export const shot55Cues = (): Cue[] => {
   const k: Cue[] = [];
   // hook slam — hero hit; the words rise, then leave behind the line before the first card
@@ -509,12 +490,6 @@ export const shot55Cues = (): Cue[] => {
   k.push(cue('blip_3', T55.formula + 26, 0.44)); // =
   k.push(cue('blip_5', T55.formula + 33, 0.5)); // "your real buying power" (the amber payoff)
   k.push(cue('ding', T55.formula + 36, 0.34));
-
-  // tease — riser + soft bell; "Cities next." and the question under it rise on their own beats
-  k.push(cue('riser', T55.tease, 0.4));
-  k.push(cue('bell_ring', T55.tease + 8, 0.5));
-  k.push(cue('hit_small', T55.tease + 12, 0.38));
-  k.push(cue('shimmer', T55.tease + 18, 0.3));
   return tidy(k);
 };
 

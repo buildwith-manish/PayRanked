@@ -506,7 +506,7 @@ def shot5():
 
 def shot55():
     """Practical takeaways: a warm, settled groove that carries the three profile cards, then lifts for the
-    formula reveal, then settles back for the tease. Same key (D minor), same tempo (96 BPM)."""
+    formula reveal, then holds that to the end (the \"Cities next\" tease was cut). Same key (D minor), same tempo (96 BPM)."""
     t0, dur = S['shot55']['start'], S['shot55']['dur']
     e = TM['shot55']
     n = bars_in(dur)
@@ -529,39 +529,26 @@ def shot55():
             groove(t, b, 3, 0.9)
             if b % 2 == 0:
                 add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.22, pan=0.3)
-        elif loc < e['tease']:  # formula reveal: lift — add arps + a swell
+        else:  # formula reveal to the end of the shot: lift, add arps, and a swell on the last bar
             groove(t, b, 4, 1.0)
             arp(t, b, step=2, g=0.28)
-            if loc + BAR > e['tease']:
+            if loc + BAR > dur:
                 add_swell(t, BAR, 0.15)
-        else:  # tease: settle back, pad + arps, ring out
-            fade = 1 - 0.4 * min(1.0, (loc - e['tease']) / max(1.0, dur - e['tease']))
-            arp(t, b, step=4, g=0.18 * fade)
-            if b % 2 == 0:
-                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.2 * fade, pan=-0.25)
 
 
 def shot6():
+    """Outro: the recap cards on a warm groove, then the last bars ring out under the fade to black.
+    (The next-video card, subscribe ask and end screen were cut: there is no next video yet.)"""
     t0, dur = S['shot6']['start'], S['shot6']['dur']
-    e = TM['shot6']
     for b in range(bars_in(dur)):
         loc = b * BAR
         t = t0 + loc
-        pad_bar(t, b, 0.85 if loc < e['click'] else 0.95)
-        if loc + 0.5 < e['next']:  # recap cards: warm, full groove
+        pad_bar(t, b, 0.85)
+        if loc + BAR <= dur - 1.5 * BAR:  # recap cards: warm, full groove
             groove(t, b, 3 if b else 2, 0.9)
             if b == 0:
                 put(drums, cached('crash', crash_w), t, 0.4)
-        elif loc + 0.5 < e['click']:  # the next-video card and the cursor: stripped
-            add_kick(t, 0.5)
-            add_bass_pulse(t, b, 0.6, eighth=False)
-            arp(t, b, step=4, g=0.2)
-        elif loc < e['end'] - 0.5:  # subscribe
-            groove(t, b, 2, 0.85)
-            add_bell(t + BEAT * 2, D3 + 24 + chord(b)[0] + (12 if chord(b)[0] < 0 else 7), 0.28, pan=0.3)
-        else:  # end screen: pad and arps, ringing out
-            if loc <= e['end'] < loc + BAR:
-                put(drums, cached('crash', crash_w), t0 + e['end'], 0.35)
+        else:  # ring out: pad and arps under the fade
             arp(t, b, step=4, g=0.2)
             if b % 2 == 0:
                 add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.24, pan=-0.25)

@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total": 508.5,
+  "total": 487.5,
   "shots": {
     "shot1": {
       "start": 0,
@@ -8,7 +8,7 @@
     },
     "shot2": {
       "start": 15,
-      "dur": 2.6
+      "dur": 3
     },
     "shot3": {
       "start": 18,
@@ -24,11 +24,11 @@
     },
     "shot55": {
       "start": 375.5,
-      "dur": 110
+      "dur": 100
     },
     "shot6": {
-      "start": 485.5,
-      "dur": 23
+      "start": 475.5,
+      "dur": 12
     }
   },
   "shot1": {
@@ -72,15 +72,12 @@
     "profile2": 30,
     "profile3": 55,
     "formula": 80,
-    "tease": 100
+    "end": 100
   },
   "shot6": {
     "cards": 0.5,
     "pct": 3,
-    "next": 5.5,
-    "cursor": 8.5,
-    "click": 11,
-    "end": 13
+    "fade": 11
   },
   "reveals": [
     {
@@ -93,8 +90,8 @@
       "from": 0,
       "dur": 15,
       "name": 2.6,
-      "bea": 4.2,
-      "dollars": 6.6,
+      "bea": 3.6,
+      "dollars": 5.2,
       "lock": 13.4,
       "mapOut": 14.4
     },
@@ -107,8 +104,8 @@
       "from": 15,
       "dur": 15,
       "name": 2.6,
-      "bea": 4.2,
-      "dollars": 6.6,
+      "bea": 3.6,
+      "dollars": 5.2,
       "lock": 13.4,
       "mapOut": 14.4
     },
@@ -121,8 +118,8 @@
       "from": 30,
       "dur": 15,
       "name": 2.6,
-      "bea": 4.2,
-      "dollars": 6.6,
+      "bea": 3.6,
+      "dollars": 5.2,
       "lock": 13.4,
       "mapOut": 14.4
     },
@@ -135,8 +132,8 @@
       "from": 45,
       "dur": 15,
       "name": 2.6,
-      "bea": 4.2,
-      "dollars": 6.6,
+      "bea": 3.6,
+      "dollars": 5.2,
       "lock": 13.4,
       "mapOut": 14.4
     },
@@ -149,8 +146,8 @@
       "from": 67.5,
       "dur": 15,
       "name": 2.6,
-      "bea": 4.2,
-      "dollars": 6.6,
+      "bea": 3.6,
+      "dollars": 5.2,
       "lock": 13.4,
       "mapOut": 14.4
     },
@@ -164,7 +161,7 @@
       "dur": 25,
       "name": 3,
       "bea": 6,
-      "dollars": 10,
+      "dollars": 8,
       "lock": 21,
       "mapOut": 23.2
     },
@@ -179,7 +176,7 @@
       "dur": 30,
       "name": 3,
       "bea": 6,
-      "dollars": 10,
+      "dollars": 8,
       "lock": 21,
       "mapOut": 23.2
     },
@@ -193,7 +190,7 @@
       "dur": 25,
       "name": 3,
       "bea": 6,
-      "dollars": 10,
+      "dollars": 8,
       "lock": 21,
       "mapOut": 23.2
     },
@@ -207,7 +204,7 @@
       "dur": 25,
       "name": 3,
       "bea": 6,
-      "dollars": 10,
+      "dollars": 8,
       "lock": 21,
       "mapOut": 23.2
     }

@@ -17,7 +17,7 @@ import {SHOT_SECONDS} from '../timeline';
  *
  * Opens on the cliffhanger that used to live in Shot 5 card3 ("So who actually wins?") and answers it for three
  * viewer profiles (remote worker, retiree, early career), then shows the formula so the viewer can plug in their
- * own salary, then teases the next video (cities). The point: turn the abstract ranking into something the viewer
+ * own salary, then closes on the formula. The point: turn the abstract ranking into something the viewer
  * can use, then leave them wanting the city-level breakdown.
  *
  * Visual style matches Shot 5's InfoCards (Glass panels with spring-in) and the cold-open formula (count-up,
@@ -34,7 +34,7 @@ export const T = {
   profile2:  sec(30),    // Retiree card flips in (25 s read time)
   profile3:  sec(55),    // Early career card flips in (25 s read time)
   formula:   sec(80),    // The formula reveal with count-up (20 s, was 10 s — more time to read)
-  tease:     sec(100),   // "Cities next. Where does $50K actually go?" (10 s, was 5 s)
+  end:       sec(100),   // the formula holds to here. A "Cities next" tease used to follow (10 s); cut, there is no next video yet
 };
 
 const PROFILE_CARDS: {
@@ -165,7 +165,7 @@ export const Shot55: React.FC = () => {
         })}
 
         {/* 65-75s: the formula reveal — "YOUR TURN: $salary ÷ (RPP ÷ 100) = your real buying power" */}
-        {f >= T.formula - 6 && f < T.tease + sec(0.5) && (
+        {f >= T.formula - 6 && f < T.end + sec(0.5) && (
           <div
             style={{
               position: 'absolute',
@@ -176,7 +176,7 @@ export const Shot55: React.FC = () => {
               flexDirection: 'column',
               alignItems: 'center',
               gap: 36,
-              opacity: win(f, T.formula, T.tease, 12),
+              opacity: win(f, T.formula, T.end, 12),
             }}
           >
             <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 36, color: C.amber, letterSpacing: '0.18em'}}>
@@ -211,30 +211,6 @@ export const Shot55: React.FC = () => {
             </div>
             <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 38, color: C.muted, textAlign: 'center', maxWidth: 1200, opacity: ramp(f, T.formula + 36, T.formula + 48)}}>
               Plug in your salary and your state's BEA score. That's what your money actually buys.
-            </div>
-          </div>
-        )}
-
-        {/* 75-80s: tease next video — "Cities next. Where does $50K actually go?" */}
-        {f >= T.tease - 6 && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 420,
-              textAlign: 'center',
-              fontFamily: F.display,
-              fontWeight: 700,
-              fontSize: 88,
-              color: C.text,
-              letterSpacing: '-0.02em',
-              opacity: win(f, T.tease, SHOT55_FRAMES, 12),
-            }}
-          >
-            <MaskWords text="Cities next." start={T.tease} step={3} dur={16} />
-            <div style={{marginTop: 18, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted}}>
-              <MaskLine start={T.tease + 16} dur={18}>Where does $50K actually go?</MaskLine>
             </div>
           </div>
         )}
