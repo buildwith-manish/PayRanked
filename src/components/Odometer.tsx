@@ -82,16 +82,28 @@ export const Odometer: React.FC<{
   prevValue?: number;
   /** frames since the number landed (negative or 0 = not landed yet) */
   sinceLanding?: number;
+  /**
+   * Pre-computed digit count of the final target value. When supplied, the odometer always
+   * renders this many digit slots regardless of the current rolling value. This prevents the
+   * one-frame layout shift (and comma appearing/disappearing) that occurs when the rolling value
+   * crosses a power-of-ten boundary mid-animation (e.g. 9,999 → 10,000 adds a digit slot and
+   * a comma, shifting all following elements). Pass String(Math.floor(to)).length from Count.
+   */
+  targetDigits?: number;
   size?: number;
   color?: string;
   prefix?: string;
   suffix?: string;
   glow?: number;
   style?: React.CSSProperties;
-}> = ({value, prevValue, sinceLanding = 0, size = 120, color = C.text, prefix = '', suffix = '', glow = 0, style}) => {
+}> = ({value, prevValue, sinceLanding = 0, targetDigits, size = 120, color = C.text, prefix = '', suffix = '', glow = 0, style}) => {
   const v = Math.max(0, value);
   const pv = Math.max(0, prevValue ?? value);
-  const places = Math.max(1, String(Math.floor(Math.round(v))).length);
+  // Bug fix: deriving `places` from Math.round(v) caused a 1-frame jump whenever the rolling
+  // value crossed a power-of-ten boundary (9999.6 rounds to 10000 → suddenly 5 digits instead
+  // of 4), adding a comma slot and shifting the layout. We now prefer `targetDigits`, which is
+  // the digit count of the final target value and stays constant throughout the animation.
+  const places = targetDigits ?? Math.max(1, String(Math.floor(Math.round(v))).length);
   const t = Math.max(0, sinceLanding);
   // mechanical settle: a third of a digit of overshoot that rings out in about 14 frames
   const wobble = sinceLanding > 0 ? 0.3 * Math.exp(-t / 3.2) * Math.sin(t * 0.85) : 0;

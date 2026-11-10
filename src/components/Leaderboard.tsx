@@ -77,7 +77,10 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
                   fontWeight: 700,
                   fontSize: tie ? 22 : 26,
                   color: C.text,
-                  opacity: nameP * ramp(open, 0.35, 1),
+                  // Bug fix: threshold was 0.35 — names started appearing when the rail was only 35%
+                  // open, overlapping the rank number in the narrow collapsed strip. Raised to 0.65
+                  // so names only become visible once the rail is wide enough to hold them.
+                  opacity: nameP * ramp(open, 0.65, 1),
                   transform: `translateX(${(1 - nameP) * 40}px)`,
                   whiteSpace: 'nowrap',
                 }}

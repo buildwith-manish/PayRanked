@@ -29,6 +29,9 @@ export const Count: React.FC<{
       value={v}
       prevValue={pv}
       sinceLanding={frame - (start + duration)}
+      // Bug 6 fix: pre-compute digit count from the final target so Odometer never shifts
+      // layout when the rolling value crosses a power-of-ten boundary mid-animation.
+      targetDigits={Math.max(String(Math.floor(Math.abs(to))).length, String(Math.floor(Math.abs(from))).length)}
       size={size}
       color={color ?? (to >= from ? C.mint : C.red)}
       prefix={prefix}
