@@ -43,7 +43,7 @@ export const SfxTrack: React.FC<{cues: Cue[]; offset: number}> = ({cues, offset}
  */
 export const MasterAudio: React.FC<{offset?: number}> = ({offset = 0}) => (
   <>
-    {AUDIO.vo && <Audio src={staticFile('vo.wav')} startFrom={toReal(offset)} volume={AUDIO.voLevel} />}
+    {AUDIO.vo && <Audio src={staticFile('vo.mp3')} startFrom={toReal(offset)} volume={AUDIO.voLevel} />}
     {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(offset)} volume={(f) => musicGain(offset + f / K)} />}
   </>
 );

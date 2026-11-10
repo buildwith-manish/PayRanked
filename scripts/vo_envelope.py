@@ -2,7 +2,7 @@
 """
 Measure the voice-over once so the music and SFX can duck against it (the sidechain).
 
-    python3 scripts/vo_envelope.py [public/vo.wav]      # writes src/audio/vo-envelope.json
+    python3 scripts/vo_envelope.py [public/vo.mp3]      # writes src/audio/vo-envelope.json
 
 Per video frame (30 fps) it writes a number 0..100: how much the voice is "speaking" at that moment.
   1. loudness per frame (RMS in dB)
@@ -21,7 +21,7 @@ import numpy as np
 
 FPS = 30
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'public', 'vo.wav')
+src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'public', 'vo.mp3')
 out = os.path.join(ROOT, 'src', 'audio', 'vo-envelope.json')
 
 SR = 16000
