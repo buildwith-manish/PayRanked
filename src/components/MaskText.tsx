@@ -83,15 +83,30 @@ export const MaskChars: React.FC<{
   dur?: number;
   style?: React.CSSProperties;
   leaveAt?: number;
-}> = ({text, start, step = 1.6, dur = 20, style, leaveAt}) => (
-  <span style={style}>
-    {text.split('').map((ch, i) => (
+}> = ({text, start, step = 1.6, dur = 20, style, leaveAt}) => {
+  // Each letter is its own inline-block, so the browser may break a line between ANY two of them ("NEBRASK" / "A").
+  // Letters are grouped into nowrap words; the only places a line can break are the spaces between words.
+  const out: React.ReactNode[] = [];
+  let word: React.ReactNode[] = [];
+  const flush = (key: number) => {
+    if (word.length) out.push(<span key={`w${key}`} style={{display: 'inline-block', whiteSpace: 'nowrap'}}>{word}</span>);
+    word = [];
+  };
+  text.split('').forEach((ch, i) => {
+    if (ch === ' ') {
+      flush(i);
+      out.push(<span key={`s${i}`} style={{whiteSpace: 'pre-wrap'}}>{' '}</span>);
+      return;
+    }
+    word.push(
       <MaskLine key={i} start={start + Math.round(i * step)} dur={dur} leaveAt={leaveAt === undefined ? undefined : leaveAt + Math.round(i * 0.8)} skew={7}>
-        {ch === ' ' ? '\u00a0' : ch}
+        {ch}
       </MaskLine>
-    ))}
-  </span>
-);
+    );
+  });
+  flush(text.length);
+  return <span style={style}>{out}</span>;
+};
 
 /** A thin rule that draws from the left with the same curve, to sit under a masked line. */
 export const MaskRule: React.FC<{start: number; dur?: number; height?: number; color: string; style?: React.CSSProperties}> = ({start, dur = 22, height = 6, color, style}) => {

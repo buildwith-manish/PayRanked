@@ -185,7 +185,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const est = 0.65 * 520 * rankLabel.length; // rough width of the big label, to land its left edge on the panel edge
   const rankX = lerp(W / 2, PANEL_X + est * 0.1, travel(frame));
   const rankY = lerp(H / 2, 118, travel(frame));
-  const rankGlow = lerp(80, 26, travel(frame));
+  // was lerp(80, 26) at full emerald: with the grade's bloom on top the slam blew out to a flat neon slab
+  const rankGlow = lerp(30, 10, travel(frame));
 
   // ---- map state: the highlighted state lifts out of the map, the others fall back into the dark ----
   const pop = tween(frame, sec(1.5), 30, slam) * 30;
@@ -353,7 +354,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             fontSize: 520,
             color: C.mint,
             lineHeight: 1,
-            textShadow: `0 0 ${rankGlow}px ${C.emerald}`,
+            textShadow: `0 0 ${rankGlow}px ${C.emerald}99`,
             whiteSpace: 'nowrap',
             ...tabular,
           }}

@@ -27,20 +27,26 @@ export const MotionBlur: React.FC<{
   const id = safeId(uid.current + useId());
   const bx = blurLength(dx, shutter, cap);
   const by = blurLength(dy, shutter, cap);
-  if (bx === 0 && by === 0) return <div style={style}>{children}</div>;
+  // The tree must have the same shape whether or not there is blur. It used to return a different structure for the two
+  // cases, so every time the blur crossed its floor React unmounted and re-created the children: for a WebGL canvas that
+  // is a new GL context each time (the whole 3D scene blinks out for a few frames in the preview, and every toggle costs
+  // a shader recompile in a render). Children stay at index 0; only the filter and the (empty) <svg> come and go.
+  const blurring = bx !== 0 || by !== 0;
   return (
-    <div style={{...style, filter: `url(#${id})`}}>
-      <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
-        <defs>
-          {/* Bug fix: old region (x="-30%" width="160%") clipped the blur trail on fast large elements
-              (rank slam, coin stacks, rising bars). 50% margin = 200% total gives enough room for any
-              realistic blur length without meaningfully increasing render cost. */}
-          <filter id={id} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
-            <feGaussianBlur stdDeviation={`${bx} ${by}`} />
-          </filter>
-        </defs>
-      </svg>
+    <div style={blurring ? {...style, filter: `url(#${id})`} : style}>
       {children}
+      {blurring && (
+        <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
+          <defs>
+            {/* Bug fix: old region (x="-30%" width="160%") clipped the blur trail on fast large elements
+                (rank slam, coin stacks, rising bars). 50% margin = 200% total gives enough room for any
+                realistic blur length without meaningfully increasing render cost. */}
+            <filter id={id} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+              <feGaussianBlur stdDeviation={`${bx} ${by}`} />
+            </filter>
+          </defs>
+        </svg>
+      )}
     </div>
   );
 };
