@@ -1,11 +1,14 @@
-import {loadFont as loadPoppins} from '@remotion/google-fonts/Poppins';
-import {loadFont as loadInter} from '@remotion/google-fonts/Inter';
+/**
+ * Design tokens — colours, spacing, typography, helpers.
+ *
+ * Fonts: Clash Display (display/numbers) + Satoshi (body) via self-hosted
+ * Fontshare woff2 files, loaded in src/fontshare/load-fonts.ts (imported by
+ * Root.tsx). Poppins and Inter have been removed.
+ */
+import {PAYRANKED_FONTS} from './fontshare/load-fonts';
 import {DESIGN_FPS} from './clock';
 
 export {DESIGN_FPS, FPS} from './clock';
-
-export const poppins = loadPoppins('normal', {weights: ['500', '700']});
-export const inter = loadInter('normal', {weights: ['500']});
 
 export const W = 1920;
 export const H = 1080;
@@ -23,9 +26,10 @@ export const C = {
   muted: '#8DA2BB',
 };
 
+/** Font stacks for all components. Source of truth is PAYRANKED_FONTS in load-fonts.ts. */
 export const F = {
-  display: `${poppins.fontFamily}, sans-serif`,
-  body: `${inter.fontFamily}, sans-serif`,
+  display: PAYRANKED_FONTS.display,  // 'Clash Display', Satoshi, sans-serif
+  body:    PAYRANKED_FONTS.body,     // Satoshi, Plus Jakarta Sans, system-ui, sans-serif
 };
 
 export const tabular: React.CSSProperties = {fontVariantNumeric: 'tabular-nums'};
