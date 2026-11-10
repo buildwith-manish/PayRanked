@@ -24,7 +24,7 @@ const Countdown: React.FC = () => (
   <AbsoluteFill>
     {timeline.map((t, i) => (
       <Sequence key={t.label} from={toReal(t.from)} durationInFrames={toReal(t.dur)} name={`${t.label} ${t.names.join(' + ')}`}>
-        <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} />
+        <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} versus={t.versus} />
         <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
       </Sequence>
     ))}
@@ -113,7 +113,7 @@ export const Root: React.FC = () => (
         component={GradedReveals[i]}
         durationInFrames={toReal(t.dur)}
         {...common}
-        defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore, fast: t.fast}}
+        defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore, fast: t.fast, versus: t.versus}}
       />
     ))}
   </>

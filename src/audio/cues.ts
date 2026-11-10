@@ -15,7 +15,7 @@
 import {byName, gap, nearTieOf, NO_WAGE_TAX, BOTTOM_FIVE} from '../data';
 import {coinsFor} from '../components/CoinStack';
 import {BREAK_BEATS} from '../components/Break';
-import {NAME_STEP, TIE_STAMP_AFTER_NAME, timing} from '../components/RankReveal';
+import {NAME_STEP, TIE_STAMP_AFTER_NAME, timing, versusAt} from '../components/RankReveal';
 import {breaks as countdownBreaks, COUNT_DUR as REVEAL_COUNT, isFast} from '../timeline';
 import {
   BRACKET_START,
@@ -204,14 +204,15 @@ export const shot3Cues = (): Cue[] => {
 };
 
 // =============================================================== Shot 4: one reveal
-export const revealCues = (names: string[], rankLabel: string): Cue[] => {
+export const revealCues = (names: string[], rankLabel: string, versus = false): Cue[] => {
   const k: Cue[] = [];
   const lead = byName(names[0]);
   const tie = names.length > 1;
   const rank = parseInt(rankLabel.replace('#', ''), 10);
   const nearTie = rank === 1 && !tie && !!nearTieOf(lead.name); // #1 is the top of a near-tie: stamp + margin line
   const TR = timing(isFast(rank));
-  const hasFact = !!(lead.fact && lead.factSource);
+  const isVersus = versus && !tie; // the versus reveal has no coins and no fact card (see RankReveal)
+  const hasFact = !!(lead.fact && lead.factSource) && !isVersus;
   const nameLen = names.join('  ·  ').length;
   const ruleAt = TR.name + Math.round(nameLen * NAME_STEP) + 4;
 
@@ -239,11 +240,19 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   // 10-15s: dollars roll on odometer wheels, coins pour in, the gain rises once they land
   k.push(...ticks(TR.dollars, REVEAL_COUNT, 16, 0.5));
   const coinsAt = (f: number) => ramp(f, TR.dollars, TR.dollars + 60, glide) * coinsFor(lead.dollars);
-  k.push(...coinLandings(TR.dollars, coinsAt, 0.45));
+  if (!isVersus) k.push(...coinLandings(TR.dollars, coinsAt, 0.45));
   k.push(cue('hit_small', TR.dollars + REVEAL_COUNT, 0.6));
   k.push(cue('ding', TR.dollars + REVEAL_COUNT, 0.45));
   k.push(cue('swish', TR.dollars + REVEAL_COUNT - 4 + 8, 0.35));
   if (nearTie) k.push(cue('swish', TR.dollars + REVEAL_COUNT + 14 + 6, 0.35)); // the margin over #2 rises
+  if (isVersus) {
+    // the two bars grow, one after the other, and the second lands as the comparison closes
+    const v = versusAt(TR);
+    k.push(cue('swish', v + 4, 0.35));
+    k.push(cue('whoosh_xs', v + 8, 0.25));
+    k.push(cue('whoosh_xs', v + 22, 0.25));
+    k.push(cue('hit_small', v + 22 + 34, 0.4));
+  }
 
   // 15-21s: the fact card slides in alone; dollars step back, coins sink
   if (hasFact) {
@@ -402,7 +411,7 @@ export const CUES = {
   shot3: shot3Cues(),
   shot5: shot5Cues(),
   shot6: shot6Cues(),
-  reveals: timeline.map((t) => revealCues(t.names, t.label)),
+  reveals: timeline.map((t) => revealCues(t.names, t.label, t.versus)),
   breaks: countdownBreaks.map((b) => breakCues(b.kind)),
 };
 

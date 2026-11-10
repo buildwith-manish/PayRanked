@@ -1,5 +1,5 @@
 import type {RailEntry} from './components/Leaderboard';
-import {COUNTDOWN} from './data';
+import {byName, COUNTDOWN} from './data';
 import {sec} from './theme';
 
 /**
@@ -19,6 +19,17 @@ export const MIN_REVEAL_SECONDS = 25;
 export const FAST_FROM_RANK = 6; // #10 .. #6 use the 15 s beats
 export const FAST_REVEAL_SECONDS = 15;
 export const isFast = (rank: number) => rank >= FAST_FROM_RANK;
+
+/**
+ * The one fast reveal that breaks the "3D map left, text panel right" template: #8 swaps the coin stack and fact card for a
+ * side-by-side against California, built from the same BEA index as the ranking (so it adds no new claim to verify).
+ * It sits in the middle of #10 to #6 so no two neighbouring reveals look alike for more than a beat or two.
+ */
+export const VERSUS_RANK = 8;
+export const hasVersus = (rank: number) => rank === VERSUS_RANK;
+
+/** The 15 s reveals give a fact about 3.8 s on screen with no source line (see RankReveal). Past this many words it cannot be read. */
+export const FAST_FACT_MAX_WORDS = 12;
 export const revealSeconds = (names: string[], rank: number) =>
   isFast(rank) ? FAST_REVEAL_SECONDS : MIN_REVEAL_SECONDS + (names.length > 1 ? 5 : 0);
 
@@ -42,7 +53,7 @@ export const { timeline, breaks, COUNTDOWN_TOTAL } = (() => {
   const brk: {kind: BreakKind; from: number; dur: number; rail: RailEntry[]}[] = [];
   const tl = COUNTDOWN.map((c) => {
     const dur = sec(revealSeconds(c.names, c.rank));
-    const item = {...c, from: at, dur, fast: isFast(c.rank), railBefore: [...done]};
+    const item = {...c, from: at, dur, fast: isFast(c.rank), versus: hasVersus(c.rank), railBefore: [...done]};
     done.push({label: c.label, names: c.names, lockAt: 0});
     at += dur;
     BREAKS.filter((b) => b.afterRank === c.rank).forEach((b) => {
@@ -55,6 +66,17 @@ export const { timeline, breaks, COUNTDOWN_TOTAL } = (() => {
   });
   return {timeline: tl, breaks: brk, COUNTDOWN_TOTAL: at};
 })();
+
+// A fact that is too long for a fast reveal is a warning, not a build failure: the facts are data, and a long one still renders.
+for (const t of timeline) {
+  if (!t.fast || t.versus) continue;
+  for (const n of t.names) {
+    const fact = byName(n).fact;
+    if (fact && fact.split(/\s+/).length > FAST_FACT_MAX_WORDS) {
+      console.warn(`[timeline] ${t.label} ${n}: fact is ${fact.split(/\s+/).length} words; fast reveals (#10 to #6) read best at ${FAST_FACT_MAX_WORDS} or fewer.`);
+    }
+  }
+}
 
 /** Length of each shot in seconds. The shot files turn these into frames; the master schedule below is built from them. */
 export const SHOT_SECONDS = {

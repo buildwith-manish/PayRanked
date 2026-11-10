@@ -33,7 +33,14 @@ export type RankRevealProps = {
   railBefore?: RailEntry[];
   /** the 15 s version of the beats (#10 to #6) */
   fast?: boolean;
+  /** swap the coin stack and fact card for a side-by-side against California (one reveal, to break the template) */
+  versus?: boolean;
 };
+
+/** The state this reveal is set against in the versus layout: the same California the cold open and the reality check use. */
+export const VERSUS_VS = 'California';
+/** Frame (within the reveal) on which the versus rows start: just after the dollar count has landed. */
+export const versusAt = (t: {dollars: number}) => t.dollars + COUNT_DUR + 10;
 
 /** Frames between letters of the state name (the cue sheet needs it to time the underline). */
 export const NAME_STEP = 1.6;
@@ -111,7 +118,7 @@ for (const [label, t] of [['full', T], ['fast', T_FAST]] as const) {
  * lifts with a ringing settle; the pin falls under gravity with a bounce; type rises from behind a mask line; numbers
  * roll on odometer wheels; fast moves carry directional motion blur measured from their real speed.
  */
-export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = [], fast = false}) => {
+export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = [], fast = false, versus = false}) => {
   const frame = useDesignFrame();
   const T = timing(fast);
   const states = names.map(byName);
@@ -202,10 +209,19 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
   // ---- 10-15s dollars + coins ----
   const coinCount = ramp(frame, T.dollars, T.dollars + 60, glide) * coinsFor(lead.dollars);
-  const hasFact = !!(lead.fact && lead.factSource);
+  // the versus reveal shows its comparison where the fact card would be, so it never carries a fact card
+  const hasFact = !!(lead.fact && lead.factSource) && !(versus && !tie);
+  // fast reveals (#10 to #6) get about 3.8 s of fact: no source line there (the source is on screen the whole video)
+  const showSource = !fast;
   // with a fact card the dollars step back and the coins sink; without one they hold
   const compact = hasFact ? tween(frame, T.fact, 24, glide) : 0;
   const coinFade = hasFact ? 1 - ramp(frame, T.fact, T.fact + 16, exitIn) : 1;
+  const isVersus = versus && !tie;
+  const vs = byName(VERSUS_VS);
+  const vAt = versusAt(T);
+  // bars share one scale, from $0, so their lengths are honest; the ring marks $100,000
+  const BAR_MAX = 120000;
+  const BAR_W = 600;
 
   // ---- 15-21s fact card ----
   const factIn = (f: number) => tween(f, T.fact + 6, 26, glide);
@@ -397,9 +413,45 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                         </MaskLine>
                       </div>
                     </div>
-                    <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: 'scale(0.85)', transformOrigin: 'bottom left', opacity: coinFade}}>
-                      <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} />
-                    </div>
+                    {!isVersus && (
+                      <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: 'scale(0.85)', transformOrigin: 'bottom left', opacity: coinFade}}>
+                        <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* versus (one reveal only): the same $100,000 in this state and in California, on one scale */}
+              {isVersus && frame >= vAt && (
+                <div style={{position: 'absolute', left: 0, top: 640, width: 760}}>
+                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 34, color: C.muted, marginBottom: 22}}>
+                    <MaskLine start={vAt} dur={20}>
+                      The same $100,000 buys
+                    </MaskLine>
+                  </div>
+                  {[
+                    {label: lead.name, dollars: lead.display, color: C.mint, delay: 0},
+                    {label: vs.name, dollars: vs.display, color: C.muted, delay: 14},
+                  ].map((row) => {
+                    const p = tween(frame, vAt + 8 + row.delay, 34, glide);
+                    return (
+                      <div key={row.label} style={{marginBottom: 26, opacity: ramp(frame, vAt + 4 + row.delay, vAt + 14 + row.delay, glide)}}>
+                        <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: BAR_W + 150}}>
+                          <span style={{fontFamily: F.body, fontWeight: 500, fontSize: 32, color: row.color === C.mint ? C.text : C.muted}}>{row.label}</span>
+                          <span style={{fontFamily: F.display, fontWeight: 700, fontSize: 44, color: row.color, ...tabular}}>{fmtUSD(Math.round(row.dollars * p))}</span>
+                        </div>
+                        <div style={{position: 'relative', marginTop: 8, height: 26, width: BAR_W + 150}}>
+                          <div style={{position: 'absolute', left: 0, top: 0, height: 26, width: (row.dollars / BAR_MAX) * BAR_W * p, borderRadius: 13, background: row.color, opacity: row.color === C.mint ? 1 : 0.55}} />
+                          <div style={{position: 'absolute', left: (SALARY / BAR_MAX) * BAR_W - 1.5, top: -6, width: 3, height: 38, background: C.text, opacity: 0.7}} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 26, color: C.muted, marginTop: -2}}>
+                    <MaskLine start={vAt + 40} dur={20}>
+                      White line: $100,000 at the US average price level
+                    </MaskLine>
                   </div>
                 </div>
               )}
@@ -436,9 +488,11 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, lineHeight: 1.25, color: C.text}}>
                       <MaskWords text={lead.fact ?? ''} start={T.fact + 12} step={2} dur={18} />
                     </div>
-                    <div style={{marginTop: 12, fontFamily: F.body, fontWeight: 500, fontSize: 24, color: C.muted}}>
-                      <MaskLine start={T.fact + 12 + Math.min(30, (lead.fact ?? '').split(' ').length * 2) + 6}>Source: {lead.factSource}</MaskLine>
-                    </div>
+                    {showSource && (
+                      <div style={{marginTop: 12, fontFamily: F.body, fontWeight: 500, fontSize: 24, color: C.muted}}>
+                        <MaskLine start={T.fact + 12 + Math.min(30, (lead.fact ?? '').split(' ').length * 2) + 6}>Source: {lead.factSource}</MaskLine>
+                      </div>
+                    )}
                   </Glass>
                 </MotionBlur>
               )}
