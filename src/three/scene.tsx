@@ -132,12 +132,12 @@ export const MapLights: React.FC<{
     <directionalLight position={[500, 1400, 260]} intensity={TUNE.rim} color="#5ad8ff" />
     {glow && glow.amount > 0.01 && (
       <>
-        <pointLight position={[glow.x, glow.y, glow.z]} color={glow.color} intensity={90000 * glow.amount} distance={900} decay={2} />
-        <sprite position={[glow.x, glow.y, glow.z]} scale={[620, 620, 1]}>
+        <pointLight position={[glow.x, glow.y, glow.z]} color={glow.color} intensity={42000 * glow.amount} distance={800} decay={2} />
+        <sprite position={[glow.x, glow.y, glow.z]} scale={[460, 460, 1]}>
           <spriteMaterial
             map={radialTexture()}
             color={glow.color}
-            opacity={0.5 * glow.amount}
+            opacity={0.16 * glow.amount}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
             transparent
@@ -179,11 +179,11 @@ export const Pin3D: React.FC<{
       <group position={[x, y, z + (1 - drop) * 90 * scale]} scale={[s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5)]}>
         <mesh position={[0, 0, 0.27]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
           <coneGeometry args={[0.2, 0.54, 24]} />
-          <meshStandardMaterial color={red} emissive={glowColor} emissiveIntensity={0.7} roughness={0.35} metalness={0.2} />
+          <meshStandardMaterial color={red} emissive={glowColor} emissiveIntensity={0.4} roughness={0.35} metalness={0.2} />
         </mesh>
         <mesh position={[0, 0, 0.72]} castShadow>
           <sphereGeometry args={[0.25, 32, 24]} />
-          <meshStandardMaterial color={red} emissive={glowColor} emissiveIntensity={0.7} roughness={0.25} metalness={0.2} />
+          <meshStandardMaterial color={red} emissive={glowColor} emissiveIntensity={0.4} roughness={0.25} metalness={0.2} />
         </mesh>
         <mesh position={[0, -0.17, 0.8]}>
           <sphereGeometry args={[0.085, 16, 12]} />

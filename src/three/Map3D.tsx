@@ -54,10 +54,10 @@ export const Map3D: React.FC<{
               grow={rise}
               extra={pop}
               color={colour}
-              glow={(0.28 + 0.14 * pulse) * clamp(rise)}
+              glow={(0.09 + 0.04 * pulse) * clamp(rise)}
               trace={trace}
               lineColor={C.mint}
-              lineOpacity={0.95}
+              lineOpacity={0.75}
             />
           );
         }
