@@ -2,16 +2,11 @@ import React from 'react';
 import {Audio, Sequence, staticFile} from 'remotion';
 import {AUDIO} from './config';
 import {Cue} from './cues';
-import {musicGain, sfxDuck, voEnv} from './duck';
+import {musicGain, sfxDuck} from './duck';
 import manifest from './manifest.json';
 import voManifest from './voiceover-manifest.json';
 import {DESIGN_FPS, FPS, K, toReal} from '../clock';
 
-/**
- * Plays one sound for every cue. Each file is started early by its `peak` (from manifest.json) so that its impact, not
- * its first sample, lands on the cue's frame. Every sound is its own <Sequence>, named after the file, so the cue sheet
- * is readable straight off the Remotion Studio timeline.
- */
 export const SfxTrack: React.FC<{cues: Cue[]; offset: number}> = ({cues, offset}) => {
   if (!AUDIO.sfx) return null;
   return (
@@ -35,14 +30,8 @@ export const SfxTrack: React.FC<{cues: Cue[]; offset: number}> = ({cues, offset}
 
 /**
  * Voice-over and music bed.
- *
- * The VO is now played as individual clips, each placed at its exact visual beat
- * via voiceover-manifest.json. This avoids the "giant wav" problem (48MB file
- * crashing the dev server) and the "overlap/cutoff" problem (clips being pushed
- * late because the previous clip ran long).
- *
- * Each clip is its own <Sequence> at the correct design-frame start time.
- * The music bed is a single <Audio> that runs the full length.
+ * Simplified: VO clips play at full volume (AUDIO.voLevel = 1.0).
+ * Music ducks based on the VO envelope from the concatenated mp3.
  */
 export const MasterAudio: React.FC<{offset?: number}> = ({offset = 0}) => {
   return (
@@ -50,8 +39,7 @@ export const MasterAudio: React.FC<{offset?: number}> = ({offset = 0}) => {
       {/* Voice-over: individual clips at exact visual beats */}
       {AUDIO.vo && voManifest.map((clip: any, i: number) => {
         const fromFrame = toReal(Math.round(clip.start * DESIGN_FPS));
-        const durFrames = toReal(Math.round(clip.duration * DESIGN_FPS));
-        const clipOffset = Math.round(clip.start * DESIGN_FPS);
+        const durFrames = toReal(Math.round(clip.duration * DESIGN_FPS)) + 10; // +10 frames buffer
         return (
           <Sequence
             key={clip.id}
@@ -62,7 +50,7 @@ export const MasterAudio: React.FC<{offset?: number}> = ({offset = 0}) => {
           >
             <Audio
               src={staticFile(clip.file)}
-              volume={(f) => AUDIO.voLevel * (1 - 0.3 * (1 - voEnv(clipOffset + f / K)))}
+              volume={AUDIO.voLevel}
             />
           </Sequence>
         );
