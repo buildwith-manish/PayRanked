@@ -458,7 +458,7 @@ export const shot6Cues = (): Cue[] => {
 /** EXTEND-4: Shot 5.5 Practical Takeaways cues.
  *  A hero hit on the hook slam and on the formula reveal. Each profile card gets a whoosh on the way in, a tap when it
  *  settles, a swish for its headline and body, and an exit as the next card takes over. The formula plays as a phrase
- *  (one blip per piece, like Shot 3's formula) */
+ *  (one blip per piece, like Shot 3's formula) and the tease gets a riser and a soft bell. */
 export const shot55Cues = (): Cue[] => {
   const k: Cue[] = [];
   // hook slam — hero hit; the words rise, then leave behind the line before the first card
@@ -490,6 +490,11 @@ export const shot55Cues = (): Cue[] => {
   k.push(cue('blip_3', T55.formula + 26, 0.44)); // =
   k.push(cue('blip_5', T55.formula + 33, 0.5)); // "your real buying power" (the amber payoff)
   k.push(cue('ding', T55.formula + 36, 0.34));
+  // tease — riser + soft bell; "Cities next." and the question under it rise on their own beats
+  k.push(cue('riser', T55.tease, 0.4));
+  k.push(cue('bell_ring', T55.tease + 8, 0.5));
+  k.push(cue('hit_small', T55.tease + 12, 0.38));
+  k.push(cue('shimmer', T55.tease + 18, 0.3));
   return tidy(k);
 };
 

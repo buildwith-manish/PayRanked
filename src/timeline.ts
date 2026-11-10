@@ -84,7 +84,7 @@ export const SHOT_SECONDS = {
   shot2: 3, // the intro clip (v9) is 3.0 s; was 2.6 s plus 0.4 s of air
   shot3: 60, // method (EXTEND-1: restored from 20 s to 60 s; was 42 s originally)
   shot5: 100, // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
-  shot55: 100, // EXTEND-4: practical takeaways. Was 110 s; the last 10 s were the "Cities next" tease, cut because there is no next video yet
+  shot55: 110, // EXTEND-4: practical takeaways (was 80 s; extended to 110 s so the body text has 25 s per profile, hits the 8:30 target)
   shot6: 12, // outro: the recap cards, then a 1 s fade to black. No next-video card, subscribe ask or end screen (there is no next video yet)
 };
 

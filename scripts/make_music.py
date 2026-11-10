@@ -506,7 +506,7 @@ def shot5():
 
 def shot55():
     """Practical takeaways: a warm, settled groove that carries the three profile cards, then lifts for the
-    formula reveal, then holds that to the end (the \"Cities next\" tease was cut). Same key (D minor), same tempo (96 BPM)."""
+    formula reveal, then settles back for the tease. Same key (D minor), same tempo (96 BPM)."""
     t0, dur = S['shot55']['start'], S['shot55']['dur']
     e = TM['shot55']
     n = bars_in(dur)
@@ -529,11 +529,16 @@ def shot55():
             groove(t, b, 3, 0.9)
             if b % 2 == 0:
                 add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.22, pan=0.3)
-        else:  # formula reveal to the end of the shot: lift, add arps, and a swell on the last bar
+        elif loc < e['tease']:  # formula reveal: lift — add arps + a swell
             groove(t, b, 4, 1.0)
             arp(t, b, step=2, g=0.28)
-            if loc + BAR > dur:
+            if loc + BAR > e['tease']:
                 add_swell(t, BAR, 0.15)
+        else:  # tease: settle back, pad + arps, ring out
+            fade = 1 - 0.4 * min(1.0, (loc - e['tease']) / max(1.0, dur - e['tease']))
+            arp(t, b, step=4, g=0.18 * fade)
+            if b % 2 == 0:
+                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.2 * fade, pan=-0.25)
 
 
 def shot6():
