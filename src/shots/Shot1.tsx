@@ -83,24 +83,109 @@ const Card: React.FC<{side: -1 | 1; target: number; startAt: number}> = ({side, 
   );
 };
 
-/** The left half: the winner's number, withheld. Same glass card, same place as Card, digits replaced by question marks. */
+/**
+ * The left half: the winner's number, withheld. Structurally identical to Card — same Glass container, same
+ * MotionBlur entrance, same size={112} Odometer layout — but each digit slot shows a "?" instead of a rolling
+ * wheel. Digit count matches the winner (Arkansas: 6 digits → "$1??,???") so the two cards occupy the same
+ * width on screen and the reveal of the real number at #1 is a true in-place substitution, not a resize.
+ *
+ * The "?" slots are built to match the Odometer's internal geometry exactly:
+ *   - font: F.display, weight 700, size 112 (= Odometer's `size` prop)
+ *   - each digit slot: width 1ch, height LINE em (1.15 em), overflow hidden, tabular-nums
+ *   - comma slots: width 0.3ch, same height — identical to Odometer's comma divs
+ *   - same fade mask (transparent → opaque → transparent) so the "?" sits in the same window the real digit would
+ * A slow sine breathe (0.8 + 0.2 * sin) is applied per-slot so the question marks pulse individually rather than
+ * the whole string flashing, which read as a glitch at 30 fps.
+ */
+const MYSTERY_SIZE = 112; // must match Card's Odometer size prop
+const MYSTERY_LINE = 1.15; // must match Odometer's LINE constant
+// Arkansas has 6 digits (115,000) — digit pattern: 1 _ _ , _ _ _ → slots: [d, d, d, ',', d, d, d]
+// We render the digits in the same left-to-right order the Odometer does: most-significant first.
+const MYSTERY_SLOTS: Array<'digit' | 'comma'> = ['digit', 'digit', 'digit', 'comma', 'digit', 'digit', 'digit'];
+
 const MysteryCard: React.FC = () => {
   const f = useDesignFrame();
   const enterAt = SHAPE_START + 8;
-  const enter = tween(f, enterAt, 22, snap);
-  const y = 610 + (1 - enter) * 50 + Math.sin(f / 22) * 3;
+  const enterAt4 = enterAt - 4; // match Card's `startAt - 4` offset so the two cards enter on the same curve
+  const yAt = (t: number) => 610 + (1 - tween(t, enterAt4, 22, snap)) * 50;
+  const y = yAt(f);
+  const py = yAt(f - 1);
+  const enter = tween(f, enterAt4, 22, snap);
+
+  const slots = MYSTERY_SLOTS.map((kind, i) => {
+    if (kind === 'comma') {
+      return (
+        <div
+          key={`mc${i}`}
+          style={{
+            width: '0.3ch',
+            textAlign: 'center',
+            height: `${MYSTERY_LINE}em`,
+            lineHeight: `${MYSTERY_LINE}em`,
+            opacity: 0.6,
+          }}
+        >
+          ,
+        </div>
+      );
+    }
+    // Per-slot breathe: stagger the phase slightly so the marks pulse in a gentle ripple, not a unison flash.
+    const breathe = 0.8 + 0.2 * Math.sin(f / 9 + i * 0.4);
+    return (
+      <div
+        key={`md${i}`}
+        style={{
+          width: '1ch',
+          height: `${MYSTERY_LINE}em`,
+          lineHeight: `${MYSTERY_LINE}em`,
+          textAlign: 'center',
+          overflow: 'hidden',
+          // same fade window as Odometer's Wheel so the glyph sits in the same visible region
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%)',
+          opacity: breathe,
+        }}
+      >
+        ?
+      </div>
+    );
+  });
+
   return (
-    <div style={{position: 'absolute', left: LX - 320, top: y, width: 640, height: 180, pointerEvents: 'none'}}>
+    <MotionBlur dx={0} dy={y - py} shutter={0.6} cap={46} style={{position: 'absolute', left: LX - 320, top: y + Math.sin(f / 22) * 3, width: 640, height: 180, pointerEvents: 'none'}}>
       <Glass
         radius={28}
         tint={C.mint}
         strength={1.1}
         glow={18 + 8 * Math.sin(f / 14)}
-        style={{width: 640, height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: ramp(f, enterAt, enterAt + 8, glide), transform: `scale(${0.86 + 0.14 * enter})`}}
+        style={{
+          width: 640,
+          height: 180,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: ramp(f, enterAt, enterAt + 8, glide),
+          transform: `scale(${0.86 + 0.14 * enter})`,
+        }}
       >
-        <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 112, color: C.mint, letterSpacing: '0.04em', opacity: 0.8 + 0.2 * Math.sin(f / 9)}}>$ ? ? ? , ? ? ?</div>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            fontFamily: F.display,
+            fontWeight: 700,
+            fontSize: MYSTERY_SIZE,
+            color: C.mint,
+            lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums',
+            filter: `drop-shadow(0 0 18px ${C.mint}88)`,
+          }}
+        >
+          <span style={{lineHeight: `${MYSTERY_LINE}em`}}>$</span>
+          {slots}
+        </span>
       </Glass>
-    </div>
+    </MotionBlur>
   );
 };
 
