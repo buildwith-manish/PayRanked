@@ -26,6 +26,12 @@ export const T = {
 
 export const BUTTON = {x: 1500, y: 560};
 
+// recap card grid: 130px gutters (was 60), the row stays centred in the 1920 frame
+const CARD_W = 480;
+const CARD_GAP = 130;
+const CARD_PITCH = CARD_W + CARD_GAP;
+const CARD_LEFT = (W - (3 * CARD_W + 2 * CARD_GAP)) / 2;
+
 export const Shot6: React.FC = () => {
   const f = useDesignFrame();
   const ark = byName('Arkansas');
@@ -40,7 +46,9 @@ export const Shot6: React.FC = () => {
   const cardsExit = ramp(f, T.next, T.next + 16, glide);
 
   // huge 27% behind the cards
-  const pctOpacity = 0.08 * ramp(f, T.pct, T.pct + 20, glide) * (1 - ramp(f, T.next + 4, T.next + 18, glide));
+  // 0.13 reads as designed type rather than print bleed (was 0.08); the RGB fringe below is the chromatic aberration pass
+  const pctOpacity = 0.13 * ramp(f, T.pct, T.pct + 20, glide) * (1 - ramp(f, T.next + 4, T.next + 18, glide));
+  const pctFringe = 6 + 2 * Math.sin(f / 40); // px of channel split, breathing slightly
 
   // next-video card
   const nextAt = (t: number) => tween(t, T.next + 8, 34, anticipate);
@@ -71,18 +79,37 @@ export const Shot6: React.FC = () => {
             left: 0,
             right: 0,
             top: 40 + Math.sin(f / 50) * 20,
-            textAlign: 'center',
-            fontFamily: F.display,
-            fontWeight: 700,
-            fontSize: 940,
-            lineHeight: 1,
-            color: C.mint,
+            height: 940,
             opacity: pctOpacity,
             transform: `translateX(${Math.sin(f / 70) * 40}px)`,
-            ...tabular,
+            isolation: 'isolate',
           }}
         >
-          {Math.round(g.pct)}%
+          {/* chromatic aberration: a warm fringe left, a cool fringe right, the mint core on top; screen-blended so the edges glow instead of muddying */}
+          {[
+            {color: '#FF4F7A', dx: -pctFringe, blend: 'screen' as const},
+            {color: '#3FA0FF', dx: pctFringe, blend: 'screen' as const},
+            {color: C.mint, dx: 0, blend: 'normal' as const},
+          ].map((layer, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                textAlign: 'center',
+                fontFamily: F.display,
+                fontWeight: 700,
+                fontSize: 940,
+                lineHeight: 1,
+                color: layer.color,
+                mixBlendMode: layer.blend,
+                transform: `translateX(${layer.dx}px)`,
+                ...tabular,
+              }}
+            >
+              {Math.round(g.pct)}%
+            </div>
+          ))}
         </div>
 
         {/* recap cards: a 3D flip on the anticipate curve (a small wind-up, a whip, a settle), each text following its card */}
@@ -97,14 +124,14 @@ export const Shot6: React.FC = () => {
               dx={90 * (flipAt(f) - flipAt(f - 1)) * -1}
               shutter={0.6}
               cap={30}
-              style={{position: 'absolute', left: 150 + i * 560, top: 230 + Math.sin(f / 30 + i * 1.3) * 5, width: 500, height: 580}}
+              style={{position: 'absolute', left: CARD_LEFT + i * CARD_PITCH, top: 230 + Math.sin(f / 30 + i * 1.3) * 5, width: CARD_W, height: 580}}
             >
               <Glass
                 radius={32}
                 tint={C.text}
                 strength={1.1}
                 style={{
-                  width: 500,
+                  width: CARD_W,
                   height: 580,
                   display: 'flex',
                   flexDirection: 'column',
@@ -179,8 +206,22 @@ export const Shot6: React.FC = () => {
           </div>
           {/* cursor */}
           {f >= T.cursor && (
-            <svg width={60} height={60} viewBox="0 0 24 24" style={{position: 'absolute', left: cursorX, top: cursorY, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))', transform: `scale(${f >= T.click && f < T.click + 8 ? 0.85 : 1})`}}>
-              <path d="M4 2 L4 19 L8.5 15 L11.5 22 L14 21 L11 14 L17 14 Z" fill="#fff" stroke="#050E1D" strokeWidth={1.2} strokeLinejoin="round" />
+            // brand cursor: a clean white arrow with an emerald glow; the tip (hotspot) is the transform origin so the click press stays on the button
+            <svg
+              width={84}
+              height={84}
+              viewBox="0 0 28 28"
+              style={{
+                position: 'absolute',
+                left: cursorX,
+                top: cursorY,
+                overflow: 'visible',
+                filter: `drop-shadow(0 6px 10px ${C.emerald}cc) drop-shadow(0 0 3px ${C.emerald}88)`,
+                transformOrigin: '4px 3px',
+                transform: `scale(${f >= T.click && f < T.click + 8 ? 0.85 : 1})`,
+              }}
+            >
+              <path d="M4 3 L4 22.5 L9.2 17.8 L12.6 25.5 L16 24 L12.7 16.6 L19.6 16.6 Z" fill="#FFFFFF" stroke="#0B3B2B" strokeWidth={0.9} strokeLinejoin="round" />
             </svg>
           )}
         </div>
