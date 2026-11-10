@@ -1,3 +1,9 @@
+// Load self-hosted Fontshare fonts (Clash Display, Satoshi) + Google Fonts
+// (Plus Jakarta Sans, JetBrains Mono) before any composition renders.
+// @font-face declarations live in src/fontshare/fonts.css; this import triggers
+// them and the @remotion/google-fonts loaders in a single side-effect call.
+import './fontshare/load-fonts';
+
 import React from 'react';
 import {AbsoluteFill, Composition, Sequence} from 'remotion';
 import {RankReveal} from './components/RankReveal';
