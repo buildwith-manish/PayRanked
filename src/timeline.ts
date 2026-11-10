@@ -83,7 +83,7 @@ export const SHOT_SECONDS = {
   shot1: 15, // cold open: the question, without the answer (was 30)
   shot2: 2.6,
   shot3: 60, // method (EXTEND-1: restored from 20 s to 60 s; was 42 s originally)
-  shot5: 44, // after #1 (was 130)
+  shot5: 100, // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
   shot6: 23, // outro (was 75): 13 s of recap and the subscribe ask, then a 10 s end screen (was 7 s)
 };
 

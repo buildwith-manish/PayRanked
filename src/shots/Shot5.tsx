@@ -15,13 +15,19 @@ import {C, F, H, MARGIN, W, mix, ordinal, sec, tabular} from '../theme';
 import {K, useDesignFrame} from '../clock';
 import {SHOT_SECONDS} from '../timeline';
 
-export const SHOT5_FRAMES = sec(SHOT_SECONDS.shot5); // was 130 s; the payoff has already landed, so this is the short version
+export const SHOT5_FRAMES = sec(SHOT_SECONDS.shot5); // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
 
 /**
  * Shot-local times (0 = the end of #1). Was 130 s with a 20 s "pivot bridge" up front. The bridge ("Cheap doesn't
  * mean you'd earn $100K there") now lives inside the countdown (Break.tsx, kind "prices"), so the tension holds
  * until #1; this shot opens straight on the map and goes: where it sits, where it shrinks, the gap, the tax angle,
  * the cliffhanger.
+ *
+ * EXTEND-3: section extended from 44 s to 100 s. The first 44 s are unchanged; the new 56 s adds four more cards
+ * after card3: housing comparison (43-50 s), property tax (50-58 s), healthcare access (58-68 s), the honest
+ * catch (68-100 s). The original cliffhanger at card3 ("So which state actually wins...") is removed because the
+ * new Shot 5.5 (Practical Takeaways) opens on that exact question; card7 now closes the section on "Cheap ≠
+ * better. It's just cheaper." — a more honest summary.
  */
 export const T = {
   rows:      sec(7),
@@ -29,10 +35,15 @@ export const T = {
   interrupt: sec(24),
   lights:    sec(26),
   ring:      sec(30),
-  /** the three closing cards */
+  /** the three closing cards (unchanged) */
   card1:     sec(31.5),
   card2:     sec(35.5),
   card3:     sec(39),
+  /** EXTEND-3: four new cards (43-100 s) */
+  card4:     sec(43),    // housing comparison: SF vs rural Arkansas
+  card5:     sec(50),    // property tax: Texas 1.7%, 6th highest
+  card6:     sec(58),    // healthcare access: cheaper states, fewer specialists
+  card7:     sec(68),    // the honest catch: "Cheap ≠ better. It's just cheaper."
 };
 
 /**
@@ -345,18 +356,72 @@ export const Shot5: React.FC = () => {
             </div>
           </InfoCard>
 
-          {/* Fix 3: replace generic conclusion card with a cliffhanger tease.
-              Old: "Total cost matters more than one tax line"  (conclusion, low retention)
-              New: a question that makes the next video feel essential, feeds Shot6 subscribe ask */}
-          <InfoCard start={T.card3} end={SHOT5_FRAMES + 20}>
-            <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 52, color: C.text, padding: '0 40px', lineHeight: 1.2}}>
-              <MaskLine start={T.card3 + 8} dur={22}>
-                So which state actually{' '}
-                <span style={{color: C.mint}}>wins</span>
-                {' '}when you combine buying power, no wage tax, and typical salaries?
+          {/* card3 (39-43 s): the cliffhanger tease is moved into Shot 5.5 (Practical Takeaways), which opens on it.
+              Here card3 is a short bridge that just states the gap once more before the four new cards land. */}
+          <InfoCard start={T.card3} end={T.card4 + sec(0.5)}>
+            <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.text, padding: '0 40px', lineHeight: 1.2}}>
+              <MaskLine start={T.card3 + 8} dur={20}>
+                Same salary. <span style={{color: C.amber}}>+27%</span> gap.
               </MaskLine>
-              <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 36, color: C.muted, opacity: ramp(f, T.card3 + sec(2.4), T.card3 + sec(2.4) + 14, glide)}}>
-                That’s the next video.
+            </div>
+          </InfoCard>
+
+          {/* EXTEND-3 card4 (43-50 s): housing comparison — San Francisco vs rural Arkansas.
+              Source: Zillow Observed Rent Index (ZORI) Sept 2024 for SF (~$3,500/mo); Census ACS 2024 for
+              Arkansas non-metro median rent (~$800/mo). The point: state averages hide a 4× city-vs-rural spread. */}
+          <InfoCard start={T.card4} end={T.card5 + sec(0.5)}>
+            <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
+              <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.red, ...tabular}}>
+                <Count to={3500} start={T.card4 + 8} duration={40} size={50} color={C.red} prefix="$" suffix="/mo" />
+                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>San Francisco rent</div>
+              </div>
+              <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
+              <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.emerald, ...tabular}}>
+                <Count to={800} start={T.card4 + 14} duration={40} size={50} color={C.emerald} prefix="$" suffix="/mo" />
+                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Rural Arkansas</div>
+              </div>
+            </div>
+          </InfoCard>
+
+          {/* EXTEND-3 card5 (50-58 s): property tax angle. Texas: no wage tax, but property tax 1.7% — 6th highest.
+              Source: Tax Foundation 2024 state and local property tax rankings. The point: no wage tax ≠ low total tax. */}
+          <InfoCard start={T.card5} end={T.card6 + sec(0.5)}>
+            <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
+              <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.amber}}>
+                <MaskLine start={T.card5 + 8} dur={18}>No wage tax</MaskLine>
+                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Texas headline</div>
+              </div>
+              <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
+              <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.red, ...tabular}}>
+                <Count to={1.7} start={T.card5 + 14} duration={30} size={50} color={C.red} prefix="" suffix="%" />
+                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Property tax — 6th highest</div>
+              </div>
+            </div>
+          </InfoCard>
+
+          {/* EXTEND-3 card6 (58-68 s): healthcare access. Cheapest states have ~30% fewer specialists per capita.
+              Source: HRSA Area Health Resources File (AHRF) 2024; per-capita specialist count by state.
+              The point: cheap states are cheap partly because they offer fewer services. */}
+          <InfoCard start={T.card6} end={T.card7 + sec(0.5)}>
+            <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', lineHeight: 1.2, ...tabular}}>
+              <MaskLine start={T.card6 + 8} dur={20}>
+                Cheapest states have <span style={{color: C.red}}>~30% fewer</span> specialists
+              </MaskLine>
+              <div style={{marginTop: 14, fontFamily: F.body, fontWeight: 500, fontSize: 30, color: C.muted, opacity: ramp(f, T.card6 + sec(2), T.card6 + sec(2) + 14, glide)}}>
+                Source: HRSA Area Health Resources File, 2024
+              </div>
+            </div>
+          </InfoCard>
+
+          {/* EXTEND-3 card7 (68-100 s): the honest catch. The emerald-to-amber color shift is the section's final
+              image: the cheap end of the map turns from "win" to "warning". The line is the section's thesis. */}
+          <InfoCard start={T.card7} end={SHOT5_FRAMES + 20}>
+            <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 64, color: C.amber, padding: '0 40px', lineHeight: 1.15}}>
+              <MaskLine start={T.card7 + 8} dur={22}>
+                Cheap <span style={{color: C.muted}}>≠</span> better.
+              </MaskLine>
+              <div style={{marginTop: 14, fontFamily: F.body, fontWeight: 500, fontSize: 38, color: C.text, opacity: ramp(f, T.card7 + sec(2.4), T.card7 + sec(2.4) + 14, glide)}}>
+                It's just cheaper.
               </div>
             </div>
           </InfoCard>

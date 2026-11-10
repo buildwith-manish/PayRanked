@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total": 342.5,
+  "total": 398.5,
   "shots": {
     "shot1": {
       "start": 0,
@@ -20,10 +20,10 @@
     },
     "shot5": {
       "start": 275.5,
-      "dur": 44
+      "dur": 100
     },
     "shot6": {
-      "start": 319.5,
+      "start": 375.5,
       "dur": 23
     }
   },
@@ -56,7 +56,11 @@
     "ring": 30,
     "card1": 31.5,
     "card2": 35.5,
-    "card3": 39
+    "card3": 39,
+    "card4": 43,
+    "card5": 50,
+    "card6": 58,
+    "card7": 68
   },
   "shot6": {
     "cards": 0.5,
