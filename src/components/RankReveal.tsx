@@ -387,8 +387,16 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 </div>
                 <MaskRule start={ruleAt} color={C.emerald} height={7} style={{marginTop: 14}} />
                 {(tie || nearTie) && (
-                  <div style={{marginTop: 20}}>
+                  <div style={{marginTop: 20, display: 'flex', alignItems: 'center', gap: 28}}>
                     <TieStamp at={T.name + TIE_STAMP_AFTER_NAME} label={tie ? 'TIE' : 'TOP TIER'} />
+                    {/* ties below #10 take two places (competition ranking), so say why the next number is skipped */}
+                    {tie && rank < 10 && (
+                      <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 34, color: C.muted, whiteSpace: 'nowrap'}}>
+                        <MaskLine start={T.name + TIE_STAMP_AFTER_NAME + 14} dur={20}>
+                          Shares #{rank} and #{rank + 1}
+                        </MaskLine>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

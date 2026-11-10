@@ -7,7 +7,7 @@ import {useDesignFrame} from '../clock';
 
 export type RailEntry = {label: string; names: string[]; lockAt: number};
 
-/** One row per rank. There is no #4 because #3 is a tie. */
+/** One row per rank. There is no #4 because #3 is a tie: the tied row is labelled "3–4" once it locks in. */
 export const RAIL_ROWS = [10, 9, 8, 7, 6, 5, 3, 2, 1];
 
 const SLIM = 104; // collapsed width: rank numbers only
@@ -45,6 +45,8 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
         const lockP = e ? tween(frame, e.lockAt, 22, slam) : 0;
         const nameP = e ? trail(frame, e.lockAt, 18, glide, 4) : 0;
         const tie = !!e && e.names.length > 1;
+        // a tie below #10 takes two places (competition ranking), so its row reads "3–4" and the missing #4 is explained
+        const spans = tie && n < 10;
         const filled = !!e && frame >= e.lockAt;
         const flash = e && frame >= e.lockAt ? Math.exp(-(frame - e.lockAt) / 7) : 0;
         // while collapsed, rows that are not the newest sit back
@@ -69,7 +71,7 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
               transformOrigin: '0% 50%',
             }}
           >
-            <span style={{fontFamily: F.display, fontWeight: 700, fontSize: 30, width: 50, flexShrink: 0, color: filled ? C.mint : C.muted, fontVariantNumeric: 'tabular-nums'}}>{n}</span>
+            <span style={{fontFamily: F.display, fontWeight: 700, fontSize: spans ? 26 : 30, width: spans ? 62 : 50, flexShrink: 0, whiteSpace: 'nowrap', color: filled ? C.mint : C.muted, fontVariantNumeric: 'tabular-nums'}}>{spans ? `${n}\u2013${n + 1}` : n}</span>
             {e && (
               <span
                 style={{
