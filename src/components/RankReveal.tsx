@@ -113,6 +113,11 @@ export const ANGLE_LAG = 7;
 /** Peak of the yaw drift in degrees. */
 const DRIFT_DEG = 9;
 
+/** Frames before T.end in which the camera eases back to the overview pose the next reveal starts from (1.2 s). */
+export const PULLBACK = sec(1.2);
+/** The overview pose: frame 0 of every reveal and, after the pull-back, its last frame. Identical, so the cut has no jump. */
+export const OVERVIEW = {target: [0, 20, 0] as [number, number, number], dist: 1.3 * CAM_D, pitch: 60, yaw: -5, offsetX: 0};
+
 export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; targetZoom: number};
 
 /**
@@ -123,7 +128,8 @@ export const cameraPose = (f: number, c: CameraInput) => {
   const t = timing(c.fast);
   const dur = flyDurOf(c.fast);
   const ease = flyEaseOf(c.fast);
-  const settle = tween(f, 0, 40, glide);
+  // the opening push-in starts from rest too, so the cut from the previous reveal's pull-back has no speed jump
+  const settle = camEase(clamp(f / 40));
   const flyP = ease(clamp((f - t.fly) / dur));
   // pitch and yaw take the same curve, a few frames later
   const turnP = ease(clamp((f - t.fly - ANGLE_LAG) / dur));
@@ -131,12 +137,22 @@ export const cameraPose = (f: number, c: CameraInput) => {
   const slideP = tween(f, t.fly, dur, glide);
   // slow yaw drift: an eased ramp, zero speed at both ends
   const drift = ramp(f, t.name, t.end, cubicInOut) * DRIFT_DEG;
-  return {
+  const base = {
     target: [lerp(0, c.wx, flyP), lerp(20, c.wy, flyP), lerp(0, c.topZ * 0.5, flyP)] as [number, number, number],
     dist: lerp(lerp(1.3, 1.08, settle) * CAM_D, CAM_D / c.targetZoom, flyP),
     pitch: lerp(lerp(60, 42, settle), 51, turnP),
     yaw: lerp(-5, -18, turnP) + drift,
     offsetX: (W / 2 - FOCUS_X) * slideP,
+  };
+  // pull-back: in the last 1.2 s everything, the yaw drift included, eases to the overview pose
+  const back = ramp(f, t.end - PULLBACK, t.end, glide);
+  const O = OVERVIEW;
+  return {
+    target: [lerp(base.target[0], O.target[0], back), lerp(base.target[1], O.target[1], back), lerp(base.target[2], O.target[2], back)] as [number, number, number],
+    dist: lerp(base.dist, O.dist, back),
+    pitch: lerp(base.pitch, O.pitch, back),
+    yaw: lerp(base.yaw, O.yaw, back),
+    offsetX: lerp(base.offsetX, O.offsetX, back),
     flyP,
   };
 };
