@@ -10,17 +10,17 @@ import {sec} from './theme';
  */
 export const COUNT_DUR = 54; // 54 design frames = 1.8 s (all timings are on the 30 fps design clock, see clock.ts)
 
-/** Shortest reveal, in seconds (a normal single-state reveal). Ties and #1 add to it.
+/** Shortest reveal, in seconds (a normal single-state reveal). Ties add to it. #1 does not: its lead over #2 is inside the data's margin.
  *  RankReveal.tsx checks its beats (the dollar count at COUNT_DUR, the hand-over at T.panelOut/T.mapOut) against this
  *  at load time, so the beats cannot outgrow the reveal without the build failing. */
 export const MIN_REVEAL_SECONDS = 25;
 
-/** Seconds per reveal: 15 for #10 to #6 (T_FAST in RankReveal), then 25 normally, 30 for ties, 35 for #1. */
+/** Seconds per reveal: 15 for #10 to #6 (T_FAST in RankReveal), then 25 normally and 30 for ties. #1 is a normal 25 s reveal. */
 export const FAST_FROM_RANK = 6; // #10 .. #6 use the 15 s beats
 export const FAST_REVEAL_SECONDS = 15;
 export const isFast = (rank: number) => rank >= FAST_FROM_RANK;
 export const revealSeconds = (names: string[], rank: number) =>
-  isFast(rank) ? FAST_REVEAL_SECONDS : MIN_REVEAL_SECONDS + (rank === 1 ? 10 : names.length > 1 ? 5 : 0);
+  isFast(rank) ? FAST_REVEAL_SECONDS : MIN_REVEAL_SECONDS + (names.length > 1 ? 5 : 0);
 
 /**
  * Pattern breaks inside the countdown, so no stretch runs longer than about a minute without a change of picture.

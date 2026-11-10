@@ -12,7 +12,7 @@
  * ticks that follow the odometer's own speed, whooshes sized to each move, and one pitched ladder (the blips) wherever
  * things light up in sequence.
  */
-import {byName, gap, NO_WAGE_TAX, BOTTOM_FIVE} from '../data';
+import {byName, gap, nearTieOf, NO_WAGE_TAX, BOTTOM_FIVE} from '../data';
 import {coinsFor} from '../components/CoinStack';
 import {BREAK_BEATS} from '../components/Break';
 import {NAME_STEP, TIE_STAMP_AFTER_NAME, timing} from '../components/RankReveal';
@@ -209,6 +209,7 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   const lead = byName(names[0]);
   const tie = names.length > 1;
   const rank = parseInt(rankLabel.replace('#', ''), 10);
+  const nearTie = rank === 1 && !tie && !!nearTieOf(lead.name); // #1 is the top of a near-tie: stamp + margin line
   const TR = timing(isFast(rank));
   const hasFact = !!(lead.fact && lead.factSource);
   const nameLen = names.join('  ·  ').length;
@@ -227,7 +228,7 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   // 3-6s: name rises letter by letter, the rule draws under it
   k.push(cue('swish_long', TR.name + 8, 0.55));
   k.push(cue('swish', ruleAt + 4, 0.35));
-  if (tie) k.push(cue('stamp', TR.name + TIE_STAMP_AFTER_NAME + STRIKE, 0.9, true));
+  if (tie || nearTie) k.push(cue('stamp', TR.name + TIE_STAMP_AFTER_NAME + STRIKE, 0.9, true));
 
   // 6-10s: BEA chip flips in, gauge sweeps, formula line rises
   k.push(cue('chip_1', TR.bea + 4 + 5, 0.75));
@@ -242,6 +243,7 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   k.push(cue('hit_small', TR.dollars + REVEAL_COUNT, 0.6));
   k.push(cue('ding', TR.dollars + REVEAL_COUNT, 0.45));
   k.push(cue('swish', TR.dollars + REVEAL_COUNT - 4 + 8, 0.35));
+  if (nearTie) k.push(cue('swish', TR.dollars + REVEAL_COUNT + 14 + 6, 0.35)); // the margin over #2 rises
 
   // 15-21s: the fact card slides in alone; dollars step back, coins sink
   if (hasFact) {

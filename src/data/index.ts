@@ -52,6 +52,23 @@ export const byName = (name: string): Computed => {
   return s;
 };
 
+/**
+ * Two adjacent ranks closer than this many BEA index points are a near-tie, not a winner and a runner-up. The index is
+ * published to one decimal and is an estimate, so a 0.1-point lead is inside its own margin of error.
+ */
+export const NEAR_TIE_RPP = 0.5;
+
+/**
+ * If `name` leads the next-ranked state by no more than NEAR_TIE_RPP, returns that runner-up and the gap between them.
+ * Used to frame #1 as the top of a tier ("ranked by index") instead of an outright winner.
+ */
+export const nearTieOf = (name: string): {name: string; rppGap: number; dollarGap: number} | null => {
+  const s = byName(name);
+  const next = STATES.find((x) => x.rpp > s.rpp);
+  if (!next || next.rpp - s.rpp > NEAR_TIE_RPP) return null;
+  return {name: next.name, rppGap: next.rpp - s.rpp, dollarGap: s.dollars - next.dollars};
+};
+
 /** Countdown order as given in the brief: each entry is one reveal (ties hold two states). */
 export const COUNTDOWN: {rank: number; label: string; names: string[]}[] = [
   {rank: 10, label: '#10', names: ['Kansas', 'Nebraska']},

@@ -16,7 +16,7 @@ import {MiniGauge} from './Gauge';
 import {Leaderboard, RailEntry, railOpenAt} from './Leaderboard';
 import {MaskChars, MaskLine, MaskRule, MaskWords} from './MaskText';
 import {MotionBlur} from './MotionBlur';
-import {byName, fmtUSD, SALARY} from '../data';
+import {byName, fmtUSD, nearTieOf, SALARY} from '../data';
 import {SourceTag} from './common';
 import {anticipate, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} from '../motion';
 import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
@@ -117,7 +117,12 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const states = names.map(byName);
   const tie = states.length > 1;
   const lead = states[0];
+  // #1 is framed as the top of a tier, not a winner, when the runner-up is inside the data's margin
+  const rank = parseInt(rankLabel.replace('#', ''), 10);
+  const nearTie = rank === 1 && !tie ? nearTieOf(lead.name) : null;
   const geos = names.map(geoOf);
+  // states that locked in before this reveal: the only ones the 3D map may show at full height (no spoilers)
+  const revealed = railBefore.flatMap((e) => e.names);
 
   // focus point: centroid (mean for ties)
   const cx = geos.reduce((a, g) => a + g.centroid[0], 0) / geos.length;
@@ -235,7 +240,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             >
               <MapLights glow={{x: wx, y: wy, z: topZ + 150, color: C.mint, amount: dimOthers * 0.55}} />
               <CameraRig target={cam.target} dist={cam.dist} pitch={cam.pitch} yaw={cam.yaw} offsetX={cam.offsetX} />
-              <Map3D frame={frame} highlight={names} dim={dimOthers} pop={pop} trace={trace} pulse={pulse} />
+              <Map3D frame={frame} highlight={names} revealed={revealed} dim={dimOthers} pop={pop} trace={trace} pulse={pulse} />
               {frame >= sec(2.4) &&
                 geos.map((g, i) => {
                   const [px, py] = toWorld(g.centroid[0], g.centroid[1]);
@@ -323,9 +328,9 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   <MaskChars text={nameText} start={T.name} step={nameStep} />
                 </div>
                 <MaskRule start={ruleAt} color={C.emerald} height={7} style={{marginTop: 14}} />
-                {tie && (
+                {(tie || nearTie) && (
                   <div style={{marginTop: 20}}>
-                    <TieStamp at={T.name + TIE_STAMP_AFTER_NAME} />
+                    <TieStamp at={T.name + TIE_STAMP_AFTER_NAME} label={tie ? 'TIE' : 'TOP TIER'} />
                   </div>
                 )}
               </div>
@@ -399,6 +404,22 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 </div>
               )}
 
+              {/* #1 only: the honest margin over #2, once the dollars have landed */}
+              {nearTie && frame >= T.dollars + COUNT_DUR && (
+                <div style={{position: 'absolute', left: 0, top: 752, width: 760, opacity: 1 - 0.25 * compact}}>
+                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, color: C.text, lineHeight: 1.2, ...tabular}}>
+                    <MaskLine start={T.dollars + COUNT_DUR + 14} dur={22}>
+                      Just ~{fmtUSD(Math.round(nearTie.dollarGap / 10) * 10)} ahead of #2 {nearTie.name}
+                    </MaskLine>
+                  </div>
+                  <div style={{marginTop: 10, fontFamily: F.body, fontWeight: 500, fontSize: 30, color: C.muted, lineHeight: 1.25}}>
+                    <MaskLine start={T.dollars + COUNT_DUR + 26} dur={22}>
+                      Ranked by index. A gap this small is within the data’s margin.
+                    </MaskLine>
+                  </div>
+                </div>
+              )}
+
               {/* fact card (15-21s): arrives alone once the dollars have stepped back */}
               {hasFact && frame >= T.fact && (
                 <MotionBlur dx={-120 * (factIn(frame) - factIn(frame - 1))} style={{position: 'absolute', left: 0, top: 560, width: 760}}>
@@ -432,8 +453,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   );
 };
 
-/** TIE stamp: slams down from large with a hard overshoot. Mint, like everything else on the frame. */
-const TieStamp: React.FC<{at: number}> = ({at}) => {
+/** TIE (or TOP TIER, for a near-tie #1) stamp: slams down from large with a hard overshoot. Mint, like everything else on the frame. */
+const TieStamp: React.FC<{at: number; label?: string}> = ({at, label = 'TIE'}) => {
   const f = useDesignFrame();
   const p = tween(f, at, 16, slam);
   return (
@@ -451,7 +472,7 @@ const TieStamp: React.FC<{at: number}> = ({at}) => {
         opacity: f >= at ? Math.min(1, p * 3) : 0,
       }}
     >
-      TIE
+      {label}
     </div>
   );
 };
