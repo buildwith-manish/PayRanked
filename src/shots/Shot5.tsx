@@ -35,6 +35,14 @@ export const T = {
   card3:     sec(39),
 };
 
+/**
+ * Median household income shown in the opening line, from the Census Bureau's 2024 American Community Survey 1-year
+ * estimates (Arkansas $62,106 ±$831, California $100,149 ±$381; US $81,604). 2024 to match the 2024 BEA prices the
+ * ranking uses. (The 2025 ACS came out Nov 2026: Arkansas $65,588, California $102,159.) The old line said ~$56K and
+ * ~$91K, which were older-survey figures.
+ */
+const INCOME_2024 = {Arkansas: '$62K', California: '$100K'};
+
 const ark = byName('Arkansas');
 const cal = byName('California');
 const BASE = '#2a4a70';
@@ -218,9 +226,12 @@ export const Shot5: React.FC = () => {
           {/* 0-7s: legend, and the one salary line that stays after the bridge moved into the countdown */}
           <div style={{position: 'absolute', left: 0, right: 0, top: 70, textAlign: 'center', fontFamily: F.body, fontWeight: 500, fontSize: 44, color: C.muted, opacity: win(f, sec(1), T.rows - sec(0.5), 12)}}>
             <MaskLine start={sec(1)} dur={24}>
-              Median household income: Arkansas ~$56K.{'  '}
-              <span style={{color: C.red}}>California ~$91K.</span>
+              Median household income (2024): Arkansas ~{INCOME_2024.Arkansas}.{'  '}
+              <span style={{color: C.red}}>California ~{INCOME_2024.California}.</span>
             </MaskLine>
+            <div style={{marginTop: 6, fontSize: 26, opacity: 0.8}}>
+              <MaskLine start={sec(1) + 10} dur={20}>Source: Census Bureau, ACS 1-year, 2024</MaskLine>
+            </div>
           </div>
           <div
             style={{

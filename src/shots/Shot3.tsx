@@ -71,10 +71,12 @@ export const Shot3: React.FC = () => {
   const resultDelay = T.formula + tokens.length * 5 + 6;
   const formulaOpacity = win(f, T.formula, T.rail - 6, 10);
 
-  // The three limits as a single compact footnote line that fades in one beat
+  // The limits as a single compact footnote line that fades in one beat
   // after the result lands — no stagger, no chips, no separate beat.
+  // The index compares price levels only: it does not count state income tax, and housing is compared by type, size and
+  // age of home, not by how good it is. Both are said on screen rather than hidden behind "before tax".
   const footnoteDelay = resultDelay + 54 + 6; // result count finishes + 6 frames
-  const footnote = 'State averages · Before tax · Prices, not pay';
+  const footnote = 'State averages · Prices only: income tax not counted · Housing quality varies';
 
   const typed = 'Let’s count down';
 
