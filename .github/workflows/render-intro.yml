@@ -20,6 +20,10 @@ on:
       - 'intro/**'
       - '.github/workflows/render-intro.yml'
 
+concurrency:
+  group: render-intro-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   render-intro:
     runs-on: ubuntu-latest
@@ -180,18 +184,30 @@ jobs:
           
           if git diff --cached --quiet; then
             echo "No changes to commit (intro.mp4 is identical to what's already in repo)"
-          else
-            echo "Committing new intro.mp4..."
-            git commit -m "chore(intro): auto-render intro.mp4 [skip ci]
+            exit 0
+          fi
+          
+          echo "Committing new intro.mp4..."
+          git commit -m "chore(intro): auto-render intro.mp4 [skip ci]
 
           Rendered by GitHub Actions workflow render-intro.yml
           Source: intro/intro-v10.html + intro/intro.wav
           Output: public/intro.mp4 (1920x1080, 60fps, 3.0s)"
-            echo ""
-            echo "Pushing to main..."
-            git push origin HEAD:main
-            echo "Done."
-          fi
+          
+          echo ""
+          echo "Pushing to main (with retry on race condition)..."
+          # Retry loop handles concurrent pushes from parallel runs
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main || true
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $i"
+              exit 0
+            fi
+            echo "Push attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "ERROR: Failed to push after 5 attempts"
+          exit 1
 
       - name: Upload intro.mp4 as workflow artifact
         uses: actions/upload-artifact@v4
