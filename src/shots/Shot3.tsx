@@ -72,7 +72,7 @@ export const Shot3: React.FC = () => {
   // formula tokens, built from the data
   const tokens     = ['$100,000', '÷', '(', cal.rpp.toFixed(1), '÷', '100', ')', '='];
   const resultDelay = T.formula + tokens.length * 5 + 6;
-  const formulaOpacity = win(f, T.formula, T.rail - 6, 10);
+  const formulaOpacity = win(f, T.formula, T.categories, 10);  // Bug 9: fade out before CategoriesBreakdown appears at T.categories
 
   // The limits as a single compact footnote line that fades in one beat
   // after the result lands — no stagger, no chips, no separate beat.
@@ -175,7 +175,7 @@ export const Shot3: React.FC = () => {
             fontSize: 30,
             color: C.muted,
             letterSpacing: '0.08em',
-            opacity: win(f, footnoteDelay, T.rail - 6, 8),
+            opacity: win(f, footnoteDelay, T.categories, 8),  // Bug 9: fade out before CategoriesBreakdown
           }}
         >
           <MaskLine start={footnoteDelay} dur={18}>

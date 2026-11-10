@@ -27,12 +27,12 @@ export const MaskLine: React.FC<{
   // vertical blur while the line is travelling fast
   const prev = ramp(f - 1, start, start + dur, rise) * (1 - (leaveAt === undefined ? 0 : ramp(f - 1, leaveAt, leaveAt + Math.round(dur * 0.7), rise)));
   const blur = Math.min(2.6, Math.abs(p - prev) * (90 / K));
+  // Bug fix: old padding (0.12em top, 0.2em bottom) was too tight for large display text
+  // (84–520px). Descenders (g, p, y) and CSS drop-shadow glow were clipped by the
+  // overflow:hidden boundary. Increased to 0.18em top and 0.38em bottom to comfortably
+  // clear descenders and a glow radius of up to ~15% of the font size. The equal negative
+  // margins cancel the extra space from the layout so surrounding elements are unaffected.
   return (
-    {/* Bug fix: old padding (0.12em top, 0.2em bottom) was too tight for large display text
-        (84–520px). Descenders (g, p, y) and CSS drop-shadow glow were clipped by the
-        overflow:hidden boundary. Increased to 0.18em top and 0.38em bottom to comfortably
-        clear descenders and a glow radius of up to ~15% of the font size. The equal negative
-        margins cancel the extra space from the layout so surrounding elements are unaffected. */}
     <span style={{display: 'inline-block', overflow: 'hidden', verticalAlign: 'top', paddingTop: '0.18em', paddingBottom: '0.38em', marginTop: '-0.18em', marginBottom: '-0.38em', ...style}}>
       <span
         style={{

@@ -22,7 +22,7 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
               {/* bright-pass: keeps only the hot, still-coloured parts */}
               <feColorMatrix in="SourceGraphic" type="matrix" values="2 0 0 0 -1.15  0 2 0 0 -1.15  0 0 2 0 -1.15  0 0 0 1 0" result="hot" />
               <feGaussianBlur in="hot" stdDeviation="7" result="bloomA" />
-              <feGaussianBlur in="hot" stdDeviation="26" result="bloomB" />
+              <feGaussianBlur in="hot" stdDeviation="16" result="bloomB" />
               <feComponentTransfer in="bloomA" result="bloomA2">
                 <feFuncR type="linear" slope="0.45" />
                 <feFuncG type="linear" slope="0.45" />

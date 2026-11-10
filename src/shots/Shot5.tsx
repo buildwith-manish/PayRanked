@@ -94,7 +94,7 @@ const Row: React.FC<{name: string; i: number}> = ({name, i}) => {
           <MaskLine start={d + 4} dur={18}>{name}</MaskLine>
         </div>
         <div style={{width: 780, height: 44, borderRadius: 22, background: 'rgba(232,238,247,0.08)'}}>
-          <div style={{width: barW, height: 44, borderRadius: 22, background: C.red, opacity: isCal ? 1 : 0.7, boxShadow: isCal ? `0 0 20px ${C.red}88` : 'none'}} />
+          <div style={{width: barW, height: 44, borderRadius: 22, background: isCal ? C.red : waveColor(s.rpp), opacity: isCal ? 1 : 0.85, boxShadow: isCal ? `0 0 20px ${C.red}88` : `0 0 12px ${waveColor(s.rpp)}44`}} />
         </div>
         <div style={{flex: 1, textAlign: 'right'}}>
           <Count to={s.display} start={d + 10} duration={50} size={54} color={isCal ? C.red : C.text} />
