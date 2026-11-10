@@ -40,8 +40,11 @@ export const CoinStack: React.FC<{
   appearAt?: number;
   color?: string;
   refLineAt?: number;
+  /** Label for the reference ring: a bold line and an optional smaller line under it. */
+  refLabel?: string;
+  refSub?: string;
   width?: number;
-}> = ({count, max = 14, appearAt = 0, color = C.mint, refLineAt, width = 170}) => {
+}> = ({count, max = 14, appearAt = 0, color = C.mint, refLineAt, refLabel = '$100,000', refSub, width = 170}) => {
   const frame = useDesignFrame();
   const {w, h} = box(max, width);
   const R = width / 2 - 8;
@@ -145,19 +148,22 @@ export const CoinStack: React.FC<{
       </ThreeCanvas>
       </MotionBlur>
       {refY !== undefined && (
+        // sits just right of the ring's end (not over the coins), vertically centred on the ring
         <div
           style={{
             position: 'absolute',
-            right: 150,
-            top: labelY - 34,
-            fontFamily: F.body,
-            fontWeight: 500,
-            fontSize: 22,
+            left: width / 2 + R + 14 + 16,
+            top: labelY - (refSub ? 27 : 15),
+            fontFamily: F.display,
+            fontWeight: 700,
             color: C.text,
-            opacity: 0.75,
+            whiteSpace: 'nowrap',
+            lineHeight: 1.1,
+            opacity: 0.85,
           }}
         >
-          $100,000
+          <div style={{fontSize: 30}}>{refLabel}</div>
+          {refSub && <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 20, opacity: 0.8, marginTop: 2}}>{refSub}</div>}
         </div>
       )}
     </div>

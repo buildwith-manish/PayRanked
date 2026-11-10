@@ -448,7 +448,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     </div>
                     {!isVersus && (
                       <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: 'scale(0.85)', transformOrigin: 'bottom left', opacity: coinFade}}>
-                        <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} />
+                        <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} refLabel="$100K" refSub="US average" />
                       </div>
                     )}
                   </div>
