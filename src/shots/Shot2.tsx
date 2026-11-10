@@ -32,7 +32,7 @@ export const Shot2: React.FC = () => {
       <Aberration at={[0]} peak={7}>
         <OffthreadVideo src={staticFile('intro.mp4')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
       </Aberration>
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.32) 100%)', pointerEvents: 'none'}} />
+      <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.15) 100%)', pointerEvents: 'none'}} />
       <AbsoluteFill style={{backgroundColor: '#000', opacity: blackOpacity, pointerEvents: 'none'}} />
     </AbsoluteFill>
   );
