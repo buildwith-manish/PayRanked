@@ -118,7 +118,7 @@ ffmpeg -y -hide_banner -loglevel warning \
     -r 60 \
     -c:a aac \
     -b:a 256k \
-    -shortest \
+    -t 3.5 \
     -movflags +faststart \
     "$OUTPUT_MP4"
 
