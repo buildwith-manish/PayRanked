@@ -18,7 +18,7 @@ import {MaskChars, MaskLine, MaskRule, MaskWords} from './MaskText';
 import {MotionBlur} from './MotionBlur';
 import {byName, fmtUSD, nearTieOf, SALARY} from '../data';
 import {SourceTag} from './common';
-import {anticipate, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} from '../motion';
+import {camEase, cubicInOut, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} from '../motion';
 import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
 // COUNT_DUR lives in timeline.ts so revealSeconds() stays in sync with the
 // count duration — changing one frame budget can't drift away from the other.
@@ -100,6 +100,47 @@ export const T_FAST: typeof T = {
 
 export const timing = (fast: boolean): typeof T => (fast ? T_FAST : T);
 
+/**
+ * Camera fly: about 2.4 s in the full reveal, scaled by the same 15/25 ratio as the beats in the fast one. The fly starts on
+ * T.fly in both, so no beat moves. The two variants use a different peak (camEase a/b) so the top speed of the whip lands
+ * on the same frame, T.fly + 17, that the whoosh cue in audio/cues.ts is placed on.
+ */
+export const FLY_DUR_FULL = sec(2.4);
+export const flyDurOf = (fast: boolean) => (fast ? Math.round(FLY_DUR_FULL * (T_FAST.end / T.end)) : FLY_DUR_FULL);
+const flyEaseOf = (fast: boolean) => (fast ? (t: number) => camEase(t, 2, 3) : (t: number) => camEase(t, 1, 3));
+/** Pitch and yaw trail the position by this many design frames, so the camera arrives before it finishes turning. */
+export const ANGLE_LAG = 7;
+/** Peak of the yaw drift in degrees. */
+const DRIFT_DEG = 9;
+
+export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; targetZoom: number};
+
+/**
+ * The camera pose as a pure function of the (design) frame, so its speed can be measured for motion blur and checked by
+ * scripts/camera-check.mjs. No wind-up: every value moves monotonically from the overview toward the state.
+ */
+export const cameraPose = (f: number, c: CameraInput) => {
+  const t = timing(c.fast);
+  const dur = flyDurOf(c.fast);
+  const ease = flyEaseOf(c.fast);
+  const settle = tween(f, 0, 40, glide);
+  const flyP = ease(clamp((f - t.fly) / dur));
+  // pitch and yaw take the same curve, a few frames later
+  const turnP = ease(clamp((f - t.fly - ANGLE_LAG) / dur));
+  // offsetX uses glide, which never overshoots, so the state settles on FOCUS_X without sliding past it
+  const slideP = tween(f, t.fly, dur, glide);
+  // slow yaw drift: an eased ramp, zero speed at both ends
+  const drift = ramp(f, t.name, t.end, cubicInOut) * DRIFT_DEG;
+  return {
+    target: [lerp(0, c.wx, flyP), lerp(20, c.wy, flyP), lerp(0, c.topZ * 0.5, flyP)] as [number, number, number],
+    dist: lerp(lerp(1.3, 1.08, settle) * CAM_D, CAM_D / c.targetZoom, flyP),
+    pitch: lerp(lerp(60, 42, settle), 51, turnP),
+    yaw: lerp(-5, -18, turnP) + drift,
+    offsetX: (W / 2 - FOCUS_X) * slideP,
+    flyP,
+  };
+};
+
 // Guard: in both variants the dollar count must finish before the hand-over, and every beat must fit inside the
 // reveal. If you change COUNT_DUR or a beat time, this fails the build instead of letting the rail timing and the
 // audio cues drift apart.
@@ -121,7 +162,7 @@ for (const [label, t] of [['full', T], ['fast', T_FAST]] as const) {
  * arrives; the whole panel leaves before the rail takes over for the lock. The rail itself folds to a slim strip
  * while a state is on stage. One accent colour (mint) per frame.
  *
- * Motion: the camera winds back, whips in, overshoots and settles (anticipate); the rank slams (slam); the state
+ * Motion: the camera whips in from rest and settles with no wind-up and no overshoot (camEase); the rank slams (slam); the state
  * lifts with a ringing settle; the pin falls under gravity with a bounce; type rises from behind a mask line; numbers
  * roll on odometer wheels; fast moves carry directional motion blur measured from their real speed.
  */
@@ -155,20 +196,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const topZ = Math.max(...names.map((n) => stateGeo(n)?.top ?? 0));
 
   // ---- camera: a pure function of the frame, so its speed can be measured for motion blur ----
-  const camAt = (f: number) => {
-    const settle = tween(f, 0, 40, glide);
-    // wind-up (the camera backs off a little), whip in, overshoot, settle
-    const flyP = tween(f, T.fly, sec(2), anticipate);
-    const drift = ramp(f, T.name, T.end) * 9;
-    return {
-      target: [lerp(0, wx, flyP), lerp(20, wy, flyP), lerp(0, topZ * 0.5, flyP)] as [number, number, number],
-      dist: lerp(lerp(1.3, 1.08, settle) * CAM_D, CAM_D / targetZoom, flyP),
-      pitch: lerp(lerp(60, 42, settle), 51, flyP),
-      yaw: lerp(-5, -18, flyP) + drift,
-      offsetX: (W / 2 - FOCUS_X) * flyP,
-      flyP,
-    };
-  };
+  const camIn: CameraInput = {fast, wx, wy, topZ, targetZoom};
+  const camAt = (f: number) => cameraPose(f, camIn);
   const cam = camAt(frame);
   const camPrev = camAt(frame - 1);
   const camScale = cam.dist / CAM_D; // world units per screen pixel

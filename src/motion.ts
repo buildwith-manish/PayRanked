@@ -107,6 +107,31 @@ export const drop = (t: number) => {
   return 1 - 0.09 * Math.sin(k * Math.PI) * (1 - k);
 };
 
+/**
+ * Camera ease: no wind-up, no overshoot, and a start from rest. Its speed is the Beta(a+1, b+1) bump t^a (1-t)^b, so the
+ * move leaves quickly but softly, peaks at t = a / (a + b), and then has a long, calm (1-t)^b tail into the final pose.
+ *   camEase(t)        a = 1, b = 3: peak speed at 25% (the full 2.4 s fly: top speed about 18 frames in)
+ *   camEase(t, 2, 3)  peak speed at 40% (the fast fly: top speed lands on the same frame as in the full one)
+ * The integral is closed-form (binomial expansion), so it stays a cheap pure function of the frame. Overshoot is 0
+ * (the brief allows up to 1.5%), so the camera never slides past its framing and back.
+ */
+export const camEase = (t: number, a = 1, b = 3) => {
+  const x = clamp01(t);
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const binom = (n: number, k: number) => {
+    let r = 1;
+    for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+    return r;
+  };
+  const F = (u: number) => {
+    let sum = 0;
+    for (let k = 0; k <= b; k++) sum += ((k % 2 ? -1 : 1) * binom(b, k) * Math.pow(u, a + k + 1)) / (a + k + 1);
+    return sum;
+  };
+  return F(x) / F(1);
+};
+
 /** Calm, long tail, no overshoot. */
 export const glide = bezier(0.19, 1, 0.22, 1);
 
