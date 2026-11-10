@@ -1,0 +1,201 @@
+name: Render Intro
+
+# Renders the PayRanked intro MP4 from intro/intro-v10.html + intro/intro.wav
+# Result is committed to public/intro.mp4 so every video build uses the same asset.
+#
+# Triggers:
+#   - Manual: GitHub Actions tab → "Run workflow"
+#   - Automatic: When files in intro/ change on main branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force re-render even if no changes'
+        required: false
+        default: 'false'
+  push:
+    branches: [main]
+    paths:
+      - 'intro/**'
+      - '.github/workflows/render-intro.yml'
+
+jobs:
+  render-intro:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to commit the MP4 back to the repo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+          install-chromedriver: false
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Verify intro source files exist
+        run: |
+          echo "Checking intro/ folder..."
+          ls -la intro/
+          echo ""
+          if [ ! -f intro/intro-v10.html ]; then
+            echo "ERROR: intro/intro-v10.html not found"
+            exit 1
+          fi
+          if [ ! -f intro/intro.wav ]; then
+            echo "ERROR: intro/intro.wav not found"
+            exit 1
+          fi
+          if [ ! -f intro/fonts/fontshare/clash-display/ClashDisplay-Variable.woff2 ]; then
+            echo "ERROR: Clash Display font not found"
+            exit 1
+          fi
+          if [ ! -f intro/fonts/fontshare/satoshi/Satoshi-Variable.woff2 ]; then
+            echo "ERROR: Satoshi font not found"
+            exit 1
+          fi
+          echo "All intro assets present."
+
+      - name: Render intro frames
+        working-directory: intro
+        env:
+          CHROME_PATH: chrome
+        run: |
+          echo "========================================================="
+          echo "  Rendering PayRanked Intro v10"
+          echo "========================================================="
+          echo ""
+          which chrome || which google-chrome || which chromium
+          echo ""
+          
+          CHROME=$(which chrome || which google-chrome || which chromium)
+          echo "Using Chrome: $CHROME"
+          $CHROME --version
+          echo ""
+          
+          HTML_FILE="$(pwd)/intro-v10.html"
+          AUDIO_WAV="$(pwd)/intro.wav"
+          OUTPUT_MP4="$(pwd)/intro.mp4"
+          TOTAL_FRAMES=180
+          FRAMES_DIR="/tmp/payranked-intro-frames"
+          
+          mkdir -p "$FRAMES_DIR"
+          
+          echo "Capturing $TOTAL_FRAMES frames at 60fps..."
+          START=$(date +%s)
+          
+          for i in $(seq 0 $((TOTAL_FRAMES - 1))); do
+            FRAME_PATH="$FRAMES_DIR/frame-$(printf '%04d' $i).png"
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --disable-setuid-sandbox \
+              --disable-dev-shm-usage \
+              --hide-scrollbars \
+              --force-device-scale-factor=1 \
+              --screenshot="$FRAME_PATH" \
+              --window-size=1920,1080 \
+              "file://$HTML_FILE?frame=$i" 2>/dev/null
+          
+            if [ ! -s "$FRAME_PATH" ]; then
+              echo ""
+              echo "ERROR: Frame $i failed to capture"
+              exit 1
+            fi
+          
+            if [ $((i % 20)) -eq 0 ] || [ $i -eq $((TOTAL_FRAMES - 1)) ]; then
+              NOW=$(date +%s)
+              ELAPSED=$((NOW - START))
+              RATE=$(awk "BEGIN{printf \"%.1f\", ($i+1)/$ELAPSED}" 2>/dev/null || echo "?")
+              REMAIN=$((TOTAL_FRAMES - i - 1))
+              ETA=$(awk "BEGIN{printf \"%.0f\", $REMAIN/$RATE}" 2>/dev/null || echo "?")
+              printf "\r  Frame %3d/%d  [%ds elapsed, %s fps, ETA %ss]   " $((i+1)) $TOTAL_FRAMES $ELAPSED "$RATE" "$ETA"
+            fi
+          done
+          echo ""
+          echo ""
+          
+          echo "Combining frames + WAV with ffmpeg..."
+          ffmpeg -y -hide_banner -loglevel warning \
+            -framerate 60 \
+            -i "$FRAMES_DIR/frame-%04d.png" \
+            -i "$AUDIO_WAV" \
+            -c:v libx264 \
+            -preset slow \
+            -crf 16 \
+            -pix_fmt yuv420p \
+            -r 60 \
+            -c:a aac \
+            -b:a 256k \
+            -shortest \
+            -movflags +faststart \
+            "$OUTPUT_MP4"
+          
+          rm -rf "$FRAMES_DIR"
+          
+          if [ ! -f "$OUTPUT_MP4" ]; then
+            echo "ERROR: intro.mp4 was not created"
+            exit 1
+          fi
+          
+          SIZE_MB=$(du -m "$OUTPUT_MP4" | cut -f1)
+          echo ""
+          echo "========================================================="
+          echo "  RENDER COMPLETE"
+          echo "========================================================="
+          echo "  Output: $OUTPUT_MP4"
+          echo "  Size:   ${SIZE_MB} MB"
+          echo ""
+          ffprobe -v error -show_entries stream=codec_name,codec_type,width,height,r_frame_rate,duration \
+            -of default=noprint_wrappers=1 "$OUTPUT_MP4" 2>&1 | sed 's/^/    /'
+          echo ""
+
+      - name: Move intro.mp4 to public/
+        run: |
+          mkdir -p public
+          cp intro/intro.mp4 public/intro.mp4
+          echo "Copied to public/intro.mp4"
+          ls -la public/intro.mp4
+
+      - name: Commit and push intro.mp4
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add public/intro.mp4
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit (intro.mp4 is identical to what's already in repo)"
+          else
+            echo "Committing new intro.mp4..."
+            git commit -m "chore(intro): auto-render intro.mp4 [skip ci]
+
+          Rendered by GitHub Actions workflow render-intro.yml
+          Source: intro/intro-v10.html + intro/intro.wav
+          Output: public/intro.mp4 (1920x1080, 60fps, 3.0s)"
+            echo ""
+            echo "Pushing to main..."
+            git push origin HEAD:main
+            echo "Done."
+          fi
+
+      - name: Upload intro.mp4 as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: intro-mp4
+          path: intro/intro.mp4
+          retention-days: 30
