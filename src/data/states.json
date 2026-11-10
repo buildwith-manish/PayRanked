@@ -1,52 +1,240 @@
 [
-  {"name": "California", "rpp": 110.7, "rppExact": 110.720},
-  {"name": "Hawaii", "rpp": 110.0, "rppExact": 109.951},
-  {"name": "New Jersey", "rpp": 108.8, "rppExact": 108.805},
-  {"name": "New York", "rpp": 107.9, "rppExact": 107.921},
-  {"name": "Washington", "rpp": 107.0, "rppExact": 107.013},
-  {"name": "Massachusetts", "rpp": 105.8},
-  {"name": "Maryland", "rpp": 105.0},
-  {"name": "New Hampshire", "rpp": 104.2},
-  {"name": "Connecticut", "rpp": 103.6},
-  {"name": "Florida", "rpp": 103.4, "rppExact": 103.414},
-  {"name": "Oregon", "rpp": 103.4},
-  {"name": "Colorado", "rpp": 103.1},
-  {"name": "Alaska", "rpp": 102.4},
-  {"name": "Rhode Island", "rpp": 102.3},
-  {"name": "Virginia", "rpp": 101.1},
-  {"name": "Arizona", "rpp": 100.7},
-  {"name": "Nevada", "rpp": 100.0},
-  {"name": "Illinois", "rpp": 100.0},
-  {"name": "Delaware", "rpp": 99.8},
-  {"name": "Utah", "rpp": 98.9},
-  {"name": "Minnesota", "rpp": 98.6},
-  {"name": "Vermont", "rpp": 98.0},
-  {"name": "Pennsylvania", "rpp": 97.6},
-  {"name": "Texas", "rpp": 97.1, "rppExact": 97.057},
-  {"name": "Maine", "rpp": 97.1},
-  {"name": "Georgia", "rpp": 96.3},
-  {"name": "Michigan", "rpp": 96.2},
-  {"name": "Idaho", "rpp": 95.5},
-  {"name": "Montana", "rpp": 94.6},
-  {"name": "North Carolina", "rpp": 94.3},
-  {"name": "Wisconsin", "rpp": 94.1},
-  {"name": "South Carolina", "rpp": 93.7},
-  {"name": "Indiana", "rpp": 93.3},
-  {"name": "Ohio", "rpp": 92.8},
-  {"name": "Wyoming", "rpp": 92.7},
-  {"name": "New Mexico", "rpp": 92.2},
-  {"name": "Tennessee", "rpp": 91.9},
-  {"name": "Missouri", "rpp": 90.8},
-  {"name": "Kentucky", "rpp": 90.2},
-  {"name": "Nebraska", "rpp": 90.1, "rppExact": 90.103},
-  {"name": "Kansas", "rpp": 90.1, "rppExact": 90.068},
-  {"name": "West Virginia", "rpp": 89.5, "rppExact": 89.497},
-  {"name": "North Dakota", "rpp": 89.0, "rppExact": 88.959},
-  {"name": "Alabama", "rpp": 88.8, "rppExact": 88.823},
-  {"name": "South Dakota", "rpp": 88.6, "rppExact": 88.586},
-  {"name": "Louisiana", "rpp": 88.2, "rppExact": 88.207},
-  {"name": "Oklahoma", "rpp": 87.8, "rppExact": 87.843},
-  {"name": "Iowa", "rpp": 87.8, "rppExact": 87.762},
-  {"name": "Mississippi", "rpp": 87.0, "rppExact": 86.953},
-  {"name": "Arkansas", "rpp": 86.9, "rppExact": 86.937}
+  {
+    "name": "California",
+    "rpp": 110.7,
+    "rppExact": 110.72
+  },
+  {
+    "name": "Hawaii",
+    "rpp": 110.0,
+    "rppExact": 109.951
+  },
+  {
+    "name": "New Jersey",
+    "rpp": 108.8,
+    "rppExact": 108.805
+  },
+  {
+    "name": "New York",
+    "rpp": 107.9,
+    "rppExact": 107.921
+  },
+  {
+    "name": "Washington",
+    "rpp": 107.0,
+    "rppExact": 107.013
+  },
+  {
+    "name": "Massachusetts",
+    "rpp": 105.8
+  },
+  {
+    "name": "Maryland",
+    "rpp": 105.0
+  },
+  {
+    "name": "New Hampshire",
+    "rpp": 104.2
+  },
+  {
+    "name": "Connecticut",
+    "rpp": 103.6
+  },
+  {
+    "name": "Florida",
+    "rpp": 103.4,
+    "rppExact": 103.414
+  },
+  {
+    "name": "Oregon",
+    "rpp": 103.4
+  },
+  {
+    "name": "Colorado",
+    "rpp": 103.1
+  },
+  {
+    "name": "Alaska",
+    "rpp": 102.4
+  },
+  {
+    "name": "Rhode Island",
+    "rpp": 102.3
+  },
+  {
+    "name": "Virginia",
+    "rpp": 101.1
+  },
+  {
+    "name": "Arizona",
+    "rpp": 100.7
+  },
+  {
+    "name": "Nevada",
+    "rpp": 100.0
+  },
+  {
+    "name": "Illinois",
+    "rpp": 100.0
+  },
+  {
+    "name": "Delaware",
+    "rpp": 99.8
+  },
+  {
+    "name": "Utah",
+    "rpp": 98.9
+  },
+  {
+    "name": "Minnesota",
+    "rpp": 98.6
+  },
+  {
+    "name": "Vermont",
+    "rpp": 98.0
+  },
+  {
+    "name": "Pennsylvania",
+    "rpp": 97.6
+  },
+  {
+    "name": "Texas",
+    "rpp": 97.1,
+    "rppExact": 97.057
+  },
+  {
+    "name": "Maine",
+    "rpp": 97.1
+  },
+  {
+    "name": "Georgia",
+    "rpp": 96.3
+  },
+  {
+    "name": "Michigan",
+    "rpp": 96.2
+  },
+  {
+    "name": "Idaho",
+    "rpp": 95.5
+  },
+  {
+    "name": "Montana",
+    "rpp": 94.6
+  },
+  {
+    "name": "North Carolina",
+    "rpp": 94.3
+  },
+  {
+    "name": "Wisconsin",
+    "rpp": 94.1
+  },
+  {
+    "name": "South Carolina",
+    "rpp": 93.7
+  },
+  {
+    "name": "Indiana",
+    "rpp": 93.3
+  },
+  {
+    "name": "Ohio",
+    "rpp": 92.8
+  },
+  {
+    "name": "Wyoming",
+    "rpp": 92.7
+  },
+  {
+    "name": "New Mexico",
+    "rpp": 92.2
+  },
+  {
+    "name": "Tennessee",
+    "rpp": 91.9
+  },
+  {
+    "name": "Missouri",
+    "rpp": 90.8
+  },
+  {
+    "name": "Kentucky",
+    "rpp": 90.2
+  },
+  {
+    "name": "Nebraska",
+    "rpp": 90.1,
+    "rppExact": 90.103,
+    "fact": "Unemployment 2.8% \u2014 5th lowest in US",
+    "factSource": "BLS Dec 2024"
+  },
+  {
+    "name": "Kansas",
+    "rpp": 90.1,
+    "rppExact": 90.068,
+    "fact": "[RESEARCH \u2014 Kansas median rent or notable stat]",
+    "factSource": "[RESEARCH \u2014 verify against Census ACS 2024]"
+  },
+  {
+    "name": "West Virginia",
+    "rpp": 89.5,
+    "rppExact": 89.497,
+    "fact": "Population shrinking \u2014 lost 24K in 5 years",
+    "factSource": "Census 2024"
+  },
+  {
+    "name": "North Dakota",
+    "rpp": 89.0,
+    "rppExact": 88.959
+  },
+  {
+    "name": "Alabama",
+    "rpp": 88.8,
+    "rppExact": 88.823,
+    "fact": "Median home $239K \u2014 35% below US",
+    "factSource": "Zillow 2024"
+  },
+  {
+    "name": "South Dakota",
+    "rpp": 88.6,
+    "rppExact": 88.586,
+    "fact": "Homeownership 68.6% \u2014 above US average",
+    "factSource": "Census ACS 2024"
+  },
+  {
+    "name": "Louisiana",
+    "rpp": 88.2,
+    "rppExact": 88.207,
+    "fact": "Sales tax 9.56% \u2014 highest in US",
+    "factSource": "Tax Foundation 2024"
+  },
+  {
+    "name": "Oklahoma",
+    "rpp": 87.8,
+    "rppExact": 87.843,
+    "fact": "Top 10 in US oil production",
+    "factSource": "EIA 2024"
+  },
+  {
+    "name": "Iowa",
+    "rpp": 87.8,
+    "rppExact": 87.762,
+    "fact": "~18% of all US corn \u2014 top producer",
+    "factSource": "USDA NASS 2024"
+  },
+  {
+    "name": "Mississippi",
+    "rpp": 87.0,
+    "rppExact": 86.953,
+    "fact": "Lowest median income $56K \u2014 but 70% own homes",
+    "factSource": "Census ACS 2024"
+  },
+  {
+    "name": "Arkansas",
+    "rpp": 86.9,
+    "rppExact": 86.937,
+    "fact": "Median rent $982 \u2014 4th lowest in US",
+    "factSource": "Census ACS 2024"
+  }
 ]
