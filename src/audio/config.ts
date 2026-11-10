@@ -8,7 +8,7 @@ export const AUDIO = {
    * public/vo.wav is not in the repo yet, so this is off. Record it against review/VO-CUES.md, drop it in public/,
    * run `npm run vo-envelope`, then set this to true.
    */
-  vo: false,
+  vo: true,
   music: true,
   sfx: true,
 
