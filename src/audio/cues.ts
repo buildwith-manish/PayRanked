@@ -258,8 +258,8 @@ export const revealCues = (names: string[], rankLabel: string, versus = false): 
   // 15-21s: the fact card slides in alone; dollars step back, coins sink
   if (hasFact) {
     k.push(cue('out_xs', TR.fact + 2, 0.35));
-    k.push(cue('whoosh_s', TR.fact + 10, 0.5));
-    k.push(cue('hit_small', TR.fact + 20, 0.4));
+    k.push(cue('whoosh_s', TR.fact + 6, 0.5));
+    k.push(cue('hit_small', TR.fact + 15, 0.4));
     k.push(cue('swish_long', TR.fact + 12 + 8, 0.42));
   }
 

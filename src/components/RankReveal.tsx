@@ -236,7 +236,10 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const BAR_W = 600;
 
   // ---- 15-21s fact card ----
-  const factIn = (f: number) => tween(f, T.fact + 6, 26, glide);
+  // snap entrance (about 10 frames, was a 26-frame glide): the blur is taken from this curve's own derivative, so a fast
+  // arrival smears like the BEA chip does instead of reading as a slow, unblurred slide
+  const FACT_SLIDE = 120;
+  const factIn = (f: number) => tween(f, T.fact + 6, 10, snap);
 
   // ---- 20-25s hand-over to the rail: the panel leaves, the rail opens, the new row locks in ----
   const panelOut = (f: number) => tween(f, T.panelOut, 18, exitIn);
@@ -507,15 +510,15 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
               {/* fact card (15-21s): arrives alone once the dollars have stepped back */}
               {hasFact && frame >= T.fact && (
-                <MotionBlur dx={-120 * (factIn(frame) - factIn(frame - 1))} style={{position: 'absolute', left: 0, top: 560, width: 760}}>
+                <MotionBlur dx={-FACT_SLIDE * (factIn(frame) - factIn(frame - 1))} shutter={0.6} cap={50} style={{position: 'absolute', left: 0, top: 560, width: 760}}>
                   <Glass
                     radius={22}
                     tint={C.text}
                     style={{
                       width: 760,
                       padding: '28px 34px',
-                      transform: `translateX(${(1 - factIn(frame)) * 120}px)`,
-                      opacity: ramp(frame, T.fact + 6, T.fact + 16, glide),
+                      transform: `translateX(${(1 - factIn(frame)) * FACT_SLIDE}px)`,
+                      opacity: ramp(frame, T.fact + 6, T.fact + 11, glide),
                     }}
                   >
                     <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, lineHeight: 1.25, color: C.text}}>
