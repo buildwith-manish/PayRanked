@@ -13,6 +13,8 @@ const FLAT = 2.5;
 /** The current state rises out of the flat map as the camera whips in (design frames, local to the reveal). */
 export const RISE_AT = sec(1.1);
 export const RISE_DUR = 34;
+/** Frames after the rise starts at which it has landed (its snap curve is within 2% of rest): the pin may drop after this. */
+export const RISE_LAND = 22;
 
 /**
  * The country as extruded states. Height is buying power: cheap states rise, expensive ones stay low.
@@ -32,11 +34,13 @@ export const Map3D: React.FC<{
   dim: number;
   /** extra world units the highlighted states rise, already sprung */
   pop: number;
+  /** frame (local to the reveal) on which the highlighted state starts to rise; the camera decides it (flyP above 0.7) */
+  riseAt?: number;
   /** 0-1 outline trace of the highlighted states */
   trace: number;
   /** emissive pulse of the highlighted states, 0-1 */
   pulse: number;
-}> = ({frame, highlight, revealed, dim, pop, trace, pulse}) => {
+}> = ({frame, highlight, revealed, dim, pop, riseAt = RISE_AT, trace, pulse}) => {
   return (
     <>
       {GEO.map((g) => {
@@ -45,7 +49,7 @@ export const Map3D: React.FC<{
 
         if (hot) {
           // rises from the flat map on a snap curve (small overshoot, then it settles), colour fading in with it
-          const rise = tween(frame, RISE_AT, RISE_DUR, snap);
+          const rise = tween(frame, riseAt, RISE_DUR, snap);
           const colour = UNREVEALED.clone().lerp(rppColor(rppOf(g.name)), clamp(rise));
           return (
             <State3D

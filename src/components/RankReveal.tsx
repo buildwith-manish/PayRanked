@@ -7,7 +7,7 @@ import {Aberration} from './Grade';
 import {Glass} from './Glass';
 import {CAM_D, FOV, lerp, toWorld} from '../three/camera';
 import {CameraRig, MapLights, Pin3D, Sync} from '../three/scene';
-import {Map3D} from '../three/Map3D';
+import {Map3D, RISE_LAND} from '../three/Map3D';
 import {currentTop} from '../three/State3D';
 import {stateGeo} from '../three/geometry';
 import {Count} from './Count';
@@ -117,6 +117,21 @@ const DRIFT_DEG = 9;
 export const PULLBACK = sec(1.2);
 /** The overview pose: frame 0 of every reveal and, after the pull-back, its last frame. Identical, so the cut has no jump. */
 export const OVERVIEW = {target: [0, 20, 0] as [number, number, number], dist: 1.3 * CAM_D, pitch: 60, yaw: -5, offsetX: 0};
+
+/** The state starts to rise when the camera is this far (0-1) through its fly. */
+const RISE_FLY_P = 0.7;
+/** Frame (local to the reveal) on which the camera is RISE_FLY_P of the way in: the highlighted state starts to rise then. */
+export const riseAtOf = (fast: boolean) => {
+  const ease = flyEaseOf(fast);
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    if (ease(mid) < RISE_FLY_P) lo = mid;
+    else hi = mid;
+  }
+  return timing(fast).fly + hi * flyDurOf(fast);
+};
 
 export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; targetZoom: number};
 
@@ -234,15 +249,20 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const rankGlow = lerp(30, 10, travel(frame));
 
   // ---- map state: the highlighted state lifts out of the map, the others fall back into the dark ----
-  const pop = tween(frame, sec(1.5), 30, slam) * 30;
+  // the state rises when the camera is 70% in; the extra lift follows the same 12 frames behind it as before (1.1 s then 1.5 s)
+  const riseAt = riseAtOf(fast);
+  const pop = tween(frame, riseAt + 12, 30, slam) * 30;
   const dimOthers = ramp(frame, T.fly, sec(2.2), glide);
   const trace = tween(frame, sec(1.4), 36, glide);
   const pulse = 0.5 + 0.5 * Math.sin(frame / 14);
 
   // pins sit on top of the (rising) states, kept at a steady size on screen whatever the camera distance
   const pinScreenPx = small ? 84 : 54; // was 76 / 40: bigger so it still reads when the preview is zoomed out
-  const pinDrop = tween(frame, sec(2.4), 22, dropEase);
-  const pinRing = ((((frame - sec(2.4) - 10) % 45) + 45) % 45) / 45;
+  // the pin drops once the rise has landed. The audio cue sheet puts the pin sound on 2.4 s, so it never drops before that:
+  // in the fast reveal the rise lands earlier and the pin stays on 2.4 s; in the full one it follows the later rise.
+  const pinAt = Math.max(sec(2.4), riseAt + RISE_LAND);
+  const pinDrop = tween(frame, pinAt, 22, dropEase);
+  const pinRing = ((((frame - pinAt - 10) % 45) + 45) % 45) / 45;
 
   // tilt-shift depth of field: the top and bottom of the frame defocus while the camera is in motion.
   // Bug fix: backdropFilter cannot read WebGL canvas pixels in Remotion's render pipeline — it had zero
@@ -321,8 +341,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             >
               <MapLights glow={{x: wx, y: wy, z: topZ + 150, color: C.mint, amount: dimOthers * 0.55}} />
               <CameraRig target={cam.target} dist={cam.dist} pitch={cam.pitch} yaw={cam.yaw} offsetX={cam.offsetX} />
-              <Map3D frame={frame} highlight={names} revealed={revealed} dim={dimOthers} pop={pop} trace={trace} pulse={pulse} />
-              {frame >= sec(2.4) &&
+              <Map3D frame={frame} highlight={names} revealed={revealed} dim={dimOthers} pop={pop} riseAt={riseAt} trace={trace} pulse={pulse} />
+              {frame >= pinAt &&
                 geos.map((g, i) => {
                   const [px, py] = toWorld(g.centroid[0], g.centroid[1]);
                   return (
