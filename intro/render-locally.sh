@@ -12,7 +12,7 @@
 #   bash render-locally.sh
 #
 # Output:
-#   intro.mp4 (1920x1080, 60fps, 3.5s, H.264 + AAC)
+#   intro.mp4 (1920x1080, 60fps, 4.0s, H.264 + AAC)
 #   → then copy to ../public/intro.mp4 for use in Remotion
 
 set -e
@@ -55,7 +55,7 @@ fi
 HTML_FILE="$(pwd)/intro-v10.html"
 AUDIO_WAV="$(pwd)/intro.wav"
 OUTPUT_MP4="$(pwd)/intro.mp4"
-TOTAL_FRAMES=210
+TOTAL_FRAMES=240
 FRAMES_DIR="/tmp/payranked-intro-frames"
 
 echo "========================================================="
@@ -65,7 +65,7 @@ echo "  Chrome:  $CHROME"
 echo "  HTML:    $HTML_FILE"
 echo "  Audio:   $AUDIO_WAV"
 echo "  Output:  $OUTPUT_MP4"
-echo "  Spec:    1920x1080 @ 60fps, 3.5s, $TOTAL_FRAMES frames"
+echo "  Spec:    1920x1080 @ 60fps, 4.0s, $TOTAL_FRAMES frames"
 echo ""
 
 rm -rf "$FRAMES_DIR"

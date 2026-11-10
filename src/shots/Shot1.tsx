@@ -375,8 +375,15 @@ export const Shot1: React.FC = () => {
               </div>
             )}
 
+            {/* Tagline: appears under the gap, above the chips */}
+            {f >= SLAM + 36 && (
+              <div style={{position: 'absolute', left: 0, right: 0, top: 780, textAlign: 'center', fontFamily: F.body, fontWeight: 500, fontSize: 32, color: C.muted, opacity: (1 - 0.7 * rest2) * ramp(f, SLAM + 36, SLAM + 50, glide)}}>
+                <MaskWords text="where your money goes further" start={SLAM + 36} step={3} />
+              </div>
+            )}
+
             {/* 10-15s: three chips close the door on the obvious guesses. Neither state is in the top 10. */}
-            <div style={{position: 'absolute', left: 0, right: 0, top: 820, display: 'flex', justifyContent: 'center', gap: 28}}>
+            <div style={{position: 'absolute', left: 0, right: 0, top: 860, display: 'flex', justifyContent: 'center', gap: 28}}>
               <Chip text="NOT TEXAS" delay={CHIPS_START} size={44} />
               <Chip text="NOT FLORIDA" delay={CHIPS_START + 14} size={44} />
               <Chip text="TOP 10, RANKED" delay={CHIPS_START + 28} color={C.amber} size={44} pulse />

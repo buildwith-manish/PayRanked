@@ -93,7 +93,7 @@ jobs:
           HTML_FILE="$(pwd)/intro-v10.html"
           AUDIO_WAV="$(pwd)/intro.wav"
           OUTPUT_MP4="$(pwd)/intro.mp4"
-          TOTAL_FRAMES=210
+          TOTAL_FRAMES=240
           FRAMES_DIR="/tmp/payranked-intro-frames"
           
           mkdir -p "$FRAMES_DIR"
@@ -192,7 +192,7 @@ jobs:
 
           Rendered by GitHub Actions workflow render-intro.yml
           Source: intro/intro-v10.html + intro/intro.wav
-          Output: public/intro.mp4 (1920x1080, 60fps, 3.5s)"
+          Output: public/intro.mp4 (1920x1080, 60fps, 4.0s)"
           
           echo ""
           echo "Pushing to main (with retry on race condition)..."
