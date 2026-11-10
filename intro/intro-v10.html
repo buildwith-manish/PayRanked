@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PayRanked – Channel Intro v10</title>
+<style>
+@font-face{font-family:'Clash Display';src:url('./fonts/fontshare/clash-display/ClashDisplay-Variable.woff2') format('woff2-variations');font-weight:200 700;font-display:swap}
+@font-face{font-family:'Satoshi';src:url('./fonts/fontshare/satoshi/Satoshi-Variable.woff2') format('woff2-variations');font-weight:300 900;font-display:swap}
+</style>
+<style>
+:root{--bg:#eef2f8;--fg:#0b1a2e;--mut:#51637a;--card:#fff;--line:#d5deea;--acc:#0fa86a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#060d18;--fg:#e8eef7;--mut:#8da2bb;--card:#0c1626;--line:#1c2b42;--acc:#3df0a8}}
+:root[data-theme="dark"]{--bg:#060d18;--fg:#e8eef7;--mut:#8da2bb;--card:#0c1626;--line:#1c2b42;--acc:#3df0a8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Satoshi',system-ui,sans-serif;min-height:100vh}
+main{max-width:1100px;margin:0 auto;padding:28px 18px 40px}
+h1{font:700 22px 'Clash Display',system-ui,sans-serif;margin:0 0 4px;letter-spacing:-.3px}
+p.sub{margin:0 0 18px;color:var(--mut);font-size:14px}
+.stage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#050e1d;aspect-ratio:16/9}
+.stage svg{display:block;width:100%;height:100%}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+button{font:600 14px 'Satoshi',system-ui,sans-serif;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#19c37d;color:#04121f}
+button.alt{background:transparent;color:var(--fg);border:1px solid var(--line)}
+input[type=range]{flex:1;min-width:160px;accent-color:#19c37d}
+label{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center}
+#tm{font-variant-numeric:tabular-nums;font-size:13px;color:var(--mut);min-width:84px;text-align:right}
+.tl{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tl div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--mut);line-height:1.45}
+.tl b{display:block;color:var(--fg);font-size:13px;margin-bottom:2px}
+.tl span{color:var(--acc);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>PayRanked intro · motion blur</h1>
+<p class="sub">Real sub-frame motion blur on every moving part, plus a restrained, textured sound design with one hero hit. Play with sound.</p>
+<div class="stage">
+<svg id="svg" text-rendering="geometricPrecision" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bgG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1280" y2="720"><stop offset="0" stop-color="#143A66"/><stop offset=".55" stop-color="#0A1D38"/><stop offset="1" stop-color="#050E1D"/></linearGradient>
+<radialGradient id="glE" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="440"><stop offset="0" stop-color="#19C37D" stop-opacity=".27"/><stop offset=".45" stop-color="#19C37D" stop-opacity=".07"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<!-- glB (blue top-left glow) removed — not in PayRanked palette -->
+<linearGradient id="pf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFE3F5"/></linearGradient>
+<linearGradient id="bf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3DF0A8"/><stop offset="1" stop-color="#0FA86A"/></linearGradient>
+<linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#143A66"/><stop offset=".55" stop-color="#0A1D38"/><stop offset="1" stop-color="#050E1D"/></linearGradient>
+<radialGradient id="tg" cx=".8" cy=".85" r=".7"><stop offset="0" stop-color="#19C37D" stop-opacity=".5"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<linearGradient id="wt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D3E5F6"/></linearGradient>
+<linearGradient id="shg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="gR" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="800" y2="0"><stop id="sR0" offset="0" stop-color="#19C37D"/><stop id="sR1" offset="1" stop-color="#4BF5B0"/></linearGradient>
+<linearGradient id="stg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9FFFD6" stop-opacity="0"/><stop offset=".5" stop-color="#EFFFF8" stop-opacity="1"/><stop offset="1" stop-color="#9FFFD6" stop-opacity="0"/></linearGradient>
+<radialGradient id="tg2"><stop offset="0" stop-color="#19C37D" stop-opacity=".55"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<radialGradient id="gmg" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="720"><stop offset=".28" stop-color="#000"/><stop offset="1" stop-color="#fff"/></radialGradient>
+<mask id="gm" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720"><rect width="1280" height="720" fill="url(#gmg)"/></mask>
+<radialGradient id="vg" gradientUnits="userSpaceOnUse" cx="640" cy="360" r="860"><stop offset=".5" stop-color="#02060E" stop-opacity="0"/><stop offset="1" stop-color="#02060E" stop-opacity=".62"/></radialGradient>
+<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" stroke-opacity=".04" stroke-width="1.5"/></pattern>
+<mask id="pm" maskUnits="userSpaceOnUse" x="0" y="0" width="800" height="800"><path id="drw" d="M307 640V206H420A104 104 0 0 1 420 414H330" fill="none" stroke="#fff" stroke-width="150" stroke-linejoin="round" stroke-dasharray="1000" stroke-dashoffset="1000"/></mask>
+<clipPath id="wc"><rect id="wcr" x="0" y="0" width="0" height="300"/></clipPath>
+<radialGradient id="glE2"><stop offset="0" stop-color="#19C37D" stop-opacity=".27"/><stop offset=".45" stop-color="#19C37D" stop-opacity=".07"/><stop offset="1" stop-color="#19C37D" stop-opacity="0"/></radialGradient>
+<clipPath id="tc"></clipPath>
+<g id="mark">
+<g mask="url(#pm)"><path d="M262 182H420A128 128 0 0 1 420 438H353V618H262ZM353 230H420A80 80 0 0 1 420 390H353Z" fill-rule="evenodd" fill="url(#pf)" stroke="url(#pf)" stroke-width="24" stroke-linejoin="round"/></g>
+<rect id="b0" x="382" width="22" rx="7" fill="url(#bf)" opacity=".62"/>
+<rect id="b1" x="416" width="22" rx="7" fill="url(#bf)" opacity=".82"/>
+<rect id="b2" x="450" width="22" rx="7" fill="url(#bf)"/>
+</g>
+<linearGradient id="tgl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="mb" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="mbs" stdDeviation="0 0"/></filter>
+</defs>
+<g id="cam">
+<rect width="1280" height="720" fill="url(#bgG)"/>
+<circle id="gE" r="460" fill="url(#glE2)" opacity="0"/>
+<!-- gB rect removed with glB gradient -->
+<rect id="gr" width="1280" height="720" fill="url(#grid)" opacity="0" mask="url(#gm)"/>
+<rect width="1280" height="720" fill="url(#vg)"/>
+<circle id="ring" r="115" fill="none" stroke="#3DF0A8" stroke-width="2" opacity="0"/>
+<circle id="tsh" r="210" fill="url(#tg2)" opacity="0"/>
+<g id="tile" opacity="0">
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tl)"/>
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tg)"/>
+<rect x="-115" y="-115" width="230" height="230" rx="48" fill="url(#tgl)"/>
+<rect x="-114" y="-114" width="228" height="228" rx="47" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+</g>
+<g id="mks"></g>
+<g clip-path="url(#wc)"><g id="wm"></g></g>
+<text id="mP" font-family="'Clash Display',system-ui,sans-serif" font-size="140" letter-spacing="-2" opacity="0">Pay</text><text id="mR" font-family="'Clash Display',system-ui,sans-serif" font-size="140" letter-spacing="-2" opacity="0">Ranked</text>
+<g clip-path="url(#tc)"><rect id="sh" y="250" width="130" height="220" fill="url(#shg)" opacity="0" transform="skewX(-20)"/></g>
+
+<rect id="ul" height="8" rx="4" fill="#19C37D" width="0"/>
+</g>
+</svg>
+</div>
+<div class="ctl">
+<button id="play">▶ Play with sound</button>
+<button id="rep" class="alt">Replay silent</button>
+<input id="scr" type="range" min="0" max="3000" value="0" aria-label="Scrub">
+<span id="fps" style="font-size:13px;color:var(--mut);min-width:54px">– fps</span><span id="tm">0.00 / 3.00s</span>
+<label><input id="snd" type="checkbox" checked> Sound</label>
+<label>Weights <select id="wsel"><option value="700,500">Pay bold · Ranked medium</option><option value="500,700" selected>Pay medium · Ranked bold</option><option value="700,700">Both bold</option></select></label>
+</div>
+<div class="tl">
+<div><b><span>0.00s</span> Build</b>A rising analog drone and a sub that climbs an octave, with one air riser. Warm taps E · G♯ · B mark the bars. Texture only for the P and the glide.</div>
+<div><b><span>1.00s</span> Suck-back</b>The whole mix is pulled to almost nothing for about 50 ms. The silence before the hit is what makes it land.</div>
+<div><b><span>1.05s</span> The hit</b>Sub drops an octave, a drum body and a saturated saw boom give it weight, with an E-major wall and one bell on the high E.</div>
+<div><b><span>1.05s</span> Cascade</b>The nine letters get one rising air sweep instead of nine notes.</div>
+<div><b><span>1.40s</span> Reveal</b>One sweep, a soft B5, a two-note tag (E6, B6) and a fading air tail in a dark room.</div>
+</div>
+</main>
+<script>
+(function(){
+var DUR=3.0,$=function(i){return document.getElementById(i)};
+var cl=function(x){return Math.min(1,Math.max(0,x))},seg=function(t,a,b){return cl((t-a)/(b-a))};
+var eo3=function(x){return 1-Math.pow(1-x,3)},eio=function(x){return x*x*x*(x*(6*x-15)+10)};
+var eob=function(x){var c=1.5,d=c+1;return 1+d*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+var lr=function(a,b,p){return a+(b-a)*p};
+var mix=function(a,b,k){var r='#';for(var i=1;i<7;i+=2){var v=Math.round(lr(parseInt(a.substr(i,2),16),parseInt(b.substr(i,2),16),k));r+=('0'+v.toString(16)).slice(-2)}return r};
+var BASE=412,L={tcx:213,tx:376,w:800},NS='http://www.w3.org/2000/svg',WT=[500,700],LT=[],lastT=0;
+var K=6,SH=.03,KM=10,SHM=.022,MK=[];
+function TX(par,x,w,fill,op,ch){var e=document.createElementNS(NS,'text');e.setAttribute('x',x);e.setAttribute('y',BASE);e.setAttribute('font-family',"'Clash Display',system-ui,sans-serif");e.setAttribute('font-size',140);e.setAttribute('font-weight',w);if(fill)e.setAttribute('fill',fill);e.setAttribute('opacity',op);e.textContent=ch;par.appendChild(e);return e}
+function meas(str,w){var cx=meas.c||(meas.c=document.createElement('canvas').getContext('2d'));cx.font=w+" 140px 'Clash Display', system-ui, sans-serif";return cx.measureText(str).width-2*str.length}
+function layout(){
+$('mP').setAttribute('font-weight',WT[0]);$('mR').setAttribute('font-weight',WT[1]);
+var wP=0,wR=0;try{wP=$('mP').getComputedTextLength();wR=$('mR').getComputedTextLength()}catch(e){}if(!(wP>50&&wR>50)){wP=meas('Pay',WT[0]);wR=meas('Ranked',WT[1])}var w=wP+wR;if(!(w>100)){w=800;wP=300;wR=500}
+var total=230+48+w,x0=(1280-total)/2;
+L={tcx:x0+115,tx:x0+278,w:w};
+var wm=$('wm'),tc=$('tc');wm.innerHTML='';tc.innerHTML='';LT=[];
+[['mP','Pay',0,WT[0],'url(#wt)'],['mR','Ranked',wP,WT[1],'url(#gR)']].forEach(function(g){
+for(var i=0;i<g[1].length;i++){var cx0=0;try{cx0=$(g[0]).getStartPositionOfChar(i).x}catch(e){cx0=NaN}if(!(cx0>=0)||(i>0&&cx0<1))cx0=meas(g[1].slice(0,i),g[3])+(i?0:0);var x=L.tx+g[2]+cx0;
+var arr=[];for(var q=0;q<K;q++)arr.push(TX(wm,x,g[3],g[4],1/(q+1),g[1][i]));TX(tc,x,g[3],null,1,g[1][i]);LT.push(arr)}});
+var gr=$('gR');gr.setAttribute('x1',L.tx+wP);gr.setAttribute('x2',L.tx+w);
+
+$('ul').setAttribute('x',L.tx+4);$('ul').setAttribute('y',BASE+34);
+var cr=$('wcr');cr.setAttribute('x',L.tx-60);cr.setAttribute('y',BASE-200);cr.setAttribute('width',w+160);cr.setAttribute('height',300);
+$('ring').setAttribute('cx',L.tcx);$('ring').setAttribute('cy',360);
+}
+var H=[34,58,84];for(var q=0;q<KM;q++){var u=document.createElementNS(NS,'use');u.setAttribute('href','#mark');$('mks').appendChild(u);MK.push(u)}
+var eo4=function(x){return 1-Math.pow(1-x,5)},eos=function(x){var c=.45,d=c+1;return 1+d*Math.pow(x-1,3)+c*Math.pow(x-1,2)},IMP=1.05;
+var AC_={};function A(id,k,v){var e=AC_[id]||(AC_[id]=$(id));var key='_'+k;if(e[key]!==v){e[key]=v;e.setAttribute(k,v)}}
+function render(t){
+var g=seg(t,0,.5);
+A('gE','opacity',eo3(g)*(.7+.2*Math.exp(-Math.pow((t-1.12)/.2,2))));
+A('gr','opacity',eo3(g));
+A('cam','transform','translate(640 360) scale('+(1+.035*seg(t,0,DUR))+') translate(-640 -360)');
+for(var i=0;i<3;i++){var p=eos(seg(t,.1+.07*i,.1+.07*i+.4)),h=Math.max(0,H[i]*p),b=$('b'+i);b.setAttribute('y',360-h);b.setAttribute('height',h)}
+A('drw','stroke-dashoffset',1000*(1-eio(seg(t,.3,.8))));
+var m=eio(seg(t,.7,1.1)),mx=lr(640,L.tcx,m),s=lr(.9,.316,m);
+MK.forEach(function(u,q){var tq=Math.max(0,t-SHM*q/(KM-1)),mm=eio(seg(tq,.7,1.1));u.setAttribute('transform','translate('+lr(640,L.tcx,mm).toFixed(2)+' 360) scale('+lr(.9,.316,mm).toFixed(4)+') translate(-405 -400)');u.setAttribute('opacity',1/(q+1))});
+var tp=eo4(seg(t,.72,1.1));
+A('tile','transform','translate('+L.tcx+' 360) scale('+lr(.9,1,tp)+')');
+A('tile','opacity',eo3(seg(t,.7,.95)));
+var r=seg(t,IMP,1.7);
+A('ring','r',lr(118,215,eo4(r)));A('ring','opacity',r>0&&r<1?.34*Math.pow(1-r,1.4):0);
+LT.forEach(function(arr,i){var a=IMP-.05+.035*i;arr.forEach(function(e,q){var tq=t-SH*q/(K-1),p=eo4(seg(tq,a,a+.6));e.setAttribute('transform','translate(0 '+(95*(1-p)).toFixed(2)+')');e.setAttribute('opacity',(eo3(seg(tq,a,a+.2))/(q+1)).toFixed(3))})});
+
+var wk=eo3(seg(t,1.4,1.95));A('sR0','stop-color',mix('#FFFFFF','#19C37D',wk));A('sR1','stop-color',mix('#FFFFFF','#4BF5B0',wk));lastT=t;
+var sh=seg(t,1.4,1.95);
+A('sh','x',(lr(L.tx-300,L.tx+L.w+160,eio(sh)))+(BASE*.364));
+A('sh','opacity',sh>0&&sh<1?.8:0);
+A('ul','width',96*eo3(seg(t,1.6,1.95)));
+A('gE','transform','translate('+mx.toFixed(2)+' 360)');
+var ts=$('tsh');ts.setAttribute('cx',L.tcx);ts.setAttribute('cy',405);ts.setAttribute('opacity',.3*eo3(seg(t,.85,1.25)));
+$('scr').value=Math.round(Math.min(t,DUR)*1000);
+$('tm').textContent=Math.min(t,DUR).toFixed(2)+' / 3.00s';
+}
+var raf=0,t0=0,ac=null;
+function stopAudio(){if(ac){try{ac.close()}catch(e){}ac=null}}
+function run(withSound){
+cancelAnimationFrame(raf);stopAudio();
+var delay=withSound?.07:0;
+if(withSound){try{sfx(delay)}catch(e){}}
+t0=performance.now()+delay*1000;
+(function f(now){
+var t=(now-t0)/1000;
+if(t>=DUR){render(DUR);return}
+render(Math.max(0,t));raf=requestAnimationFrame(f);
+})(performance.now());
+}
+/* seeded PRNG: noise and reverb are identical on every play and every offline render */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+/*
+ PAYRANKED SONIC SIGNATURE — restrained, textured, one hero moment. Key: E major.
+  Rules:  few voices, each with a job; saturation and drift for grit; space before the hit; silence is a sound.
+  Motif:  E · G# · B (three warm taps as the bars climb) → E5 on the hit.  "rank, rank, rank — PAY"
+  Build   0.00–1.05  a rising analog drone (detuned saws, filter opening, slow pitch drift) under one air riser.
+                     The P stroke and mark glide only add texture to it (friction, one whoosh). No beeps.
+  Suck    1.00–1.05  the whole mix is pulled back to almost nothing for ~50 ms: the vacuum before the hit.
+  Hit     1.05       sub drop an octave (E2 → E1), drum body, saturated saw "boom", click, E-major wall, one bell on E5.
+  Cascade 1.05–1.40  letters get one rising air sweep, not nine notes.
+  Reveal  1.40–1.95  one sweep, one soft B5, a two-note tag (E6, B6) and a fading air tail.
+ Space:   darker, early-reflection room reverb. Master: opening low-pass, high-pass, tanh glue, compressor, limiter.
+*/
+function sfx(delay,ctxIn){
+var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ac=ctxIn||new AC();var c=ac,T=c.currentTime+delay,R=rng(2026);
+
+/* ---------- master chain ---------- */
+var master=c.createGain(),g0=master.gain;g0.setValueAtTime(.7,T);g0.linearRampToValueAtTime(.55,T+IMP-.06);g0.linearRampToValueAtTime(.06,T+IMP-.012);g0.setValueAtTime(1,T+IMP);g0.linearRampToValueAtTime(.7,T+IMP+.3);g0.setValueAtTime(.7,T+DUR-.45);g0.linearRampToValueAtTime(0,T+DUR-.02);
+/* bus2 skips the opening low-pass so early plucks keep their clarity */
+var bus2=c.createGain();bus2.gain.setValueAtTime(.8,T);bus2.gain.setValueAtTime(.8,T+DUR-.45);bus2.gain.linearRampToValueAtTime(0,T+DUR-.02);
+var lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.5;lp.frequency.setValueAtTime(600,T);lp.frequency.exponentialRampToValueAtTime(15000,T+IMP);
+var mixN=c.createGain(),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=28;hp.Q.value=.7;
+var sat=c.createWaveShaper(),cv=new Float32Array(2049);for(var si=0;si<2049;si++){var sx=si/1024-1;cv[si]=Math.tanh(1.25*sx)/Math.tanh(1.25)}sat.curve=cv;sat.oversample='2x';
+var comp=c.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=12;comp.ratio.value=3;comp.attack.value=.005;comp.release.value=.15;
+var lim=c.createDynamicsCompressor();lim.threshold.value=-3;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.002;lim.release.value=.08;
+var trim=c.createGain();trim.gain.value=.69;
+master.connect(lp);lp.connect(mixN);bus2.connect(mixN);mixN.connect(hp);hp.connect(sat);sat.connect(comp);comp.connect(lim);lim.connect(trim);trim.connect(c.destination);
+
+/* ---------- reverb (deterministic, soft pre-delay) ---------- */
+var n=Math.floor(c.sampleRate*2),pd=Math.floor(c.sampleRate*.015),ib=c.createBuffer(2,n,c.sampleRate),ER=[.011,.017,.023,.031,.043,.059,.071];
+for(var ch=0;ch<2;ch++){var d=ib.getChannelData(ch),y=0;for(var i=pd;i<n;i++){var tt=i/n,aa=.55+.4*tt;y=aa*y+(1-aa)*(R()*2-1);d[i]=y*Math.sqrt((1+aa)/(1-aa))*Math.pow(1-tt,2.6)}
+for(var e=0;e<ER.length;e++)d[Math.floor(ER[e]*c.sampleRate)+ch*7]+=(e%2?-1:1)*.9*(1-e*.1)}
+var rv=c.createConvolver();rv.buffer=ib;var rg=c.createGain();rg.gain.value=.5;rv.connect(rg);rg.connect(master);
+var nb=c.createBuffer(1,c.sampleRate,c.sampleRate),nd=nb.getChannelData(0);for(var j=0;j<nd.length;j++)nd[j]=R()*2-1;
+
+/* ---------- building blocks ---------- */
+function route(node,pan,wet,byp,pe,st,dur){var p=c.createStereoPanner();p.pan.setValueAtTime(pan||0,T+(st||0));if(pe!==undefined&&pe!==null)p.pan.linearRampToValueAtTime(pe,T+(st||0)+dur);node.connect(p);p.connect(byp?bus2:master);if(wet){var s=c.createGain();s.gain.value=wet;p.connect(s);s.connect(rv)}}
+function out(node,pan,wet,byp){route(node,pan,wet,byp)}
+function env(g,st,a,dur,vol){g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(vol,T+st+a);g.gain.exponentialRampToValueAtTime(.0008,T+st+dur)}
+function tone(f,st,dur,vol,o){o=o||{};var os=c.createOscillator(),g=c.createGain();os.type='sine';os.frequency.setValueAtTime(f,T+st);
+if(o.f2)os.frequency.exponentialRampToValueAtTime(o.f2,T+st+(o.fd||dur));env(g,st,o.a||.006,dur,vol);os.connect(g);out(g,o.pan,o.wet,o.byp);os.start(T+st);os.stop(T+st+dur+.05)}
+function bell(f,st,dur,vol,wet,ratio,idx,pan,byp){var car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),g=c.createGain();
+car.frequency.value=f;mod.frequency.value=f*ratio;mg.gain.setValueAtTime(f*idx,T+st);mg.gain.exponentialRampToValueAtTime(1,T+st+dur*.5);
+mod.connect(mg);mg.connect(car.frequency);env(g,st,.004,dur,vol);car.connect(g);out(g,pan,wet,byp);car.start(T+st);mod.start(T+st);car.stop(T+st+dur+.05);mod.stop(T+st+dur+.05)}
+function noise(st,dur,ft,f0,f1,vol,pan,Q,rise,wet,byp){var s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();s.buffer=nb;b.type=ft;b.Q.value=Q||1;
+b.frequency.setValueAtTime(f0,T+st);if(f1)b.frequency.exponentialRampToValueAtTime(f1,T+st+dur);
+if(rise){g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(vol*.3,T+st+dur*.6);g.gain.linearRampToValueAtTime(vol,T+st+dur*.95);g.gain.linearRampToValueAtTime(0,T+st+dur)}else env(g,st,.003,dur,vol);
+s.connect(b);b.connect(g);out(g,pan,wet,byp);s.start(T+st);s.stop(T+st+dur+.02)}
+/* sustained filtered noise with attack/release and an optional pan sweep (att+rel must be <= dur) */
+function bed(st,dur,ft,f0,f1,vol,pan,Q,att,rel,wet,byp,pe){var s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();s.buffer=nb;s.loop=true;b.type=ft;b.Q.value=Q||1;
+b.frequency.setValueAtTime(f0,T+st);if(f1)b.frequency.exponentialRampToValueAtTime(f1,T+st+dur);
+g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(vol,T+st+att);g.gain.setValueAtTime(vol,T+st+dur-rel);g.gain.linearRampToValueAtTime(0,T+st+dur);
+s.connect(b);b.connect(g);route(g,pan,wet,byp,pe,st,dur);s.start(T+st);s.stop(T+st+dur+.02)}
+/* soft glass mallet: fundamental + quick octave + a tiny filtered click */
+function pluck(f,st,dur,vol,pan,wet,byp){var o1=c.createOscillator(),o2=c.createOscillator(),g1=c.createGain(),g2=c.createGain();
+o1.type='sine';o2.type='sine';o1.frequency.value=f;o2.frequency.value=f*2;env(g1,st,.003,dur,vol);env(g2,st,.002,dur*.4,vol*.3);
+o1.connect(g1);o2.connect(g2);out(g1,pan,wet,byp);out(g2,pan,wet,byp);o1.start(T+st);o2.start(T+st);o1.stop(T+st+dur+.05);o2.stop(T+st+dur+.05);
+noise(st,.02,'bandpass',Math.min(f*4,9000),0,vol*.35,pan,3,false,0,byp)}
+/* continuous pitch glide along a shaped curve, optional vibrato and pan sweep */
+function glide(o){var N=64,g=c.createGain(),shape=o.shape||function(x){return x};
+g.gain.setValueAtTime(0,T+o.st);g.gain.linearRampToValueAtTime(o.vol,T+o.st+o.att);g.gain.setValueAtTime(o.vol,T+o.st+o.dur-o.rel);g.gain.linearRampToValueAtTime(0,T+o.st+o.dur);
+(o.parts||[[1,1]]).forEach(function(pt){var os=c.createOscillator(),pg=c.createGain(),cu=new Float32Array(N);
+for(var i=0;i<N;i++)cu[i]=o.fa*pt[0]*Math.pow(o.fb/o.fa,shape(i/(N-1)));
+os.type='sine';os.frequency.setValueCurveAtTime(cu,T+o.st,o.dur);pg.gain.value=pt[1];
+if(o.vib){var l=c.createOscillator(),lg=c.createGain();l.frequency.value=5.5;lg.gain.value=o.fa*pt[0]*o.vib;l.connect(lg);lg.connect(os.frequency);l.start(T+o.st);l.stop(T+o.st+o.dur+.05)}
+os.connect(pg);pg.connect(g);os.start(T+o.st);os.stop(T+o.st+o.dur+.05)});
+route(g,o.pan,o.wet,o.byp,o.pe,o.st,o.dur)}
+
+/* ---------- helpers ---------- */
+function drv(k){var s=c.createWaveShaper(),cu=new Float32Array(1025);for(var i=0;i<1025;i++){var x=i/512-1;cu[i]=Math.tanh(k*x)/Math.tanh(k)}s.curve=cu;s.oversample='2x';return s}
+/* analog voice stack: detuned saws, closing/opening filter, optional drive and slow pitch drift */
+function stack(o){var lp2=c.createBiquadFilter(),g=c.createGain(),dr=o.drive?drv(o.drive):null,lg=null;
+lp2.type='lowpass';lp2.Q.value=o.q||.8;lp2.frequency.setValueAtTime(o.f0,T+o.st);lp2.frequency.exponentialRampToValueAtTime(o.f1,T+o.st+o.dur*.8);
+g.gain.setValueAtTime(0,T+o.st);g.gain.linearRampToValueAtTime(o.vol,T+o.st+o.att);g.gain.exponentialRampToValueAtTime(.0008,T+o.st+o.dur);
+if(o.drift){var lfo=c.createOscillator();lg=c.createGain();lfo.frequency.value=.35;lg.gain.value=o.drift;lfo.connect(lg);lfo.start(T+o.st);lfo.stop(T+o.st+o.dur+.05)}
+o.notes.forEach(function(f){(o.cents||[-7,0,7]).forEach(function(dc){var os=c.createOscillator();os.type=o.type||'sawtooth';os.frequency.value=f;os.detune.value=dc;if(lg)lg.connect(os.detune);os.connect(lp2);os.start(T+o.st);os.stop(T+o.st+o.dur+.05)})});
+if(dr){lp2.connect(dr);dr.connect(g)}else lp2.connect(g);route(g,0,o.wet,false)}
+/* modal drum body: a membrane's inharmonic modes, pitch-dropping on attack */
+function body(f,st,dur,vol,pan){var M=[1,1.59,2.14,2.65],AM=[1,.5,.3,.18],DM=[1,.7,.5,.35];
+M.forEach(function(m,i){var o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(f*m*1.6,T+st);o.frequency.exponentialRampToValueAtTime(f*m,T+st+.06);env(g,st,.003,dur*DM[i],vol*AM[i]);o.connect(g);out(g,pan,.15);o.start(T+st);o.stop(T+st+dur*DM[i]+.05)})}
+
+/* ---------- BUILD 0.00 – 1.05 : rising analog drone, one air riser, room tone ---------- */
+tone(41.2,0,IMP+.05,.2,{a:IMP-.04,f2:82.41,fd:IMP});                  /* sub rises an octave: E1 → E2, tension */
+stack({notes:[82.41,123.47,164.81],st:0,dur:IMP+.05,vol:.03,f0:180,f1:1800,att:IMP-.05,wet:.35,drive:2,drift:7}); /* the drone */
+noise(0,IMP,'bandpass',500,5000,.08,0,.9,true,.3);                    /* the one air riser */
+bed(0,2.9,'lowpass',2500,0,.012,0,.7,.4,1,.2);                       /* room tone: stops it sounding like a sterile synth */
+
+/* motif: E · G# · B as warm FM taps with a wooden transient and a low thud */
+var BN=[329.63,415.3,493.88];
+for(var i=0;i<3;i++){var s0=.1+.07*i,pn=-.25+.25*i;
+ bell(BN[i],s0,.35,.07,.3,1,1.4,pn,true);
+ tone(100+12*i,s0,.12,.07,{f2:62+8*i,fd:.1,a:.003,pan:pn});
+ noise(s0,.025,'bandpass',900+200*i,0,.04,pn,2,false,0)}
+
+/* P stroke: texture only */
+bed(.3,.5,'bandpass',1200,4200,.03,-.3,3,.12,.18,.3,false,.3);        /* paper friction under the drone */
+
+/* mark glide: one whoosh, then the reverse riser sucks into the hit */
+bed(.7,.4,'bandpass',500,2400,.06,-.05,1.2,.18,.18,.35,false,-.5);
+bed(.84,.21,'highpass',2500,9000,.05,0,.7,.19,.02,.3,false,0);
+
+/* ---------- HIT 1.05 : weight first, then colour ---------- */
+tone(110,IMP,.7,.85,{f2:41.2,fd:.35,a:.004});tone(41.2,IMP,1.4,.3,{a:.02});   /* sub drop + deep E1 floor */
+body(82.41,IMP,1.1,.25,0);                                                    /* drum body */
+stack({notes:[82.41,164.81],st:IMP,dur:1,vol:.06,f0:3500,f1:160,att:.01,wet:.25,drive:3,cents:[-9,0,9]}); /* saturated saw boom */
+noise(IMP,.05,'lowpass',1800,0,.16);noise(IMP,.02,'highpass',5000,0,.07);     /* transient click */
+stack({notes:[164.81,246.94,329.63,415.3,493.88],st:IMP+.02,dur:1.5,vol:.016,f0:4200,f1:650,att:.03,wet:.5}); /* E-major wall */
+bell(659.25,IMP+.01,1.6,.1,.7,2,.9,0);bell(659.25*1.0025,IMP+.01,1.4,.04,.7,2,.9,.45);bell(659.25*.9975,IMP+.01,1.4,.04,.7,2,.9,-.45); /* the hero note, E5 */
+bed(IMP,.65,'bandpass',5200,1400,.03,0,1.5,.02,.5,.6);                        /* ring shimmer */
+
+/* ---------- CASCADE: letters get one rising air sweep ---------- */
+bed(IMP-.05,.4,'bandpass',2500,7500,.035,-.4,2,.12,.2,.35,false,.4);
+
+/* ---------- REVEAL 1.40 – 3.0 ---------- */
+bed(1.4,.55,'bandpass',2000,7500,.06,-.2,2.5,.25,.25,.5,false,.5);            /* the light sweep */
+tone(987.77,1.55,1,.02,{a:.3,wet:.8});                                        /* one soft B5 */
+bell(1318.51,1.85,1.2,.04,.8,2,.6,.3);bell(1975.53,1.95,.5,.025,.7,2,.5,.3);  /* two-note tag: E6, B6 */
+noise(1.65,.7,'highpass',6000,0,.015,.2,1,false,.4);                          /* air tail */
+}
+$('play').onclick=function(){run($('snd').checked)};
+$('rep').onclick=function(){run(false)};
+$('scr').oninput=function(){cancelAnimationFrame(raf);stopAudio();render(this.value/1000)};
+$('wsel').onchange=function(){WT=this.value.split(',').map(Number);layout();render(lastT)};
+window.__sfxOffline=async function(){var sr=44100,oc=new OfflineAudioContext(2,Math.ceil(sr*DUR),sr);sfx(0,oc);var b=await oc.startRendering();var L=b.getChannelData(0),R=b.getChannelData(1),n=L.length,buf=new ArrayBuffer(44+n*4),v=new DataView(buf);
+function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
+ws(0,'RIFF');v.setUint32(4,36+n*4,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*4,true);
+for(var i=0;i<n;i++){v.setInt16(44+i*4,Math.max(-1,Math.min(1,L[i]))*32767,true);v.setInt16(46+i*4,Math.max(-1,Math.min(1,R[i]))*32767,true)}
+var s='',u=new Uint8Array(buf);for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+window.__FPS=60;window.__frames=Math.round(DUR*60);window.__frame=function(n){render(n/60)};window.__render=render;window.__layout=layout;layout();render(0);
+var go=function(){layout();render(0);run(false)};
+if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();
+
+  // === Frame render mode for screenshot automation ===
+  // Reads ?frame=N from URL and renders that specific frame, then signals completion
+  if (window.location.search.includes('frame=')) {
+    const params = new URLSearchParams(window.location.search);
+    const frameNum = parseInt(params.get('frame'), 10);
+    if (!isNaN(frameNum) && window.__frame && window.__layout) {
+      window.__layout();
+      window.__frame(frameNum);
+      // Hide UI chrome for screenshot
+      const stage = document.querySelector('.stage');
+      if (stage) {
+        stage.style.position = 'fixed';
+        stage.style.top = '0';
+        stage.style.left = '0';
+        stage.style.width = '100vw';
+        stage.style.height = '100vh';
+        stage.style.borderRadius = '0';
+        stage.style.border = 'none';
+      }
+      document.querySelectorAll('main > *:not(.stage)').forEach(el => { el.style.display = 'none'; });
+      document.body.style.margin = '0';
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.background = '#000';
+      // Signal completion
+      window.__FRAME_READY = true;
+    }
+  }
+})();
+</script>
+</body>
+</html>
