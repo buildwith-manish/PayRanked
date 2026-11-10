@@ -228,6 +228,8 @@ export const Shot3: React.FC = () => {
           </div>
         )}
       </Background>
+      {/* fade in from black at the start (matches Shot 2's dissolve out) */}
+      <AbsoluteFill style={{backgroundColor: '#000', opacity: f < 6 ? 1 - f / 6 : 0, pointerEvents: 'none'}} />
       <SourceTag />
     </AbsoluteFill>
   );

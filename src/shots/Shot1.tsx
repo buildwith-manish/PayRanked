@@ -388,7 +388,7 @@ export const Shot1: React.FC = () => {
         <Flash at={SLAM} duration={8} peak={0.6} />
         <Flash at={SHAPE_START} duration={6} peak={0.5} />
         {/* fade in from black at the start; hard cut to black at the end */}
-        <AbsoluteFill style={{background: '#000', opacity: f >= SHOT1_FRAMES - 4 ? 1 : interpolate(f, [0, 8], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none'}} />
+        <AbsoluteFill style={{background: '#000', opacity: f >= SHOT1_FRAMES - 6 ? 1 : interpolate(f, [0, 8], [1, 0], {extrapolateRight: 'clamp'}), pointerEvents: 'none'}} />
       </AbsoluteFill>
     </Aberration>
   );
