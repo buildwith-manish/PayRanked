@@ -34,6 +34,7 @@ import {
 } from '../shots/Shot1';
 import {SHOT3_FRAMES, T as T3} from '../shots/Shot3';
 import {T as T5} from '../shots/Shot5';
+import {T as T55} from '../shots/Shot55'; // EXTEND-4
 import {BUTTON, T as T6} from '../shots/Shot6';
 import {glide, ramp, roll, stagger} from '../motion';
 import {sec} from '../theme';
@@ -406,10 +407,41 @@ export const shot6Cues = (): Cue[] => {
   return k;
 };
 
+/** EXTEND-4: Shot 5.5 Practical Takeaways cues.
+ *  Mostly ticks + a hero hit at the hook slam and at the formula reveal. Each profile card gets a whoosh on entrance
+ *  and a chip when the body lands. The tease at the end gets a riser and a soft bell. */
+export const shot55Cues = (): Cue[] => {
+  const k: Cue[] = [];
+  // hook slam — hero hit
+  k.push(cue('hit_big', T55.hook + 4, 0.9, true));
+  k.push(cue('whoosh_xl', T55.hook, 0.5));
+  // profile cards — whoosh on entrance, chip on body landing
+  k.push(cue('whoosh_l', T55.profile1, 0.6));
+  k.push(cue('chip_0', T55.profile1 + 14, 0.5));
+  k.push(cue('whoosh_l', T55.profile2, 0.6));
+  k.push(cue('chip_1', T55.profile2 + 14, 0.5));
+  k.push(cue('whoosh_l', T55.profile3, 0.6));
+  k.push(cue('chip_2', T55.profile3 + 14, 0.5));
+  // formula reveal — hero hit on the $100K count-up start
+  k.push(cue('hit_med', T55.formula + 6, 0.7, true));
+  k.push(cue('riser_short', T55.formula, 0.4));
+  // ticks for the count-up (40-frame count, ~5 ticks) — explicit SFX names so TypeScript keeps the literal-type check
+  const tickSfx: SfxName[] = ['tick_0', 'tick_1', 'tick_2', 'tick_0', 'tick_1'];
+  for (let i = 0; i < tickSfx.length; i++) {
+    k.push(cue(tickSfx[i], T55.formula + 8 + i * 8, 0.4));
+  }
+  // tease — riser + soft bell
+  k.push(cue('riser', T55.tease, 0.4));
+  k.push(cue('bell_ring', T55.tease + 8, 0.5));
+  k.push(cue('shimmer', T55.tease + 18, 0.3));
+  return k;
+};
+
 export const CUES = {
   shot1: shot1Cues(),
   shot3: shot3Cues(),
   shot5: shot5Cues(),
+  shot55: shot55Cues(), // EXTEND-4
   shot6: shot6Cues(),
   reveals: timeline.map((t) => revealCues(t.names, t.label, t.versus)),
   breaks: countdownBreaks.map((b) => breakCues(b.kind)),
@@ -421,6 +453,7 @@ export const HERO_BEATS: number[] = (() => {
   const add = (offset: number, cues: Cue[]) => cues.filter((c) => c.hero && (c.sfx === 'hit_big' || c.sfx === 'glitch')).forEach((c) => beats.push(offset + c.at));
   add(START.shot1, CUES.shot1);
   add(START.shot5, CUES.shot5);
+  add(START.shot55, CUES.shot55); // EXTEND-4
   timeline.forEach((t, i) => add(START.shot4 + t.from, CUES.reveals[i]));
   return beats.sort((a, b) => a - b);
 })();

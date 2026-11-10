@@ -84,6 +84,7 @@ export const SHOT_SECONDS = {
   shot2: 2.6,
   shot3: 60, // method (EXTEND-1: restored from 20 s to 60 s; was 42 s originally)
   shot5: 100, // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
+  shot55: 110, // EXTEND-4: practical takeaways (was 80 s; extended to 110 s so the body text has 25 s per profile, hits the 8:30 target)
   shot6: 23, // outro (was 75): 13 s of recap and the subscribe ask, then a 10 s end screen (was 7 s)
 };
 
@@ -92,7 +93,8 @@ const shot2 = sec(SHOT_SECONDS.shot1);
 const shot3 = shot2 + sec(3); // the intro keeps its 0.4 s of air
 const shot4 = shot3 + sec(SHOT_SECONDS.shot3);
 const shot5 = shot4 + COUNTDOWN_TOTAL;
-const shot6 = shot5 + sec(SHOT_SECONDS.shot5);
+const shot55 = shot5 + sec(SHOT_SECONDS.shot5); // EXTEND-4: practical takeaways sit between Shot 5 and Shot 6
+const shot6 = shot55 + sec(SHOT_SECONDS.shot55);
 export const START = {
   shot1: 0,
   shot2,
@@ -104,6 +106,7 @@ export const START = {
    */
   shot4,
   shot5,
+  shot55, // EXTEND-4
   shot6,
 };
 

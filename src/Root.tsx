@@ -11,6 +11,7 @@ import {Shot1, SHOT1_FRAMES} from './shots/Shot1';
 import {Shot2, SHOT2_FRAMES} from './shots/Shot2';
 import {Shot3, SHOT3_FRAMES} from './shots/Shot3';
 import {Shot5, SHOT5_FRAMES} from './shots/Shot5';
+import {Shot55, SHOT55_FRAMES} from './shots/Shot55'; // EXTEND-4: practical takeaways
 import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
 import {Watermark} from './components/Watermark';
@@ -76,6 +77,11 @@ const Video1: React.FC = () => (
       <Shot5 />
       <SfxTrack cues={CUES.shot5} offset={START.shot5} />
     </Sequence>
+    {/* EXTEND-4: Shot 5.5 Practical Takeaways — 80s, sits between Reality Check and Outro */}
+    <Sequence from={toReal(START.shot55)} durationInFrames={toReal(SHOT55_FRAMES)} name="Shot 5.5 Practical">
+      <Shot55 />
+      <SfxTrack cues={CUES.shot55} offset={START.shot55} />
+    </Sequence>
     <Sequence from={toReal(START.shot6)} durationInFrames={toReal(SHOT6_FRAMES)} name="Shot 6 Outro">
       <Shot6 />
       <SfxTrack cues={CUES.shot6} offset={START.shot6} />
@@ -91,6 +97,7 @@ const GradedShot1 = graded(Shot1, START.shot1, CUES.shot1);
 const GradedShot2 = graded(Shot2, START.shot2);
 const GradedShot3 = graded(Shot3, START.shot3, CUES.shot3);
 const GradedShot5 = graded(Shot5, START.shot5, CUES.shot5);
+const GradedShot55 = graded(Shot55, START.shot55, CUES.shot55); // EXTEND-4
 const GradedShot6 = graded(Shot6, START.shot6, CUES.shot6);
 const GradedCountdown = graded(Countdown, START.shot4); // the reveals carry their own cues
 const GradedReveals = timeline.map((_, i) => graded(RankReveal, START.shot4 + timeline[i].from, CUES.reveals[i]));
@@ -107,6 +114,7 @@ export const Root: React.FC = () => (
     <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
     <Composition id="Shot4-Countdown" component={GradedCountdown} durationInFrames={toReal(COUNTDOWN_TOTAL)} {...common} />
     <Composition id="Shot5-RealityCheck" component={GradedShot5} durationInFrames={toReal(SHOT5_FRAMES)} {...common} />
+    <Composition id="Shot55-Practical" component={GradedShot55} durationInFrames={toReal(SHOT55_FRAMES)} {...common} />
     <Composition id="Shot6-Outro" component={GradedShot6} durationInFrames={toReal(SHOT6_FRAMES)} {...common} />
     {breaks.map((b, i) => (
       <Composition key={b.kind} id={`Break-${b.kind}`} component={GradedBreaks[i]} durationInFrames={toReal(b.dur)} {...common} defaultProps={{kind: b.kind, rail: b.rail, durationInFrames: b.dur}} />

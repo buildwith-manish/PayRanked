@@ -1,6 +1,6 @@
 {
   "fps": 30,
-  "total": 398.5,
+  "total": 508.5,
   "shots": {
     "shot1": {
       "start": 0,
@@ -23,8 +23,12 @@
       "dur": 100
     },
     "shot6": {
-      "start": 375.5,
+      "start": 485.5,
       "dur": 23
+    },
+    "shot55": {
+      "start": 375.5,
+      "dur": 110
     }
   },
   "shot1": {
@@ -211,5 +215,13 @@
       "from": 137.5,
       "dur": 10
     }
-  ]
+  ],
+  "shot55": {
+    "hook": 0,
+    "profile1": 5,
+    "profile2": 30,
+    "profile3": 55,
+    "formula": 80,
+    "tease": 100
+  }
 }
