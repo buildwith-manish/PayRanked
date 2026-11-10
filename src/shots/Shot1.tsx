@@ -317,18 +317,51 @@ export const Shot1: React.FC = () => {
 
             {/* 6-10s: the gap is the only bright thing on the frame. Amber, alone. It says how much further, never where. */}
             <div style={{position: 'absolute', inset: 0, opacity: 1 - 0.7 * rest2}}>
-              <svg width={W} height={H} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
-                <path
-                  d="M 830 680 v 40 M 830 700 H 1090 M 1090 680 v 40"
-                  fill="none"
-                  stroke={C.amber}
-                  strokeWidth={7}
-                  strokeLinecap="round"
-                  pathLength={1}
-                  strokeDasharray={1}
-                  strokeDashoffset={1 - dimLineP}
-                />
-              </svg>
+              {/* Bracket glow: starts breathing once the draw completes (dimLineP ≥ 1), intensifies on the slam,
+                  then settles into a slow pulse at the same 14-frame rhythm as Chip's pulse glow. The drop-shadow
+                  on the wrapper div is a second amber halo outside the SVG overflow boundary. */}
+              {(() => {
+                const drawn = clamp((dimLineP - 0.85) / 0.15); // 0→1 in the last 15% of the draw
+                const postSlam = clamp((f - SLAM) / 8);        // 0→1 over 8 frames after slam
+                const breathe = drawn > 0 ? 0.6 + 0.4 * Math.sin(f / 14) : 0;
+                // Glow radius: grows as it draws, jumps on the slam, then breathes
+                const glowR = drawn * (8 + 4 * breathe) + postSlam * 10 * Math.exp(-(f - SLAM) / 12);
+                const glowOpacity = drawn * (0.75 + 0.25 * breathe);
+                return (
+                  <svg width={W} height={H} style={{position: 'absolute', inset: 0, overflow: 'visible', filter: glowR > 0.5 ? `drop-shadow(0 0 ${glowR}px ${C.amber})` : undefined}}>
+                    <defs>
+                      <filter id="bracketGlow" x="-80%" y="-400%" width="260%" height="900%" colorInterpolationFilters="sRGB">
+                        <feGaussianBlur stdDeviation={glowR * 1.4} result="blur" />
+                        <feComposite in="blur" in2="SourceGraphic" operator="over" />
+                      </filter>
+                    </defs>
+                    {/* glow layer: same path, wider, blurred amber — drawn in sync with the main stroke */}
+                    <path
+                      d="M 830 680 v 40 M 830 700 H 1090 M 1090 680 v 40"
+                      fill="none"
+                      stroke={C.amber}
+                      strokeWidth={22}
+                      strokeLinecap="round"
+                      pathLength={1}
+                      strokeDasharray={1}
+                      strokeDashoffset={1 - dimLineP}
+                      opacity={glowOpacity * 0.55}
+                      filter="url(#bracketGlow)"
+                    />
+                    {/* main stroke: thickened from 7 to 11px */}
+                    <path
+                      d="M 830 680 v 40 M 830 700 H 1090 M 1090 680 v 40"
+                      fill="none"
+                      stroke={C.amber}
+                      strokeWidth={11}
+                      strokeLinecap="round"
+                      pathLength={1}
+                      strokeDasharray={1}
+                      strokeDashoffset={1 - dimLineP}
+                    />
+                  </svg>
+                );
+              })()}
               {f >= SLAM && (
                 <div
                   style={{
