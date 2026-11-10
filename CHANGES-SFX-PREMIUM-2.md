@@ -30,9 +30,20 @@ Verified: tick_1.wav mean went from +0.0176 (audible pop) to -0.000252 (clean).
 ### 4. Transient shaper
 `transient_shaper()` in `finish()`: for hits and impacts (hit_big, hit_med, hit_small, stamp, lock, pin_land, pop, click), boosts the attack by 1.25x and reduces the sustain by 0.88x in the 1.25-5 kHz band. Makes the "snap" of each impact sharper without changing the overall level.
 
-### 5. Foley license notes
-- `coin_drop_opengameart.wav`: CC0 (confirmed at opengameart.org/content/coin-drop)
-- `crash.wav`, `door_slamming.wav`, `glasses_hitting.wav`, `metal_scratching.wav`, `punches.wav`: from archive.org William Dyer Sound Effects Library. **License not explicitly stated on the archive.org page** — the page mentions AGPL for the archive.org software, not the audio. These are likely public domain (the library was digitized from old studio tapes), but **verify before shipping**. If you need guaranteed CC0, replace these with Freesound CC0 samples or Sonniss GDC bundle files.
+### 5. Foley license notes — ALL CC0 VERIFIED
+Every foley sample in this library is CC0 (public domain). No attribution required, no commercial restrictions.
+
+| File | Source | License | Verified |
+|------|--------|---------|----------|
+| `coin_drop_opengameart.wav` | OpenGameArt (Vinrax) | CC0 | ✅ Confirmed at opengameart.org/content/coin-drop |
+| `cc0_hit_big.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_rock_hit_01) | CC0 | ✅ Collection title explicitly says "CC0" |
+| `cc0_hit_med.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_hit_02) | CC0 | ✅ Same collection |
+| `cc0_hit_small.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_hit_06) | CC0 | ✅ Same collection |
+| `cc0_stamp.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_wood_hit_01) | CC0 | ✅ Same collection |
+| `cc0_lock.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_metal_hit_02) | CC0 | ✅ Same collection |
+| `cc0_glass.wav` | OpenGameArt "75 CC0 breaking/falling/hit sfx" (bfh1_glass_hit_02) | CC0 | ✅ Same collection |
+
+The archive.org William Dyer library files (crash, door_slamming, glasses_hitting, metal_scratching, punches) from the previous commit were REMOVED — their license was "Attribution" with no clear CC0/public domain statement. Replaced with confirmed CC0 files from OpenGameArt.
 
 ## What did NOT change
 - All 53 file names unchanged
