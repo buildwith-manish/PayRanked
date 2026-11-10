@@ -1,0 +1,164 @@
+{
+  "coin_drop_opengameart": [
+    {
+      "file": "coin_drop_opengameart_00.wav",
+      "duration": 0.7,
+      "rms_db": -22.7,
+      "transient_at": 0.2
+    }
+  ],
+  "crash": [
+    {
+      "file": "crash_00.wav",
+      "duration": 0.699,
+      "rms_db": -10.5,
+      "transient_at": 0.199
+    }
+  ],
+  "door_slamming": [
+    {
+      "file": "door_slamming_00.wav",
+      "duration": 0.7,
+      "rms_db": -6.8,
+      "transient_at": 0.2
+    }
+  ],
+  "glasses_hitting": [
+    {
+      "file": "glasses_hitting_00.wav",
+      "duration": 0.37,
+      "rms_db": -10.3,
+      "transient_at": 0.012
+    }
+  ],
+  "metal_scratching": [
+    {
+      "file": "metal_scratching_00.wav",
+      "duration": 0.7,
+      "rms_db": -20.1,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_01.wav",
+      "duration": 0.7,
+      "rms_db": -28.8,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_02.wav",
+      "duration": 0.7,
+      "rms_db": -19.3,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_03.wav",
+      "duration": 0.7,
+      "rms_db": -30.4,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_04.wav",
+      "duration": 0.7,
+      "rms_db": -25.1,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_05.wav",
+      "duration": 0.7,
+      "rms_db": -29.7,
+      "transient_at": 0.2
+    },
+    {
+      "file": "metal_scratching_06.wav",
+      "duration": 0.7,
+      "rms_db": -20.0,
+      "transient_at": 0.2
+    }
+  ],
+  "punches": [
+    {
+      "file": "punches_00.wav",
+      "duration": 0.7,
+      "rms_db": -21.3,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_01.wav",
+      "duration": 0.7,
+      "rms_db": -17.1,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_02.wav",
+      "duration": 0.7,
+      "rms_db": -14.5,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_03.wav",
+      "duration": 0.7,
+      "rms_db": -16.8,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_04.wav",
+      "duration": 0.7,
+      "rms_db": -19.1,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_05.wav",
+      "duration": 0.7,
+      "rms_db": -19.2,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_06.wav",
+      "duration": 0.7,
+      "rms_db": -25.0,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_07.wav",
+      "duration": 0.7,
+      "rms_db": -25.4,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_08.wav",
+      "duration": 0.7,
+      "rms_db": -22.8,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_09.wav",
+      "duration": 0.7,
+      "rms_db": -28.5,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_10.wav",
+      "duration": 0.7,
+      "rms_db": -20.9,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_11.wav",
+      "duration": 0.7,
+      "rms_db": -23.8,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_12.wav",
+      "duration": 0.7,
+      "rms_db": -19.3,
+      "transient_at": 0.2
+    },
+    {
+      "file": "punches_13.wav",
+      "duration": 0.674,
+      "rms_db": -26.2,
+      "transient_at": 0.2
+    }
+  ]
+}

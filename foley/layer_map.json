@@ -1,0 +1,16 @@
+{
+  "_comment": "Maps SFX names to processed foley samples. gain is linear (0.15 = -16dB). offset is seconds from the start of the SFX. The foley is mixed in BEFORE normalisation, so it becomes part of the sound. The LOCKED RMS check in finish() keeps the overall loudness within tolerance.",
+  "coin_0": {"file": "coin_drop_opengameart_00.wav", "gain": 0.20, "offset": 0.0},
+  "coin_1": {"file": "coin_drop_opengameart_00.wav", "gain": 0.18, "offset": 0.0},
+  "coin_2": {"file": "coin_drop_opengameart_00.wav", "gain": 0.22, "offset": 0.0},
+  "coin_3": {"file": "coin_drop_opengameart_00.wav", "gain": 0.20, "offset": 0.0},
+  "hit_big": {"file": "crash_00.wav", "gain": 0.12, "offset": 0.0},
+  "hit_med": {"file": "punches_01.wav", "gain": 0.15, "offset": 0.0},
+  "hit_small": {"file": "punches_06.wav", "gain": 0.18, "offset": 0.0},
+  "stamp": {"file": "door_slamming_00.wav", "gain": 0.15, "offset": 0.0},
+  "lock": {"file": "metal_scratching_00.wav", "gain": 0.12, "offset": 0.0},
+  "ding": {"file": "glasses_hitting_00.wav", "gain": 0.08, "offset": 0.0},
+  "ding_hi": {"file": "glasses_hitting_00.wav", "gain": 0.08, "offset": 0.0},
+  "bell_ring": {"file": "glasses_hitting_00.wav", "gain": 0.10, "offset": 0.0},
+  "pin_land": {"file": "punches_02.wav", "gain": 0.15, "offset": 0.0}
+}

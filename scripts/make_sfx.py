@@ -105,6 +105,66 @@ lib: dict = {}  # name -> (audio[n] or [n,2], peak seconds)
 # D natural minor, the key of the music bed: D E F G A Bb C
 D1, D2, D3, A1, A2, F1, F2, C3 = 36.71, 73.42, 146.83, 55.0, 110.0, 43.65, 87.31, 130.81
 
+# ---------------------------------------------------------------- foley layering
+# Real recorded foley (coin drops, punches, door slams, glass clinks) layered on top of the
+# synthesised sub + tails. The foley is mixed in BEFORE normalisation, so it becomes part of the
+# sound. The LOCKED RMS check in finish() keeps the overall loudness within tolerance.
+import wave as _wave
+FOLEY_DIR = os.path.join(ROOT, 'foley', 'processed')
+LAYER_MAP_PATH = os.path.join(ROOT, 'foley', 'layer_map.json')
+_foley_cache = {}
+_layer_map = {}
+
+def _load_layer_map():
+    global _layer_map
+    if not os.path.exists(LAYER_MAP_PATH):
+        return
+    with open(LAYER_MAP_PATH) as f:
+        raw = json.load(f)
+    _layer_map = {k: v for k, v in raw.items() if not k.startswith('_')}
+
+def _load_foley(fname):
+    if fname in _foley_cache:
+        return _foley_cache[fname]
+    path = os.path.join(FOLEY_DIR, fname)
+    if not os.path.exists(path):
+        return None
+    with _wave.open(path, 'rb') as w:
+        ch = w.getnchannels()
+        fr = w.getframerate()
+        nf = w.getnframes()
+        raw = w.readframes(nf)
+    samples = np.frombuffer(raw, dtype=np.int16).astype(np.float64) / 32768.0
+    if ch == 2:
+        mono = samples[0::2]
+    else:
+        mono = samples
+    if fr != SR:
+        ratio = SR / fr
+        n = int(len(mono) * ratio)
+        mono = np.interp(np.arange(n) / ratio, np.arange(len(mono)), mono)
+    _foley_cache[fname] = mono
+    return mono
+
+def get_foley(name, n_samples):
+    if not _layer_map:
+        _load_layer_map()
+    if name not in _layer_map:
+        return None
+    cfg = _layer_map[name]
+    foley = _load_foley(cfg['file'])
+    if foley is None:
+        return None
+    offset = int(cfg.get('offset', 0.0) * SR)
+    gain = cfg.get('gain', 0.15)
+    out = np.zeros(n_samples, dtype=np.float64)
+    dst_start = offset
+    if dst_start >= n_samples:
+        return None
+    copy_len = min(len(foley), n_samples - dst_start)
+    out[dst_start:dst_start + copy_len] = foley[:copy_len] * gain
+    return out
+
 
 # ---------------------------------------------------------------- helpers
 def t_(dur):
@@ -215,9 +275,53 @@ DRIVES = (None, 1.2, 1.5, 1.9, 2.4)
 NOISY = DRIVES + (3.0, 3.8, 4.6)  # noise-based sounds (whooshes, risers) take a harder soft clip: it just makes noise denser
 
 
+def true_peak_limit(x, ceiling=0.89):
+    """True-peak limiter: detects inter-sample peaks by 4x oversampling, then limits to ceiling.
+    Prevents clipping when the audio is played back through a DAC that does sinc reconstruction."""
+    if x.ndim == 2:
+        return np.stack([true_peak_limit(x[:, i], ceiling) for i in range(x.shape[1])], axis=1)
+    # 4x oversample for inter-sample peak detection
+    up = signal.resample_poly(x, 4, 1)
+    peak = np.max(np.abs(up))
+    if peak > ceiling:
+        ratio = ceiling / (np.abs(up) + 1e-9)
+        gain = np.where(np.abs(up) > ceiling, ratio, 1.0)
+        # Smooth the gain envelope (5ms attack, 50ms release)
+        smooth_len = max(2, int(0.005 * SR * 4))
+        kernel = np.ones(smooth_len) / smooth_len
+        gain = np.convolve(gain, kernel, mode='same')
+        gain = np.maximum(gain, np.where(np.abs(up) > ceiling, ceiling / (np.abs(up) + 1e-9), 1.0))
+        up = up * gain
+    return signal.resample_poly(up, 1, 4)[:len(x)]
+
+
+def transient_shaper(x, attack_gain=1.3, sustain_gain=0.85, freq=2500.0):
+    """Transient shaper: boosts the attack, reduces the sustain, in a frequency band around `freq`."""
+    if x.ndim == 2:
+        return np.stack([transient_shaper(x[:, i], attack_gain, sustain_gain, freq) for i in range(x.shape[1])], axis=1)
+    bp_signal = bp(x, freq * 0.5, freq * 2.0)
+    env = np.abs(bp_signal)
+    attack_tc = 0.001
+    release_tc = 0.050
+    a_coef = np.exp(-1 / (attack_tc * SR))
+    r_coef = np.exp(-1 / (release_tc * SR))
+    smoothed = np.zeros_like(env)
+    for i in range(1, len(env)):
+        if env[i] > smoothed[i-1]:
+            smoothed[i] = a_coef * smoothed[i-1] + (1 - a_coef) * env[i]
+        else:
+            smoothed[i] = r_coef * smoothed[i-1] + (1 - r_coef) * env[i]
+    transient = np.maximum(0, np.gradient(smoothed))
+    max_t = np.max(transient)
+    if max_t > 1e-9:
+        transient = transient / max_t
+    gain = attack_gain * transient + sustain_gain * (1 - transient)
+    return x * gain
+
+
 def finish(name, x, peak=0.0, mono=False, tail_fade=0.02, drives=DRIVES):
-    """Pin the file to its locked length, end it on a short fade, normalise to -1 dBFS peak, and keep its loudness
-    within 2 dB of the level the cue sheet was balanced against (a soft clip, only as hard as it needs to be)."""
+    """Pin the file to its locked length, layer foley if mapped, end it on a short fade, remove DC,
+    true-peak limit, normalise to -1 dBFS peak, and keep its loudness within 2 dB of LOCKED."""
     x = np.asarray(x, dtype=np.float64)
     if x.ndim == 1 and not mono:
         x = stereo(x)
@@ -226,8 +330,43 @@ def finish(name, x, peak=0.0, mono=False, tail_fade=0.02, drives=DRIVES):
         x = x[:n]
     else:
         x = np.pad(x, [(0, n - len(x))] + [(0, 0)] * (x.ndim - 1))
+
+    # LAYER FOLEY: mix in a real recorded sample for physical texture.
+    # The foley is mixed BEFORE normalisation, so it becomes part of the sound.
+    # The LOCKED RMS check below keeps the overall loudness within tolerance.
+    foley = get_foley(name, n)
+    if foley is not None:
+        if x.ndim == 2:
+            x[:, 0] += foley
+            if x.shape[1] > 1:
+                x[:, 1] += foley
+        else:
+            x += foley
+
     x = fade(x, 0.0005, tail_fade)
-    x = signal.sosfiltfilt(signal.butter(2, 15, btype='high', fs=SR, output='sos'), x, axis=0)  # no DC offset, no edge step
+
+    # FIX: subtract mean BEFORE high-pass. The old code only high-passed at 15 Hz (67ms time constant),
+    # which is longer than tick files (60ms). For very short files the filter can't remove DC, so
+    # tick_1.wav had a +0.0175 DC offset (audible pop at the start). Subtracting the mean first fixes
+    # this for all files regardless of length.
+    if x.ndim == 2:
+        x = x - x.mean(axis=0, keepdims=True)
+    else:
+        x = x - x.mean()
+
+    # For files longer than 100ms, also apply the 15 Hz high-pass to remove any residual DC drift.
+    # For shorter files (ticks, clicks), the mean subtraction above is sufficient — the Butterworth's
+    # impulse response is longer than the file, so it would reintroduce edge artifacts.
+    if n > int(0.100 * SR):
+        x = signal.sosfiltfilt(signal.butter(2, 15, btype='high', fs=SR, output='sos'), x, axis=0)
+
+    # Transient shaper: sharpen the attack on hits and impacts
+    if name in ('hit_big', 'hit_med', 'hit_small', 'stamp', 'lock', 'pin_land', 'pop', 'click'):
+        x = transient_shaper(x, attack_gain=1.25, sustain_gain=0.88, freq=2500.0)
+
+    # True-peak limiter: prevent inter-sample peaks from clipping on playback
+    x = true_peak_limit(x, LEVEL)
+
     x = x / (np.max(np.abs(x)) + 1e-9) * LEVEL
     target = LOCKED[name]['rms'] - 2.0
     for drive in drives:
