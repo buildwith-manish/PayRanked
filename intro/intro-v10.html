@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PayRanked – Channel Intro v10</title>
 <style>
-@font-face{font-family:'Clash Display';src:url('./fonts/fontshare/clash-display/ClashDisplay-Variable.woff2') format('woff2-variations');font-weight:200 700;font-display:swap}
-@font-face{font-family:'Satoshi';src:url('./fonts/fontshare/satoshi/Satoshi-Variable.woff2') format('woff2-variations');font-weight:300 900;font-display:swap}
+@font-face{font-family:'Clash Display';src:url('/fonts/fontshare/clash-display/ClashDisplay-Variable.woff2') format('woff2-variations');font-weight:200 700;font-display:swap}
+@font-face{font-family:'Satoshi';src:url('/fonts/fontshare/satoshi/Satoshi-Variable.woff2') format('woff2-variations');font-weight:300 900;font-display:swap}
 </style>
 <style>
 :root{--bg:#eef2f8;--fg:#0b1a2e;--mut:#51637a;--card:#fff;--line:#d5deea;--acc:#0fa86a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -70,8 +70,6 @@ label{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center}
 </defs>
 <g id="cam">
 <rect width="1280" height="720" fill="url(#bgG)"/>
-<!-- fade-in from black: covers the first 0.2 s so the animation arrives instead of popping -->
-<rect id="fadein" width="1280" height="720" fill="#000" opacity="1"/>
 <circle id="gE" r="460" fill="url(#glE2)" opacity="0"/>
 <!-- gB rect removed with glB gradient -->
 <rect id="gr" width="1280" height="720" fill="url(#grid)" opacity="0" mask="url(#gm)"/>
@@ -144,7 +142,6 @@ var g=seg(t,0,.5);
 A('gE','opacity',eo3(g)*(.7+.2*Math.exp(-Math.pow((t-1.12)/.2,2))));
 A('gr','opacity',eo3(g));
 A('cam','transform','translate(640 360) scale('+(1+.035*seg(t,0,DUR))+') translate(-640 -360)');
-A('fadein','opacity',1-eo3(seg(t,0,.2)));
 for(var i=0;i<3;i++){var p=eos(seg(t,.1+.07*i,.1+.07*i+.4)),h=Math.max(0,H[i]*p),b=$('b'+i);b.setAttribute('y',360-h);b.setAttribute('height',h)}
 A('drw','stroke-dashoffset',1000*(1-eio(seg(t,.3,.8))));
 var m=eio(seg(t,.7,1.1)),mx=lr(640,L.tcx,m),s=lr(.9,.316,m);
@@ -311,48 +308,7 @@ for(var i=0;i<n;i++){v.setInt16(44+i*4,Math.max(-1,Math.min(1,L[i]))*32767,true)
 var s='',u=new Uint8Array(buf);for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 window.__FPS=60;window.__frames=Math.round(DUR*60);window.__frame=function(n){render(n/60)};window.__render=render;window.__layout=layout;layout();render(0);
 var go=function(){layout();render(0);run(false)};
-var __frameMode=window.location.search.indexOf('frame=')!==-1;
-if(!__frameMode){if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();}
-
-  // === Frame render mode for screenshot automation ===
-  // When ?frame=N is in the URL, render only that frame and DO NOT auto-play.
-  // This lets render-locally.sh capture exact frames via headless Chrome --screenshot.
-  if (window.location.search.indexOf('frame=') !== -1) {
-    var __params = new URLSearchParams(window.location.search);
-    var __frameNum = parseInt(__params.get('frame'), 10);
-    if (!isNaN(__frameNum) && window.__frame && window.__layout) {
-      // Hide UI chrome first so the screenshot is clean
-      var stage = document.querySelector('.stage');
-      if (stage) {
-        stage.style.position = 'fixed';
-        stage.style.top = '0';
-        stage.style.left = '0';
-        stage.style.width = '100vw';
-        stage.style.height = '100vh';
-        stage.style.borderRadius = '0';
-        stage.style.border = 'none';
-      }
-      var nonStage = document.querySelectorAll('main > *:not(.stage)');
-      for (var i = 0; i < nonStage.length; i++) nonStage[i].style.display = 'none';
-      document.body.style.margin = '0';
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.background = '#000';
-      // Wait for fonts, then render the requested frame
-      var __renderFrame = function() {
-        window.__layout();
-        window.__frame(__frameNum);
-        window.__FRAME_READY = true;
-      };
-      if (document.fonts && document.fonts.ready) {
-        Promise.race([
-          document.fonts.ready,
-          new Promise(function(r){ setTimeout(r, 1500); })
-        ]).then(__renderFrame);
-      } else {
-        __renderFrame();
-      }
-    }
-  }
+if(document.fonts&&document.fonts.load){Promise.race([Promise.all([document.fonts.load("700 140px 'Clash Display'"),document.fonts.load("500 140px 'Clash Display'"),document.fonts.ready]),new Promise(function(r){setTimeout(r,1500)})]).then(go)}else go();
 })();
 </script>
 </body>
