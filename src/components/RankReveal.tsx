@@ -88,8 +88,8 @@ export const T_FAST: typeof T = {
   slam: 0,
   fly: sec(0.8),
   name: sec(2.6),
-  bea: sec(4.2),
-  dollars: sec(4.6),  // was sec(6.6): BEA beat shortened, time moved here
+  bea: sec(3.6),     // was 4.2: with dollars at 4.6 the chip had 0.4 s and was still on screen when the count started
+  dollars: sec(5.2),
   fact: sec(8.8),
   panelOut: sec(12.6),
   railOpen: sec(12.8),
@@ -218,7 +218,10 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   // ---- 6-10s BEA score: the one thing on stage ----
   const chipP = (f: number) => tween(f, T.bea + 4, 24, snap);
   const flip = (1 - tween(frame, T.bea + 4, 26, glide)) * 90;
-  const beaOut = tween(frame, T.dollars, 18, exitIn); // leaves as the dollars arrive
+  // BEA exits so that it is fully gone by the time the dollars start (both sit at top:410; overlapping them looked broken)
+  const BEA_EXIT = 18;
+  const beaOutAt = T.dollars - BEA_EXIT;
+  const beaOut = tween(frame, beaOutAt, BEA_EXIT, exitIn);
 
   // ---- 10-15s dollars + coins ----
   const coinCount = ramp(frame, T.dollars, T.dollars + 60, glide) * coinsFor(lead.dollars);
@@ -229,6 +232,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   // with a fact card the dollars step back and the coins sink; without one they hold
   const compact = hasFact ? tween(frame, T.fact, 24, glide) : 0;
   const coinFade = hasFact ? 1 - ramp(frame, T.fact, T.fact + 16, exitIn) : 1;
+  const gainFade = hasFact ? 1 - ramp(frame, T.fact - 6, T.fact + 2, exitIn) : 1;
   const isVersus = versus && !tie;
   const vs = byName(VERSUS_VS);
   const vAt = versusAt(T);
@@ -396,8 +400,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   partially out of its own overflow:hidden box — it was only partially visible. Now rendered
                   at its natural size (MiniGauge renders Gauge at size*2 = 300px svg, viewBox-fit to 150px
                   display) with no clip, so the full semicircle and needle read clearly. */}
-              {frame >= T.bea && frame < T.dollars + 20 && (
-                <MotionBlur dy={-40 * (beaOut - tween(frame - 1, T.dollars, 18, exitIn))} style={{position: 'absolute', left: 0, top: 410, width: 760, opacity: 1 - beaOut, transform: `translateY(${-40 * beaOut}px)`}}>
+              {frame >= T.bea && frame < T.dollars && (
+                <MotionBlur dy={-40 * (beaOut - tween(frame - 1, beaOutAt, BEA_EXIT, exitIn))} style={{position: 'absolute', left: 0, top: 410, width: 760, opacity: 1 - beaOut, transform: `translateY(${-40 * beaOut}px)`}}>
                   <div style={{display: 'flex', alignItems: 'center', gap: 48}}>
                     <MotionBlur dx={90 * (chipP(frame) - chipP(frame - 1)) * -1}>
                       <Glass
@@ -444,7 +448,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     <div>
                       <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? 110 : 128} color={C.mint} glow={14} />
                       {/* follow-through: the gain rises into view once the wheels have settled */}
-                      <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.mint, opacity: 0.9, ...tabular}}>
+                      {/* fades out before the fact card arrives so it never peeks out behind the card */}
+                      <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.mint, opacity: 0.9 * gainFade, ...tabular}}>
                         <MaskLine start={T.dollars + COUNT_DUR - 4} dur={22}>
                           +{fmtUSD(Math.round(lead.extra / 100) * 100)}
                         </MaskLine>
