@@ -12,11 +12,18 @@ const safe = (s: string) => s.replace(/[^a-zA-Z0-9_-]/g, '_');
  * One filmic grade for the whole video, as a single SVG filter: a bright-pass bloom, then an S-curve with lifted teal
  * shadows and warm highlights. Wrap each composition in this once (Root does it) so every shot gets the same look.
  */
-export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({children, dust = true}) => (
+export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({children, dust = true}) => {
+  // Bug fix: the filter ID was hardcoded as "payGrade". In Remotion Studio, multiple Grade
+  // instances render (Video1 + each graded standalone composition), so two <filter id="payGrade">
+  // exist in the same document. The browser resolves url(#payGrade) to the first one, which may
+  // be wrong, causing a white screen. A unique ID per instance fixes this.
+  const uid = useRef(Math.random().toString(36).slice(2, 8));
+  const filterId = `payGrade_${uid.current}`;
+  return (
   <AbsoluteFill style={{isolation: 'isolate', backgroundColor: '#000'}}>
     <svg width={0} height={0} style={{position: 'absolute'}} aria-hidden>
       <defs>
-        <filter id="payGrade" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+        <filter id={filterId} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
           {BLOOM && (
             <>
               {/* bright-pass: keeps only the hot, still-coloured parts */}
@@ -45,10 +52,11 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
         </filter>
       </defs>
     </svg>
-    <AbsoluteFill style={{filter: 'url(#payGrade)'}}>{children}</AbsoluteFill>
+    <AbsoluteFill style={{filter: `url(#${filterId})`}}>{children}</AbsoluteFill>
     {dust && <LensDust />}
   </AbsoluteFill>
-);
+  );
+};
 
 /** Faint out-of-focus dust and two aperture ghosts drifting at different speeds, plus a slow warm light leak. */
 export const LensDust: React.FC = () => {
