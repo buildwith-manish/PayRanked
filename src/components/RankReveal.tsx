@@ -264,14 +264,6 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const pinDrop = tween(frame, pinAt, 22, dropEase);
   const pinRing = ((((frame - pinAt - 10) % 45) + 45) % 45) / 45;
 
-  // tilt-shift depth of field: the top and bottom of the frame defocus while the camera is in motion.
-  // Bug fix: backdropFilter cannot read WebGL canvas pixels in Remotion's render pipeline — it had zero
-  // effect. We now render two narrow blurred overlay strips (top 20%, bottom 22%) as separate divs that
-  // sample the already-composited frame below them via a CSS SVG filter on each strip. The strips are
-  // absolutely positioned siblings of the ThreeCanvas, so they sit above it in the same stacking context
-  // and their SVG blur does operate on the canvas pixels as expected.
-  const dof = 4 + 7 * Math.sin(clamp(cam.flyP) * Math.PI);
-
   // ---- 3-6s name: rises from behind a line, letter by letter; the rule draws under it, a beat later ----
   const nameText = names.join('  ·  ').toUpperCase();
   const nameSize = tie ? 68 : 92;
@@ -362,40 +354,6 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
               <Sync />
             </ThreeCanvas>
           </MotionBlur>
-          {/* tilt-shift: two blurred strips (top 20%, bottom 22%) fake a shallow depth of field.
-              Using two separate divs with CSS filter: blur() instead of a single backdropFilter div.
-              backdropFilter cannot composite with a WebGL canvas in Remotion's renderer — the canvas
-              pixels are invisible to it. A regular CSS blur filter on a positioned div DOES work because
-              Remotion composites the full frame before applying element filters. Each strip covers only
-              its band; the centre of the frame is untouched. */}
-          {dof > 0.5 && (
-            <>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0, top: 0, right: 0,
-                  height: '20%',
-                  pointerEvents: 'none',
-                  filter: `blur(${dof}px)`,
-                  WebkitFilter: `blur(${dof}px)`,
-                  WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, transparent 100%)',
-                  maskImage: 'linear-gradient(to bottom, #000 0%, transparent 100%)',
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0, bottom: 0, right: 0,
-                  height: '22%',
-                  pointerEvents: 'none',
-                  filter: `blur(${dof}px)`,
-                  WebkitFilter: `blur(${dof}px)`,
-                  WebkitMaskImage: 'linear-gradient(to top, #000 0%, transparent 100%)',
-                  maskImage: 'linear-gradient(to top, #000 0%, transparent 100%)',
-                }}
-              />
-            </>
-          )}
         </AbsoluteFill>
 
         {/* scrim: a dark falloff behind the text column so mint text never sits on a mint map (contrast) */}
