@@ -385,7 +385,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   </div>
                   <div style={{marginTop: 18, fontFamily: F.body, fontWeight: 500, fontSize: 44, color: C.muted, ...tabular}}>
                     <MaskLine start={T.bea + 12} dur={20}>
-                      {fmtUSD(SALARY)} ÷ {(lead.rpp / 100).toFixed(3)}
+                      {fmtUSD(SALARY)} ÷ {((lead.rppExact ?? lead.rpp) / 100).toFixed(4)}
                     </MaskLine>
                   </div>
                 </MotionBlur>

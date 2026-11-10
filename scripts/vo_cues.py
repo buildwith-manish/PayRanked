@@ -39,7 +39,7 @@ c = S['countdown']['start']
 out.extend(['', '## Countdown', '',
             'Each reveal: the rank slams, the camera flies in, the name appears, the BEA score, the dollars, then the row locks into the rail.',
             '#1 is a near-tie with #2 and is framed as the top tier ("ranked by index"), not as an outright winner: keep the line',
-            'about it honest (about $130 apart, inside the margin of the data).', '',
+            'about it honest (about $20 apart, effectively tied, inside the margin of the data).', '',
             '| Reveal | Start | Name | BEA score | Dollars | Locks | Ends |', '|---|---|---|---|---|---|---|'])
 rows = [(r['from'], f"{r['label']} {' + '.join(r['names'])}", r) for r in TM['reveals']] + [(b['from'], f"Break: {b['kind']}", b) for b in TM['breaks']]
 for _, label, r in sorted(rows, key=lambda x: x[0]):

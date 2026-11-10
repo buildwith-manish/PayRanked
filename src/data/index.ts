@@ -2,7 +2,10 @@ import raw from './states.json';
 
 export type StateRow = {
   name: string;
+  /** BEA regional price parity as published, one decimal. Drives rank and ties. */
   rpp: number;
+  /** BEA's unrounded index (three decimals, via FRED). Drives dollars when present. Rounds to `rpp`. */
+  rppExact?: number;
   fact?: string;
   factSource?: string;
 };
@@ -35,7 +38,8 @@ const rows = raw as StateRow[];
 const sorted = [...rows].sort((a, b) => a.rpp - b.rpp);
 
 export const STATES: Computed[] = sorted.map((s) => {
-  const dollars = worth(s.rpp);
+  // Dollars use the unrounded index where we have it; rank and ties stay on the published one-decimal `rpp`.
+  const dollars = worth(s.rppExact ?? s.rpp);
   return {
     ...s,
     dollars,

@@ -163,7 +163,7 @@ jobs:
           CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           TITLE: ${{ secrets.YOUTUBE_TITLE || 'What $100,000 Is Really Worth in Every State | PayRanked' }}
-          DESC: ${{ secrets.YOUTUBE_DESC || 'Where does $100,000 go the furthest? We ranked all 50 states by purchasing power. Comment your state below!' }}
+          DESC: ${{ secrets.YOUTUBE_DESC }}
           TAGS: ${{ secrets.YOUTUBE_TAGS || 'salary,states,ranking,cost of living,purchasing power,us states,finance,data visualization,payranked' }}
         run: |
           python3 - <<'PY'
@@ -183,7 +183,9 @@ jobs:
           if not at:
               print("No access token"); exit(1)
           print("Got token")
-          meta = {"snippet":{"title":os.environ['TITLE'],"description":os.environ['DESC'],
+          # The YOUTUBE_DESC secret wins if set; otherwise the description (with sources) lives in video-description.txt.
+          desc = os.environ.get('DESC') or open('video-description.txt', encoding='utf-8').read().strip()
+          meta = {"snippet":{"title":os.environ['TITLE'],"description":desc,
                             "tags":os.environ['TAGS'].split(","),"categoryId":"24"},
                   "status":{"privacyStatus":"private","selfDeclaredMadeForKids":False}}
           r1 = subprocess.run(["curl", "-s", "-i", "-X", "POST",
