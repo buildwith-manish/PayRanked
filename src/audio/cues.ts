@@ -141,6 +141,7 @@ export const shot1Cues = (): Cue[] => {
   k.push(cue('hit_big', S1_SLAM + STRIKE, 1, true));
   k.push(...ticks(S1_SLAM, 24, 8, 0.45));
   k.push(cue('ding_hi', S1_SLAM + 24, 0.4));
+  k.push(cue('swish', S1_SLAM + 20 + 6, 0.3)); // "more buying power than California" rises
   k.push(cue('out_s', REST2_START + 2, 0.4));
   void BRACKET_START;
 
@@ -192,6 +193,44 @@ export const shot3Cues = (): Cue[] => {
   k.push(cue('hit_med', resultDelay + 54, 0.7, true));
   k.push(cue('ding', resultDelay + 54, 0.38));
   k.push(cue('swish_long', resultDelay + 44 + 8, 0.4));
+  k.push(cue('swish', resultDelay + 54 + 6 + 8, 0.26)); // the small footnote line under the result rises
+
+  // EXTEND-1 (20-56 s): the formula steps out, then three beats carry the method: categories, housing, the honesty line
+  k.push(cue('out_m', T3.categories - 8, 0.45)); // formula and footnote leave
+
+  // what BEA measures: title, then six bars rise left to right and each lands on a rung of the ladder
+  k.push(cue('whoosh_s', T3.categories + 2, 0.3));
+  k.push(cue('swish', T3.categories + 8, 0.4));
+  for (let i = 0; i < 6; i++) {
+    const d = T3.categories + 18 + i * 6;
+    k.push(cue('whoosh_xs', d + 2, 0.18));
+    k.push(cue('hit_small', d + 9, i === 0 ? 0.42 : 0.26)); // housing, the big one, lands hardest
+    k.push(cue(`blip_${i}` as SfxName, d + 12, 0.38));
+  }
+  k.push(cue('ding', T3.categories + 18 + 22, 0.3)); // housing bar settles
+  k.push(cue('swish_long', T3.categories + 60 + 8, 0.35)); // "Housing dominates. That's why cheap states feel cheap."
+  k.push(cue('out_m', T3.housing - 14, 0.4));
+
+  // concrete housing example: three bars grow and their values roll up
+  k.push(cue('whoosh_s', T3.housing + 2, 0.3));
+  k.push(cue('swish', T3.housing + 8, 0.4));
+  for (let i = 0; i < 3; i++) {
+    const d = T3.housing + 18 + i * 8;
+    k.push(cue('whoosh_xs', d + 2, 0.2));
+    k.push(cue('hit_small', d + 10, 0.36));
+    k.push(...ticks(d + 4, 50, 8, 0.24, i));
+    k.push(cue(i === 2 ? 'ding_hi' : 'ding', d + 54, i === 2 ? 0.34 : 0.26)); // each value lands
+  }
+  k.push(cue('sink_down', T3.housing + 18 + 16 + 20, 0.24)); // the California bar towers over the rest
+  k.push(cue('swish_long', T3.housing + 80 + 8, 0.35)); // "Same $100K salary, but a California mortgage eats 4x..."
+  k.push(cue('out_m', T3.honesty - 14, 0.4));
+
+  // the honesty line carries the section out
+  k.push(cue('swish_long', T3.honesty + 6, 0.5)); // "Prices, not paychecks."
+  k.push(cue('hit_small', T3.honesty + 24, 0.5)); // the punch on "paychecks"
+  k.push(cue('swish', T3.honesty + 24 + 8, 0.35)); // "Pay gets its own video."
+  k.push(cue('ding', T3.honesty + 24 + 26, 0.28));
+  k.push(cue('out_s', T3.rail - 10, 0.3));
   k.push(cue('out_m', T3.rail - 2, 0.4));
 
   // rail slides in: nine rows trail each other, so nine rising notes
@@ -250,7 +289,10 @@ export const revealCues = (names: string[], rankLabel: string, versus = false): 
   k.push(cue('hit_small', TR.dollars + REVEAL_COUNT, 0.6));
   k.push(cue('ding', TR.dollars + REVEAL_COUNT, 0.45));
   k.push(cue('swish', TR.dollars + REVEAL_COUNT - 4 + 8, 0.35));
-  if (nearTie) k.push(cue('swish', TR.dollars + REVEAL_COUNT + 14 + 6, 0.35)); // the margin over #2 rises
+  if (nearTie) {
+    k.push(cue('swish', TR.dollars + REVEAL_COUNT + 14 + 6, 0.35)); // the margin over #2 rises
+    k.push(cue('swish', TR.dollars + REVEAL_COUNT + 26 + 6, 0.26)); // "Ranked by index. A gap this small..."
+  }
   if (isVersus) {
     // the two bars grow, one after the other, and the second lands as the comparison closes
     const v = versusAt(TR);
@@ -263,6 +305,7 @@ export const revealCues = (names: string[], rankLabel: string, versus = false): 
   // 15-21s: the fact card slides in alone; dollars step back, coins sink
   if (hasFact) {
     k.push(cue('out_xs', TR.fact + 2, 0.35));
+    if (!isVersus) k.push(cue('sink_down', TR.fact + 4, 0.26)); // the coins sink as the dollars step back
     k.push(cue('whoosh_s', TR.fact + 6, 0.5));
     k.push(cue('hit_small', TR.fact + 15, 0.4));
     k.push(cue('swish_long', TR.fact + 12 + 8, 0.42));
@@ -285,7 +328,7 @@ export const revealCues = (names: string[], rankLabel: string, versus = false): 
 };
 
 // =============================================================== Countdown breaks
-export const breakCues = (kind: 'notHere' | 'prices'): Cue[] => {
+export const breakCues = (kind: 'notHere' | 'prices', dur: number): Cue[] => {
   const k: Cue[] = [];
   k.push(cue('out_m', 2, 0.4)); // the last reveal's panel clears
   k.push(cue('whoosh_s', BREAK_BEATS.line1 + 6, 0.4));
@@ -300,6 +343,7 @@ export const breakCues = (kind: 'notHere' | 'prices'): Cue[] => {
     k.push(cue('hit_small', sec(2.4), 0.45));
     k.push(cue('swish', sec(4.6) + 8, 0.3));
   }
+  k.push(cue('out_m', dur - 10 + 2, 0.4)); // the break's text fades out into the next reveal
   return k;
 };
 
@@ -340,6 +384,7 @@ export const shot5Cues = (): Cue[] => {
   k.push(cue('hit_big', T5.bars + 40 + STRIKE, 1, true));
   k.push(...ticks(T5.bars + 40, 34, 10, 0.5));
   k.push(cue('ding_hi', T5.bars + 40 + 34, 0.45));
+  k.push(cue('whoosh_xs', T5.bars + 24, 0.2)); // the dashed reference line draws across
   k.push(cue('out_s', T5.bars + 44, 0.35));
   void ark;
   void cal;
@@ -353,6 +398,7 @@ export const shot5Cues = (): Cue[] => {
 
   // 88s: the nine no-wage-tax states light up west to east, one note each, climbing
   k.push(cue('out_m', T5.lights + 2, 0.4));
+  k.push(cue('whoosh_xs', T5.lights + 8, 0.22)); // the "0 / 9 no state tax on wages" counter drops in
   for (let i = 0; i < NO_WAGE_TAX.length; i++) {
     k.push(cue(`blip_${i}` as SfxName, T5.lights + i * 4 + 3, 0.6));
     k.push(cue(`tick_${i % 3}` as SfxName, T5.lights + 30 + i * 8 + 4, 0.35)); // each name rising into view
@@ -360,11 +406,15 @@ export const shot5Cues = (): Cue[] => {
   // sonar rings on Washington
   [0, 1, 2, 3].forEach((n) => k.push(cue('ping_lo', T5.ring + n * 45, [0.5, 0.4, 0.3, 0.2][n])));
 
-  // 31-44s: three cards, one at a time
-  const cards = [
+  // 31-100s: seven cards, one at a time (EXTEND-3 added cards 4-7; they used to be silent)
+  const cards: {start: number; end: number; words: number[]}[] = [
     {start: T5.card1, end: T5.card2 + sec(0.5), words: [8 + 8, 14 + 8]},
     {start: T5.card2, end: T5.card3 + sec(0.5), words: [8 + 8]},
-    {start: T5.card3, end: -1, words: [8 + 8]},
+    {start: T5.card3, end: T5.card4 + sec(0.5), words: [8 + 8]},
+    {start: T5.card4, end: T5.card5 + sec(0.5), words: []}, // two count-ups instead of a text line (see below)
+    {start: T5.card5, end: T5.card6 + sec(0.5), words: [8 + 8]}, // "No wage tax" rises, the 1.7% rolls up beside it
+    {start: T5.card6, end: T5.card7 + sec(0.5), words: [8 + 8]},
+    {start: T5.card7, end: -1, words: [8 + 8]}, // the last card stays to the end of the shot
   ];
   cards.forEach((c) => {
     k.push(cue('whoosh_s', c.start + 8, 0.5));
@@ -372,6 +422,28 @@ export const shot5Cues = (): Cue[] => {
     c.words.forEach((w, i) => k.push(cue(i === 0 ? 'swish_long' : 'swish', c.start + w, 0.38)));
     if (c.end > 0) k.push(cue('out_s', c.end - 12 + 4, 0.35));
   });
+
+  // card 4: rent comparison. Both numbers roll up on odometer wheels and land one after the other.
+  k.push(...ticks(T5.card4 + 8, 40, 8, 0.28));
+  k.push(...ticks(T5.card4 + 14, 40, 8, 0.22, 1));
+  k.push(cue('sink_down', T5.card4 + 8 + 40, 0.26)); // $3,500 lands: the red one
+  k.push(cue('ding', T5.card4 + 14 + 40, 0.3)); // $800 lands: the cheap one
+  k.push(cue('swish', T5.card4 + 12, 0.24)); // the two captions under the numbers
+
+  // card 5: Texas has no wage tax, and a 1.7% property tax rolls in beside it
+  k.push(...ticks(T5.card5 + 14, 30, 6, 0.28));
+  k.push(cue('swish', T5.card5 + 22, 0.26)); // "Texas headline" / "Property tax, 6th highest"
+  k.push(cue('hit_small', T5.card5 + 14 + 30, 0.36)); // the 1.7% lands
+
+  // card 6: specialists. The negative number sinks; the source line fades in a beat later
+  k.push(cue('sink_down', T5.card6 + 16, 0.28));
+  k.push(cue('swish', T5.card6 + sec(2) + 4, 0.22));
+
+  // card 7: the thesis line gets a proper finish, since it is the end of the section
+  k.push(cue('hit_med', T5.card7 + 14, 0.6, true)); // "Cheap ≠ better."
+  k.push(cue('swish', T5.card7 + sec(2.4) + 4, 0.35)); // "It's just cheaper."
+  k.push(cue('ding', T5.card7 + sec(2.4) + 10, 0.32));
+  k.push(cue('shimmer', T5.card7 + sec(2.4) + 20, 0.28));
   return k;
 };
 
@@ -413,31 +485,56 @@ export const shot6Cues = (): Cue[] => {
 };
 
 /** EXTEND-4: Shot 5.5 Practical Takeaways cues.
- *  Mostly ticks + a hero hit at the hook slam and at the formula reveal. Each profile card gets a whoosh on entrance
- *  and a chip when the body lands. The tease at the end gets a riser and a soft bell. */
+ *  A hero hit on the hook slam and on the formula reveal. Each profile card gets a whoosh on the way in, a tap when it
+ *  settles, a swish for its headline and body, and an exit as the next card takes over. The formula plays as a phrase
+ *  (one blip per piece, like Shot 3's formula) and the tease gets a riser and a soft bell. */
 export const shot55Cues = (): Cue[] => {
   const k: Cue[] = [];
-  // hook slam — hero hit
+  // hook slam — hero hit; the words rise, then leave behind the line before the first card
   k.push(cue('hit_big', T55.hook + 4, 0.9, true));
   k.push(cue('whoosh_xl', T55.hook, 0.5));
-  // profile cards — whoosh on entrance, chip on body landing
-  k.push(cue('whoosh_l', T55.profile1, 0.6));
-  k.push(cue('chip_0', T55.profile1 + 14, 0.5));
-  k.push(cue('whoosh_l', T55.profile2, 0.6));
-  k.push(cue('chip_1', T55.profile2 + 14, 0.5));
-  k.push(cue('whoosh_l', T55.profile3, 0.6));
-  k.push(cue('chip_2', T55.profile3 + 14, 0.5));
-  // formula reveal — hero hit on the $100K count-up start
+  k.push(cue('swish_long', T55.hook + 10, 0.4));
+  k.push(cue('out_m', T55.profile1 - 8, 0.45));
+
+  // profile cards — whoosh on entrance, chip on body landing, headline + body rise, exit as the next one arrives
+  const profiles: {start: number; end: number; chip: SfxName}[] = [
+    {start: T55.profile1, end: T55.profile2, chip: 'chip_0'},
+    {start: T55.profile2, end: T55.profile3, chip: 'chip_1'},
+    {start: T55.profile3, end: T55.formula, chip: 'chip_2'},
+  ];
+  profiles.forEach((p) => {
+    k.push(cue('whoosh_l', p.start, 0.6));
+    k.push(cue(p.chip, p.start + 14, 0.5));
+    k.push(cue('tick_0', p.start + 8, 0.28)); // the label ("REMOTE WORKER" ...) fades in
+    k.push(cue('swish', p.start + 12, 0.38)); // the headline's words rise
+    k.push(cue('hit_small', p.start + 26, 0.34)); // the card settles flat
+    k.push(cue('swish_long', p.start + 22, 0.3)); // the body text fades up
+    k.push(cue('out_m', p.end - 8, 0.5)); // the card leaves
+  });
+
+  // formula reveal — hero hit on the $100K count-up start, then each piece lands on a rung of the ladder
   k.push(cue('hit_med', T55.formula + 6, 0.7, true));
   k.push(cue('riser_short', T55.formula, 0.4));
+  k.push(cue('swish', T55.formula + 4, 0.3)); // "YOUR TURN"
   // ticks for the count-up (40-frame count, ~5 ticks) — explicit SFX names so TypeScript keeps the literal-type check
   const tickSfx: SfxName[] = ['tick_0', 'tick_1', 'tick_2', 'tick_0', 'tick_1'];
   for (let i = 0; i < tickSfx.length; i++) {
     k.push(cue(tickSfx[i], T55.formula + 8 + i * 8, 0.4));
   }
-  // tease — riser + soft bell
+  k.push(cue('blip_1', T55.formula + 14, 0.4)); // ÷
+  k.push(cue('blip_2', T55.formula + 20, 0.42)); // (RPP ÷ 100)
+  k.push(cue('blip_3', T55.formula + 26, 0.44)); // =
+  k.push(cue('blip_5', T55.formula + 33, 0.5)); // "your real buying power" (the amber payoff)
+  k.push(cue('ding', T55.formula + 36, 0.34));
+  k.push(cue('swish_long', T55.formula + 40, 0.32)); // "Plug in your salary and your state's BEA score..."
+  k.push(cue('out_m', T55.tease - 10, 0.45)); // the formula leaves
+
+  // tease — riser + soft bell; "Cities next." and the question under it rise on their own beats
   k.push(cue('riser', T55.tease, 0.4));
+  k.push(cue('swish', T55.tease + 4, 0.35)); // "Cities next."
   k.push(cue('bell_ring', T55.tease + 8, 0.5));
+  k.push(cue('hit_small', T55.tease + 12, 0.38));
+  k.push(cue('swish_long', T55.tease + 20, 0.34)); // "Where does $50K actually go?"
   k.push(cue('shimmer', T55.tease + 18, 0.3));
   return k;
 };
@@ -449,7 +546,7 @@ export const CUES = {
   shot55: shot55Cues(), // EXTEND-4
   shot6: shot6Cues(),
   reveals: timeline.map((t) => revealCues(t.names, t.label, t.versus)),
-  breaks: countdownBreaks.map((b) => breakCues(b.kind)),
+  breaks: countdownBreaks.map((b) => breakCues(b.kind, b.dur)),
 };
 
 /** Master-timeline frames of the big strikes: the music dips around these (see AUDIO.dip* and duck.ts). */
