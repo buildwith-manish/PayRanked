@@ -10,6 +10,7 @@
     "render:half": "remotion render src/index.ts Video1 out/video1-half.mp4 --scale=0.5",
     "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
     "sfx": "python3 scripts/make_sfx.py",
+    "previews": "node scripts/dump-cues.mjs && python3 scripts/make_audio_previews.py",
     "vo-envelope": "python3 scripts/vo_envelope.py",
     "timing": "node scripts/export-timing.mjs",
     "music": "node scripts/export-timing.mjs && python3 scripts/make_music.py",

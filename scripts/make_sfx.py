@@ -4,17 +4,25 @@ PayRanked sound library, synthesised from scratch (no samples, so there is nothi
 
     python3 scripts/make_sfx.py          # writes public/sfx/*.wav and src/audio/manifest.json
 
-Every sound is built the way a sound designer layers it:
-  hits    sub thump (pitch-dropping sine) + body + crack (filtered noise transient) + a short room tail
-  coins   inharmonic metal partials (a real coin is not a clean tone) + a tick + a small bounce
-  whoosh  noise through a bank of band-passes that sweeps in pitch; the louder, faster and brighter the move,
-          the higher the sweep goes and the shorter it is (xs / s / m / l / xl, and out_ versions that fall)
-  ticks   three mechanical variants so a roll never plays the same click twice in a row
-  blips   a pentatonic ladder, used wherever things light up one after another
+Premium pass. Every sound is built the way a sound designer layers it:
+  hits    tuned sub thump (pitch-dropping sine, tuned to D / F / A so it sits under the D-minor music) + mid body
+          + soft-saturated low end + a clean filtered-noise crack + a short room tail that darkens as it decays
+  coins   inharmonic metal partials (highs die fastest) + detuned twin for a slow shimmer + contact tick + a tiny
+          bounce, four pitches taken from D natural minor
+  glass   bells, dings, pings, chips and blips are additive glass tones: stretched partials, a 2-4 ms raised-cosine
+          attack and a smooth decay, all inside D natural minor
+  whoosh  noise through a bank of band-passes that sweeps in pitch, 8 ms fade-in, tapered end, a touch of widening
+  risers  filtered noise + tone gliding D3 -> D6 + sub D1 -> D2, ending on a tiny suck-out right before the hit
+  ticks   three mechanical variants, clicks and pops: mono and dry on purpose
+
+Hits, whooshes, risers and swells are widened (side signal high-passed at 220 Hz, so the bass stays in the middle).
+Every file is normalised to -1 dBFS peak and ends on a short fade.
 
 manifest.json holds, per file, its length and `peak`: the time in seconds of its main impact. The cue sheet uses it
 to start each file early enough that the impact lands exactly on the visual beat (a whoosh starts before the move,
-a riser ends on the hit it builds to).
+a riser ends on the hit it builds to). LOCKED below pins each file's length and impact point to the values the cue
+sheet was built against, so a better-sounding file can never move a cue. The manifest is written from the real
+output and the script stops if it ever disagrees with LOCKED.
 
 Needs numpy and scipy. Deterministic: the same files come out every run.
 """
@@ -26,14 +34,76 @@ import numpy as np
 from scipy import signal
 
 SR = 48000
+LEVEL = 10 ** (-1 / 20)  # -1 dBFS peak
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'public', 'sfx')
 MANIFEST = os.path.join(ROOT, 'src', 'audio', 'manifest.json')
 os.makedirs(OUT, exist_ok=True)
 os.makedirs(os.path.dirname(MANIFEST), exist_ok=True)
 
-rng = np.random.default_rng(20261108)
+# length (s), impact point (s) and loudness (RMS, dBFS, with the file at -1 dBFS peak) of every file, as the cue sheet
+# was built against them. RMS is what keeps the mix balance: cues.ts sets gains relative to these levels.
+LOCKED = {
+    'bell_ring': {'dur': 1.6, 'peak': 0.0, 'rms': -13.4},
+    'blip_0': {'dur': 0.5, 'peak': 0.0, 'rms': -14.8},
+    'blip_1': {'dur': 0.5, 'peak': 0.0, 'rms': -14.9},
+    'blip_2': {'dur': 0.5, 'peak': 0.0, 'rms': -14.7},
+    'blip_3': {'dur': 0.5, 'peak': 0.0, 'rms': -14.7},
+    'blip_4': {'dur': 0.5, 'peak': 0.0, 'rms': -14.6},
+    'blip_5': {'dur': 0.5, 'peak': 0.0, 'rms': -14.8},
+    'blip_6': {'dur': 0.5, 'peak': 0.0, 'rms': -14.6},
+    'blip_7': {'dur': 0.5, 'peak': 0.0, 'rms': -14.7},
+    'blip_8': {'dur': 0.5, 'peak': 0.0, 'rms': -14.7},
+    'chip_0': {'dur': 0.28, 'peak': 0.0, 'rms': -13.9},
+    'chip_1': {'dur': 0.28, 'peak': 0.0, 'rms': -14.0},
+    'chip_2': {'dur': 0.28, 'peak': 0.0, 'rms': -14.2},
+    'click': {'dur': 0.1417, 'peak': 0.0, 'rms': -24.3},
+    'coin_0': {'dur': 0.9, 'peak': 0.0, 'rms': -13.7},
+    'coin_1': {'dur': 0.9, 'peak': 0.0, 'rms': -13.5},
+    'coin_2': {'dur': 0.9, 'peak': 0.0, 'rms': -14.5},
+    'coin_3': {'dur': 0.9, 'peak': 0.0, 'rms': -13.7},
+    'ding': {'dur': 1.6, 'peak': 0.0, 'rms': -9.9},
+    'ding_hi': {'dur': 1.2, 'peak': 0.0, 'rms': -8.8},
+    'gauge_sweep': {'dur': 1.0, 'peak': 0.45, 'rms': -17.4},
+    'glitch': {'dur': 0.5, 'peak': 0.0, 'rms': -8.9},
+    'hit_big': {'dur': 3.279, 'peak': 0.0, 'rms': -10.6},
+    'hit_med': {'dur': 2.1077, 'peak': 0.0, 'rms': -12.7},
+    'hit_small': {'dur': 1.1353, 'peak': 0.0, 'rms': -16.0},
+    'icon_draw': {'dur': 0.32, 'peak': 0.15, 'rms': -17.3},
+    'lock': {'dur': 1.5435, 'peak': 0.0, 'rms': -16.3},
+    'out_m': {'dur': 0.9, 'peak': 0.27, 'rms': -10.2},
+    'out_s': {'dur': 0.5, 'peak': 0.15, 'rms': -9.4},
+    'out_xs': {'dur': 0.22, 'peak': 0.066, 'rms': -7.7},
+    'pin_land': {'dur': 1.3556, 'peak': 0.0, 'rms': -14.7},
+    'ping': {'dur': 1.3, 'peak': 0.0, 'rms': -16.1},
+    'ping_lo': {'dur': 1.3, 'peak': 0.0, 'rms': -14.8},
+    'pop': {'dur': 0.4, 'peak': 0.0, 'rms': -15.5},
+    'reverse_swell': {'dur': 1.1, 'peak': 1.1, 'rms': -8.9},
+    'rise_up': {'dur': 0.9, 'peak': 0.495, 'rms': -11.3},
+    'riser': {'dur': 2.0, 'peak': 2.0, 'rms': -9.4},
+    'riser_short': {'dur': 1.0, 'peak': 1.0, 'rms': -9.1},
+    'seam': {'dur': 0.6, 'peak': 0.57, 'rms': -13.4},
+    'shimmer': {'dur': 2.6, 'peak': 1.0, 'rms': -20.0},
+    'sink_down': {'dur': 1.0, 'peak': 0.0, 'rms': -10.9},
+    'stamp': {'dur': 2.1892, 'peak': 0.0, 'rms': -13.4},
+    'swish': {'dur': 0.24, 'peak': 0.12, 'rms': -8.7},
+    'swish_long': {'dur': 0.55, 'peak': 0.275, 'rms': -9.6},
+    'tick_0': {'dur': 0.06, 'peak': 0.0, 'rms': -15.7},
+    'tick_1': {'dur': 0.06, 'peak': 0.0, 'rms': -15.7},
+    'tick_2': {'dur': 0.06, 'peak': 0.0, 'rms': -16.7},
+    'wave_swell': {'dur': 3.4, 'peak': 1.87, 'rms': -12.7},
+    'whoosh_l': {'dur': 1.4, 'peak': 0.77, 'rms': -11.5},
+    'whoosh_m': {'dur': 0.8, 'peak': 0.464, 'rms': -10.2},
+    'whoosh_s': {'dur': 0.45, 'peak': 0.27, 'rms': -9.0},
+    'whoosh_xl': {'dur': 2.4, 'peak': 1.248, 'rms': -13.0},
+    'whoosh_xs': {'dur': 0.22, 'peak': 0.121, 'rms': -7.6},
+}
+
+rng = np.random.default_rng(20261110)
 lib: dict = {}  # name -> (audio[n] or [n,2], peak seconds)
+
+# D natural minor, the key of the music bed: D E F G A Bb C
+D1, D2, D3, A1, A2, F1, F2, C3 = 36.71, 73.42, 146.83, 55.0, 110.0, 43.65, 87.31, 130.81
 
 
 # ---------------------------------------------------------------- helpers
@@ -55,22 +125,26 @@ def sine(freq, t, phase=0.0):
     return np.sin(2 * np.pi * np.cumsum(f) / SR + phase)
 
 
+def tone(f, t, phase=0.0):
+    return sine(np.full_like(t, f), t, phase)
+
+
 def bp(x, lo, hi, order=2):
     hi = min(hi, SR / 2 * 0.95)
     sos = signal.butter(order, [lo, hi], btype='band', fs=SR, output='sos')
-    return signal.sosfilt(sos, x)
+    return signal.sosfilt(sos, x, axis=0)
 
 
 def lp(x, f, order=2):
-    return signal.sosfilt(signal.butter(order, f, btype='low', fs=SR, output='sos'), x)
+    f = min(f, SR / 2 * 0.95)
+    return signal.sosfilt(signal.butter(order, f, btype='low', fs=SR, output='sos'), x, axis=0)
 
 
 def hp(x, f, order=2):
-    return signal.sosfilt(signal.butter(order, f, btype='high', fs=SR, output='sos'), x)
+    return signal.sosfilt(signal.butter(order, f, btype='high', fs=SR, output='sos'), x, axis=0)
 
 
 def fade(x, a=0.002, b=0.01):
-    n = len(x)
     ia, ib = int(a * SR), int(b * SR)
     x = x.copy()
     shape = (-1, 1) if x.ndim == 2 else (-1,)
@@ -81,14 +155,47 @@ def fade(x, a=0.002, b=0.01):
     return x
 
 
-def room(x, rt=0.9, wet=0.25, bright=5000, pre=0.008):
-    """Short synthetic room: decaying, low-passed noise, different in each ear. Returns stereo."""
+def sat(x, drive=1.6):
+    """Soft saturation: rounds the peaks and adds low odd harmonics, so the low end sounds thick, not just loud."""
+    return np.tanh(drive * x) / np.tanh(drive)
+
+
+def raised(t, atk):
+    """Raised-cosine attack: no click, no slow fade-in."""
+    return 0.5 - 0.5 * np.cos(np.pi * np.clip(t / atk, 0, 1))
+
+
+def _allpass(x, d, g):
+    b = np.zeros(d + 1)
+    a = np.zeros(d + 1)
+    b[0], b[d] = -g, 1.0
+    a[0], a[d] = 1.0, -g
+    return signal.lfilter(b, a, x, axis=0)
+
+
+def widen(x, amt=0.3, lo=220.0):
+    """Stereo width. Mono in: a decorrelated copy (two all-passes) becomes the side signal. Stereo in: the side signal
+    is lifted. Either way the side is high-passed at `lo`, so the bass stays mono and the file folds down cleanly."""
+    if x.ndim == 1:
+        m = x
+        s = hp(_allpass(_allpass(x, int(0.0053 * SR), 0.55), int(0.0117 * SR), 0.5), lo) * amt
+    else:
+        m = (x[:, 0] + x[:, 1]) / 2
+        s = hp((x[:, 0] - x[:, 1]) / 2, lo) * (1 + amt)
+    return np.stack([m + s, m - s], axis=1)
+
+
+def room(x, rt=0.9, wet=0.25, bright=4200, pre=0.008):
+    """Short synthetic room: decaying noise, different in each ear. The tail is a bright part plus a darker, longer
+    part, so it gets softer as it dies (a gentle low-pass that deepens with time). Returns stereo."""
     n = int(rt * 1.4 * SR)
     tt = np.arange(n) / SR
+    tau = rt / 6.9 * 2.2
     out = []
-    for ch in range(2):
-        ir = rng.standard_normal(n) * np.exp(-tt / (rt / 6.9 * 2.2))
-        ir = lp(ir, bright)
+    for _ in range(2):
+        ir = lp(rng.standard_normal(n), bright) * np.exp(-tt / tau)
+        ir += 0.9 * lp(rng.standard_normal(n), 1500) * np.exp(-tt / (tau * 1.7))
+        ir = hp(ir, 140)  # no sub in the reverb: the low end stays tight and in the dry thump
         ir[: int(pre * SR)] = 0
         ir /= np.sqrt(np.sum(ir ** 2)) + 1e-9
         out.append(np.pad(signal.fftconvolve(x, ir), (0, 1))[: len(x) + n])
@@ -100,94 +207,125 @@ def stereo(x):
     return np.stack([x, x], axis=1) if x.ndim == 1 else x
 
 
-def finish(name, x, peak=0.0, level=0.89, mono=False, tail_fade=0.02):
+def _rms_db(x):
+    return 20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9)
+
+
+DRIVES = (None, 1.2, 1.5, 1.9, 2.4)
+NOISY = DRIVES + (3.0, 3.8, 4.6)  # noise-based sounds (whooshes, risers) take a harder soft clip: it just makes noise denser
+
+
+def finish(name, x, peak=0.0, mono=False, tail_fade=0.02, drives=DRIVES):
+    """Pin the file to its locked length, end it on a short fade, normalise to -1 dBFS peak, and keep its loudness
+    within 2 dB of the level the cue sheet was balanced against (a soft clip, only as hard as it needs to be)."""
     x = np.asarray(x, dtype=np.float64)
-    x = np.tanh(x * 1.0) if np.max(np.abs(x)) > 1.6 else x
-    m = np.max(np.abs(x)) + 1e-9
-    x = x / m * level
     if x.ndim == 1 and not mono:
         x = stereo(x)
-    # trim trailing silence (-70 dB) so files stay small
-    env = np.max(np.abs(x), axis=1) if x.ndim == 2 else np.abs(x)
-    idx = np.where(env > 3e-4)[0]
-    end = (idx[-1] + int(0.03 * SR)) if len(idx) else len(x)
-    x = x[: min(len(x), end)]
+    n = int(round(LOCKED[name]['dur'] * SR))
+    if len(x) >= n:
+        x = x[:n]
+    else:
+        x = np.pad(x, [(0, n - len(x))] + [(0, 0)] * (x.ndim - 1))
     x = fade(x, 0.0005, tail_fade)
-    lib[name] = (x, peak)
+    x = signal.sosfiltfilt(signal.butter(2, 15, btype='high', fs=SR, output='sos'), x, axis=0)  # no DC offset, no edge step
+    x = x / (np.max(np.abs(x)) + 1e-9) * LEVEL
+    target = LOCKED[name]['rms'] - 2.0
+    for drive in drives:
+        y = x if drive is None else sat(x / LEVEL, drive) * LEVEL
+        y = y / (np.max(np.abs(y)) + 1e-9) * LEVEL
+        if _rms_db(y) >= target:
+            break
+    lib[name] = (y, peak)
 
 
-def to_mono_if_wide_not_needed(x):
+# ---------------------------------------------------------------- glass tone (bells, dings, pings, chips, blips)
+def glass(f, dur, decay=0.9, atk=0.002, tick=0.0, ratios=(1.0, 2.0, 3.0, 4.2, 5.4), amps=(1.0, 0.34, 0.2, 0.09, 0.045)):
+    """Additive glass tone: slightly stretched partials, the higher ones dying faster, a detuned twin of the
+    fundamental for a slow shimmer, a raised-cosine attack. `tick` adds a barely-there contact tap."""
+    t = t_(dur)
+    x = np.zeros_like(t)
+    for r, a in zip(ratios, amps):
+        x += tone(f * r * (1 + 0.0004 * r), t) * a * expd(t, decay / r ** 0.85)
+    x += 0.32 * tone(f * 1.0025, t, phase=1.3) * expd(t, decay)
+    x *= raised(t, atk)
+    if tick:
+        x += bp(noise(dur), 3500, 11000) * expd(t, 0.003) * tick
     return x
 
 
 # ---------------------------------------------------------------- hits
-def hit(name, big=1.0, dur=2.2, tail=0.9, wet=0.28, sub=(72, 36), crack=1.0, body=1.0, metal=0.0):
-    """Layered impact. big scales the length and weight of the low layers."""
+def hit(name, big=1.0, dur=2.4, tail=1.1, wet=0.28, sub=(D2, D1), crack=1.0, body=1.0, metal=0.0, drive=1.7):
+    """Layered impact. big scales the length and weight of the low layers. sub = (start, end) pitch of the sub drop."""
     t = t_(dur)
-    # 1. sub: sine that drops in pitch, then decays
-    fsub = sub[1] + (sub[0] - sub[1]) * expd(t, 0.06)
-    s = sine(fsub, t) * expd(t, 0.28 * big + 0.08) * 1.2
-    # 2. body: a short thump an octave up, plus filtered noise "boom"
-    b = sine(np.full_like(t, sub[0] * 2.1), t) * expd(t, 0.09 * big) * 0.45 * body
-    b += lp(noise(dur), 220) * expd(t, 0.16 * big) * 1.1 * body
+    # 1. tuned sub: a sine that falls fast from sub[0] to sub[1], then decays
+    fsub = sub[1] + (sub[0] - sub[1]) * expd(t, 0.05)
+    s = sine(fsub, t) * expd(t, 0.30 * big + 0.08) * 1.15
+    s *= np.minimum(1, t / 0.0004)  # no click at sample 0
+    # 2. mid body: an octave up so small speakers still feel it, a band of noise for the "chest", a low boom
+    mid = sine(fsub * 2.0, t) * expd(t, 0.11 * big + 0.03) * 0.42 * body
+    mid += bp(noise(dur), 140, 700) * expd(t, 0.07 * big + 0.035) * 0.9 * body
+    mid += lp(noise(dur), 200) * expd(t, 0.16 * big) * 0.8 * body
+    low = sat(s + mid, drive)  # saturation on the body only, the crack stays clean
     # 3. crack: the transient, so the hit has an edge
-    c = bp(noise(dur), 1800, 9000) * expd(t, 0.012 + 0.006 * big) * 0.9 * crack
-    c += hp(noise(dur), 400) * expd(t, 0.004) * 0.7 * crack
-    # 4. optional metal ring (stamps, locks)
+    c = bp(noise(dur), 1800, 9000) * expd(t, 0.010 + 0.005 * big) * 0.8 * crack
+    c += hp(noise(dur), 500) * expd(t, 0.0035) * 0.55 * crack
+    # 4. optional metal ring (stamps, locks): slightly inharmonic, with a detuned twin
     m = np.zeros_like(t)
     if metal:
         for fr, a, tau in [(1180, 1.0, 0.22), (2630, 0.6, 0.14), (4210, 0.35, 0.09)]:
-            m += sine(np.full_like(t, fr), t) * a * expd(t, tau)
-        m *= 0.35 * metal
-    x = s + b + c + m
-    x = np.tanh(x * 1.3)
-    x[: int(0.0004 * SR)] *= np.linspace(0, 1, int(0.0004 * SR))  # no click at sample 0
-    x = room(x, rt=tail, wet=wet)
-    finish(name, x, peak=0.0)
+            m += (tone(fr, t) + 0.4 * tone(fr * 1.006, t, phase=0.7)) * a * expd(t, tau)
+        m *= 0.3 * metal
+    x = sat(low + c + m, 1.25)  # glue: rounds the crack so it sits on the body instead of sticking out of it
+    x = room(x, rt=tail, wet=wet)  # stereo, tail darkens as it dies
+    x = widen(x, 0.28)
+    finish(name, x, peak=0.0, tail_fade=0.06)
 
 
-hit('hit_big', big=1.0, dur=2.4, tail=1.1, wet=0.3, sub=(76, 34))
-hit('hit_med', big=0.55, dur=1.4, tail=0.7, wet=0.22, sub=(88, 44), crack=0.9)
-hit('hit_small', big=0.22, dur=0.8, tail=0.4, wet=0.14, sub=(120, 70), crack=0.8, body=0.7)
-hit('stamp', big=0.6, dur=1.6, tail=0.6, wet=0.2, sub=(84, 42), metal=1.0)
-hit('lock', big=0.3, dur=1.0, tail=0.5, wet=0.15, sub=(110, 60), crack=1.1, metal=0.7)
+hit('hit_big', big=1.0, dur=2.4, tail=1.1, wet=0.3, sub=(D2, D1))
+hit('hit_med', big=0.55, dur=1.4, tail=0.7, wet=0.22, sub=(F2, F1), crack=0.9)
+hit('hit_small', big=0.22, dur=0.8, tail=0.4, wet=0.14, sub=(C3, D2), crack=0.8, body=0.7)
+hit('stamp', big=0.6, dur=1.6, tail=0.6, wet=0.2, sub=(F2, F1), metal=1.0)
+hit('lock', big=0.3, dur=1.0, tail=0.5, wet=0.15, sub=(A2, A1), crack=1.1, metal=0.7)
 
-
-def chip_variant(name, f=1.0):
+# glass tap: a pitched glass ping on top of a small low thump. Pitches are A6 / C7 / D7 over A2 / C3 / D3.
+for i, (ft, fl) in enumerate([(1760.0, A2), (2093.0, C3), (2349.3, D3)]):
     t = t_(0.28)
-    tap = sine(1900 * f * (1 - 0.35 * (1 - expd(t, 0.01))), t) * expd(t, 0.02)
-    tap += bp(noise(0.28), 2500, 9000) * expd(t, 0.006) * 0.8
-    low = sine(np.full_like(t, 130 * f), t) * expd(t, 0.05) * 1.1
-    ring = sine(np.full_like(t, 3300 * f), t) * expd(t, 0.09) * 0.18
-    finish(name, tap + low + ring, peak=0.0, mono=True)
+    x = glass(ft, 0.28, decay=0.05, atk=0.0008, tick=0.5, ratios=(1.0, 2.0, 2.76, 5.4), amps=(1.0, 0.5, 0.3, 0.12))
+    x += tone(fl, t) * expd(t, 0.05) * 1.0
+    finish(f'chip_{i}', x, peak=0.0, mono=True)
 
-
-for i, f in enumerate([0.94, 1.0, 1.12]):
-    chip_variant(f'chip_{i}', f)
 
 # ---------------------------------------------------------------- coins
-def coin(name, f0, bounce=True):
+def coin(name, f0):
     dur = 0.9
     t = t_(dur)
-    x = np.zeros_like(t)
-    # inharmonic partials, the higher the faster they die
-    for ratio, a, tau in [(1.0, 1.0, 0.20), (2.32, 0.7, 0.13), (4.25, 0.5, 0.08), (6.63, 0.32, 0.05), (9.38, 0.2, 0.03)]:
-        x += sine(np.full_like(t, f0 * ratio), t, phase=rng.uniform(0, 6.28)) * a * expd(t, tau)
-    x += bp(noise(dur), 3000, 11000) * expd(t, 0.004) * 0.9  # the contact tick
-    x += sine(np.full_like(t, 410), t) * expd(t, 0.025) * 0.5  # a dull tap underneath
-    if bounce:
-        d = int(0.062 * SR)
-        x[d:] += 0.38 * x[:-d] * 0.8
-        d2 = int(0.105 * SR)
-        x[d2:] += 0.16 * x[:-d2] * 0.7
+    phases = rng.uniform(0, 6.28, 6)
+
+    def strike(f, short=1.0):
+        y = np.zeros_like(t)
+        # inharmonic partials; the higher the partial the faster it dies (tau ~ 1 / ratio)
+        for k, (ratio, a) in enumerate([(1.0, 1.0), (2.32, 0.7), (4.25, 0.5), (6.63, 0.32), (9.38, 0.2)]):
+            y += tone(f * ratio, t, phases[k]) * a * expd(t, 0.22 / ratio * short)
+        y += 0.5 * tone(f * 1.004, t, phases[5]) * expd(t, 0.22 * short)  # detuned twin, slow beating shimmer
+        return y
+
+    x = strike(f0)
+    x += bp(noise(dur), 3000, 11000) * expd(t, 0.0035) * 0.5  # the contact tick
+    x += tone(380, t) * expd(t, 0.022) * 0.45  # a dull tap underneath
+    # tiny bounce: two small, shorter, slightly flatter strikes
+    for delay, g, ratio in [(0.058, 0.34, 0.99), (0.104, 0.15, 0.975)]:
+        d = int(delay * SR)
+        b = strike(f0 * ratio, 0.5)
+        x[d:] += g * b[:-d]
     finish(name, x, peak=0.0, mono=True)
 
 
-for i, f0 in enumerate([1650, 1900, 2200, 2480]):
+for i, f0 in enumerate([1568.0, 1760.0, 2093.0, 2349.3]):  # G6 A6 C7 D7, so a pour of coins stays in the key
     coin(f'coin_{i}', f0)
 
+
 # ---------------------------------------------------------------- whooshes
-def whoosh(name, dur, f0, f1, peak_at=0.6, width=2.2, bands=30, rise=1.6, fall=2.4, pan=(-0.35, 0.35), gain=1.0, body=0.0):
+def whoosh(name, dur, f0, f1, peak_at=0.6, width=2.2, bands=36, rise=1.6, fall=2.4, pan=(-0.35, 0.35), body=0.0):
     """Noise through a sweeping band-pass bank. f0 -> f1 can fall (out_ versions). peak_at is where it is loudest."""
     t = t_(dur)
     n = len(t)
@@ -206,6 +344,8 @@ def whoosh(name, dur, f0, f1, peak_at=0.6, width=2.2, bands=30, rise=1.6, fall=2
     p = peak_at * dur
     amp = np.where(t < p, (t / p) ** rise, ((dur - t) / (dur - p)) ** fall)
     amp = np.clip(amp, 0, 1)
+    amp *= raised(t, 0.008)  # short fade-in
+    amp *= 1 - raised(t - (dur - 0.02), 0.02)  # clean, tapered end
     x *= amp[:, None]
     # pan across the move
     th = (0.5 + np.linspace(pan[0], pan[1], n) / 2) * np.pi / 2
@@ -214,7 +354,9 @@ def whoosh(name, dur, f0, f1, peak_at=0.6, width=2.2, bands=30, rise=1.6, fall=2
     if body:  # a low rumble under bigger moves
         r = lp(noise(dur), 160) * amp ** 1.5 * body
         x += r[:, None]
-    finish(name, x * gain, peak=peak_at * dur)
+    x = lp(x, max(f0, f1) * 1.5, order=1)  # take the hiss off the top
+    x = widen(x, 0.15)
+    finish(name, x, peak=peak_at * dur, tail_fade=0.012, drives=NOISY)
 
 
 # in: loudest near the end of the move; fast moves are short and bright, slow ones long and low
@@ -227,29 +369,34 @@ whoosh('whoosh_xl', 2.4, 160, 7000, 0.52, body=0.9, pan=(-0.6, 0.6), width=2.6)
 whoosh('out_xs', 0.22, 8000, 2000, 0.3)
 whoosh('out_s', 0.5, 6000, 700, 0.3)
 whoosh('out_m', 0.9, 7000, 400, 0.3, body=0.3)
-whoosh('swish', 0.24, 3000, 8500, 0.5, gain=0.7)
-whoosh('swish_long', 0.55, 2000, 8000, 0.5, gain=0.7)
+whoosh('swish', 0.24, 3000, 8500, 0.5)
+whoosh('swish_long', 0.55, 2000, 8000, 0.5)
+
 
 # ---------------------------------------------------------------- risers and reverses
-def riser(name, dur, f0=250, f1=9000, tone=True, sub=True):
+def riser(name, dur, f0=250, f1=9000, tonal=True, sub=True):
     t = t_(dur)
+    prog = t / dur
     x = np.zeros_like(t)
     src = noise(dur)
-    bands = 26
+    bands = 30
     for k in range(bands):
         fc = f0 * (f1 / f0) ** (k / (bands - 1))
         tk = dur * (k / (bands - 1)) ** 0.8
         g = np.exp(-0.5 * ((t - tk) / (dur * 0.12)) ** 2)
         x += bp(src, fc * 0.7, fc * 1.4) * g
-    x *= (t / dur) ** 2.2
-    if tone:
-        f = 180 * (6 ** (t / dur) ** 1.5)
-        x += 0.45 * sine(f, t) * (t / dur) ** 2.5 + 0.2 * sine(f * 2.01, t) * (t / dur) ** 3
-    if sub:
-        x += 0.8 * sine(40 + 50 * (t / dur) ** 2, t) * (t / dur) ** 1.6
-    x[-int(0.035 * SR):] *= np.linspace(1, 0, int(0.035 * SR)) ** 0.5  # the suck-out right before the hit
-    st = np.stack([x, np.roll(x, 60)], axis=1)
-    finish(name, st, peak=dur, tail_fade=0.01)
+    x *= prog ** 2.2
+    x += lp(hp(noise(dur), 6500), 12000) * prog ** 3.2 * 0.05  # air on top as it opens
+    if tonal:  # glides D3 -> D6, so the riser lands on the key note
+        f = D3 * 8 ** (prog ** 1.5)
+        x += 0.42 * sine(f, t) * prog ** 2.5 + 0.18 * sine(f * 2.0, t) * prog ** 3 + 0.12 * sine(f * 1.003, t) * prog ** 2.5
+    if sub:  # D1 -> D2
+        x += 0.8 * sine(D1 * 2 ** (prog ** 2), t) * prog ** 1.6
+    x *= raised(t, 0.02)  # short fade-in
+    so = int(0.04 * SR)  # the tiny suck-out right before the hit: a smooth dip to almost nothing
+    u = np.linspace(0, 1, so)
+    x[-so:] *= 0.06 + 0.94 * 0.5 * (1 + np.cos(np.pi * u))
+    finish(name, widen(x, 0.35), peak=dur, tail_fade=0.006, drives=NOISY)
 
 
 riser('riser', 2.0)
@@ -261,27 +408,30 @@ def reverse_of(name, src, take):
     n = int(take * SR)
     r = x[:n][::-1].copy()
     r *= np.linspace(0.2, 1, len(r))[:, None] ** 1.5
+    r *= raised(np.arange(len(r)) / SR, 0.015)[:, None]
     finish(name, r, peak=take, tail_fade=0.004)
 
 
 reverse_of('reverse_swell', 'hit_big', 1.1)
 
-# ---------------------------------------------------------------- tonal: gauge, seam, bells, blips
+
+# ---------------------------------------------------------------- tonal: gauge, seam, shimmer, bells, blips
 def gauge_sweep():
     dur = 1.0
     t = t_(dur)
     p = 0.45
     amp = np.where(t < p * dur, (t / (p * dur)) ** 1.6, ((dur - t) / (dur * (1 - p))) ** 2.0)
+    amp *= raised(t, 0.01)
     f = 220 * (7 ** np.clip(t / dur / 0.9, 0, 1) ** 1.2)
-    tone = (signal.sawtooth(2 * np.pi * np.cumsum(f) / SR) * 0.5 + sine(f * 1.005, t) * 0.5)
-    tone = lp(tone, 3200)
-    air = bp(noise(dur), 1500, 7000) * 0.35
-    x = (tone * 0.6 + air) * amp
+    tn = 0.6 * sine(f, t) + 0.18 * sine(f * 2.0, t) + 0.3 * sine(f * 1.004, t)  # smooth, no saw edge
+    tn = lp(tn, 4200)
+    air = bp(noise(dur), 1500, 7000) * 0.3
+    x = (tn * 0.7 + air) * amp
     # faint servo ticks along the sweep
     for k in range(10):
         i = int((0.1 + 0.07 * k) * SR)
-        x[i:i + 300] += np.hanning(300) * 0.08 * np.sign(np.sin(np.arange(300) / 2))
-    finish('gauge_sweep', stereo(x), peak=p * dur)
+        x[i:i + 300] += np.hanning(300) * 0.06 * np.sign(np.sin(np.arange(300) / 2))
+    finish('gauge_sweep', widen(x, 0.2), peak=p * dur)
 
 
 gauge_sweep()
@@ -294,7 +444,8 @@ def seam():
     x = sine(f + 120 * np.sin(2 * np.pi * 38 * t), t) * (t / dur) ** 1.4
     x += bp(noise(dur), 3000, 12000) * (t / dur) ** 2 * 0.4
     x *= np.minimum(1, (dur - t) / 0.05)
-    finish('seam', stereo(x), peak=dur * 0.95)
+    x *= raised(t, 0.01)
+    finish('seam', widen(x, 0.25), peak=dur * 0.95)
 
 
 seam()
@@ -303,27 +454,16 @@ seam()
 def shimmer():
     dur = 2.6
     t = t_(dur)
-    x = hp(noise(dur), 5000) * 0.6
+    x = lp(hp(noise(dur), 5000) * 0.6, 14000)
     x *= (0.6 + 0.4 * np.sin(2 * np.pi * 9 * t)) * np.minimum(1, t / 1.0) ** 1.5 * np.minimum(1, (dur - t) / 0.8)
-    st = np.stack([x, np.roll(x, 90)], axis=1)
-    finish('shimmer', st * 0.5, peak=1.0)
+    finish('shimmer', widen(x * 0.5, 0.5), peak=1.0)
 
 
 shimmer()
 
-
-def bell(name, base, dur=1.5, soft=True, mono=False):
-    t = t_(dur)
-    x = np.zeros_like(t)
-    for ratio, a, tau in [(1.0, 1.0, 0.9), (2.76, 0.5, 0.5), (5.4, 0.28, 0.3), (8.93, 0.14, 0.18)]:
-        x += sine(np.full_like(t, base * ratio), t) * a * expd(t, tau)
-    x *= np.minimum(1, t / (0.004 if soft else 0.001))
-    x += bp(noise(dur), 4000, 12000) * expd(t, 0.004) * 0.25
-    finish(name, x, peak=0.0, mono=mono)
-
-
-bell('ding', 1568, 1.6)
-bell('ding_hi', 2093, 1.2)
+bell_cfg = {'ding': (1567.98, 1.6, 0.6), 'ding_hi': (2093.0, 1.2, 0.45)}  # G6, C7
+for nm, (f, d, dc) in bell_cfg.items():
+    finish(nm, glass(f, d, decay=dc, atk=0.002, tick=0.06), peak=0.0, tail_fade=0.15)
 
 
 def bell_ring():
@@ -335,27 +475,25 @@ def bell_ring():
         i = int(k * 0.11 * SR)
         n = min(len(d), len(out) - i)
         out[i:i + n] += d[:n] * g * np.exp(-k * 0.12)
-    finish('bell_ring', stereo(out), peak=0.0)
+    finish('bell_ring', stereo(out), peak=0.0, tail_fade=0.15)
 
 
 bell_ring()
 
-SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19]  # major pentatonic over two octaves
+SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19]  # C D E G A over two octaves: all inside D natural minor
 for i, semi in enumerate(SCALE):
     f = 523.25 * 2 ** (semi / 12)
-    t = t_(0.5)
-    x = sine(np.full_like(t, f), t) * expd(t, 0.11) + 0.35 * sine(np.full_like(t, f * 2), t) * expd(t, 0.06)
-    x += 0.12 * sine(np.full_like(t, f * 3), t) * expd(t, 0.04)
-    x *= np.minimum(1, t / 0.003)
-    x += bp(noise(0.5), 3000, 9000) * expd(t, 0.003) * 0.15
-    finish(f'blip_{i}', x, peak=0.0, mono=True)
+    x = glass(f, 0.5, decay=0.13, atk=0.003, ratios=(1.0, 2.0, 3.0, 4.2), amps=(1.0, 0.3, 0.1, 0.04))
+    finish(f'blip_{i}', x, peak=0.0, mono=True, tail_fade=0.06)
 
-# ---------------------------------------------------------------- ticks (odometer, UI)
+# ---------------------------------------------------------------- ticks (odometer, UI): mono and dry
 for i, (f, tau) in enumerate([(2300, 0.006), (1700, 0.007), (2900, 0.005)]):
     t = t_(0.06)
-    x = sine(np.full_like(t, f), t) * expd(t, tau) + bp(noise(0.06), 1000, 7000) * expd(t, 0.003) * 1.0
-    x += sine(np.full_like(t, 800 + 100 * i), t) * expd(t, 0.012) * 0.5
+    x = tone(f, t) * expd(t, tau) + bp(noise(0.06), 1000, 7000) * expd(t, 0.003) * 1.0
+    x += tone(800 + 100 * i, t) * expd(t, 0.012) * 0.5
+    x[:12] *= np.linspace(0, 1, 12)  # 0.25 ms, no click at sample 0
     finish(f'tick_{i}', x, peak=0.0, mono=True)
+
 
 # ---------------------------------------------------------------- map, pin, rise and sink
 def rise_up():
@@ -364,17 +502,17 @@ def rise_up():
     p = 0.55
     amp = np.where(t < p * dur, (t / (p * dur)) ** 1.8, expd(t - p * dur, 0.12))
     f = 38 + 85 * (t / dur) ** 1.3
-    x = sine(f, t) * amp * 1.1 + lp(noise(dur), 300) * amp * 0.5
-    finish('rise_up', stereo(x), peak=p * dur)
+    x = sine(f, t) * amp * 1.1 + 0.25 * sine(f * 2, t) * amp + lp(noise(dur), 300) * amp * 0.5
+    finish('rise_up', widen(sat(x * 0.8, 1.3), 0.2), peak=p * dur)
 
 
 def sink_down():
     dur = 1.0
     t = t_(dur)
     f = 40 + 110 * expd(t, 0.22)
-    x = sine(f, t) * expd(t, 0.4) * 1.0 + lp(noise(dur), 260) * expd(t, 0.15) * 0.5
+    x = sine(f, t) * expd(t, 0.28) * 1.0 + 0.2 * sine(f * 2, t) * expd(t, 0.2) + lp(noise(dur), 260) * expd(t, 0.15) * 0.5
     x *= np.minimum(1, t / 0.01)
-    finish('sink_down', stereo(x), peak=0.0)
+    finish('sink_down', widen(sat(x * 0.8, 1.3), 0.2), peak=0.0, tail_fade=0.1)
 
 
 rise_up()
@@ -384,27 +522,31 @@ sink_down()
 def pin_land():
     t = t_(0.7)
     x = sine(120 * (1 + 0.6 * expd(t, 0.03)), t) * expd(t, 0.09) * 1.2
-    x += sine(np.full_like(t, 1100), t) * expd(t, 0.2) * 0.35 + sine(np.full_like(t, 2400), t) * expd(t, 0.1) * 0.2
+    x += tone(1100, t) * expd(t, 0.2) * 0.35 + tone(2400, t) * expd(t, 0.1) * 0.2
     x += bp(noise(0.7), 2000, 8000) * expd(t, 0.008) * 0.6
-    finish('pin_land', room(x, rt=0.5, wet=0.15), peak=0.0)
+    x = sat(x * 0.8, 1.3)
+    finish('pin_land', widen(room(x, rt=0.5, wet=0.15), 0.2), peak=0.0, tail_fade=0.04)
 
 
 pin_land()
 
 
 def ping(name, f, dur=1.3):
-    t = t_(dur)
-    x = sine(np.full_like(t, f), t) * expd(t, 0.22) * 0.9 + sine(np.full_like(t, f * 2.01), t) * expd(t, 0.12) * 0.25
-    x *= np.minimum(1, t / 0.004)
-    out = x.copy()
-    for k, g in enumerate([0.45, 0.25, 0.12]):  # sonar echoes
+    x = glass(f, dur, decay=0.25, atk=0.004, ratios=(1.0, 2.0), amps=(0.9, 0.22))
+    left, right = 0.8 * x, 0.8 * x
+    for k, g in enumerate([0.45, 0.25, 0.12]):  # sonar echoes, darker each time, bouncing left and right
         d = int((0.21 + 0.18 * k) * SR)
-        out[d:] += g * x[:-d]
-    finish(name, stereo(out), peak=0.0)
+        echo = lp(x[:-d], 5500 - 1300 * k) * g
+        if k % 2 == 0:
+            right[d:] += echo
+        else:
+            left[d:] += echo
+    finish(name, np.stack([left, right], axis=1), peak=0.0, tail_fade=0.1)
 
 
-ping('ping', 1250)
-ping('ping_lo', 880)
+ping('ping', 1174.66)  # D6
+ping('ping_lo', 880.0)  # A5
+
 
 # ---------------------------------------------------------------- glitch, click, pop, draw, wave
 def glitch():
@@ -414,8 +556,8 @@ def glitch():
     seg = np.round(seg * 4) / 4  # bit-crush
     f = 5000 * expd(t, 0.09) + 150
     x = (seg * 0.6 + sine(f, t) * 0.7) * expd(t, 0.12)
-    x += sine(55 * (1 + expd(t, 0.05)), t) * expd(t, 0.3) * 1.2
-    finish('glitch', stereo(x), peak=0.0)
+    x += sine(55 * (1 + expd(t, 0.05)), t) * expd(t, 0.2) * 1.2
+    finish('glitch', stereo(x), peak=0.0, tail_fade=0.1)
 
 
 glitch()
@@ -423,7 +565,7 @@ glitch()
 
 def mouse_click():
     t = t_(0.2)
-    x = bp(noise(0.2), 1500, 9000) * expd(t, 0.003) * 1.0 + sine(np.full_like(t, 3400), t) * expd(t, 0.004) * 0.6
+    x = bp(noise(0.2), 1500, 9000) * expd(t, 0.003) * 1.0 + tone(3400, t) * expd(t, 0.004) * 0.6
     up = np.zeros_like(x)
     d = int(0.085 * SR)
     up[d:] = 0.45 * x[:-d]
@@ -434,6 +576,7 @@ def pop():
     t = t_(0.4)
     f = 380 + 700 * (1 - expd(t, 0.03))
     x = sine(f, t) * expd(t, 0.07) * 1.0 + sine(f * 2, t) * expd(t, 0.04) * 0.3
+    x[:12] *= np.linspace(0, 1, 12)
     finish('pop', x, peak=0.0, mono=True)
 
 
@@ -456,18 +599,19 @@ def wave_swell():
     t = t_(dur)
     p = 0.55
     amp = np.where(t < p * dur, (t / (p * dur)) ** 1.5, ((dur - t) / (dur * (1 - p))) ** 1.6)
-    low = sine(55 + 20 * (t / dur), t) * 0.9 + lp(noise(dur), 420) * 0.7
+    low = sine(A1 + (D2 - A1) * (t / dur), t) * 0.9 + lp(noise(dur), 420) * 0.7
+    pad = 0.12 * (tone(D3, t) + 0.8 * tone(D3 * 1.5, t, phase=0.9) + 0.5 * tone(D3 * 2.003, t))  # open fifth on D
     air = bp(noise(dur), 800, 5000) * 0.25
-    x = (low + air) * amp
-    finish('wave_swell', stereo(x), peak=p * dur)
+    x = (low + pad + air) * amp
+    finish('wave_swell', widen(x, 0.4), peak=p * dur, tail_fade=0.03)
 
 
 wave_swell()
 
+
 # ---------------------------------------------------------------- write
 def write_wav(path, x):
-    pcm = np.clip(x, -1, 1)
-    pcm = (pcm * 32767).astype('<i2')
+    pcm = (np.clip(x, -1, 1) * 32767).astype('<i2')
     ch = 1 if pcm.ndim == 1 else pcm.shape[1]
     with wave.open(path, 'wb') as w:
         w.setnchannels(ch)
@@ -476,10 +620,15 @@ def write_wav(path, x):
         w.writeframes(pcm.tobytes())
 
 
+assert set(lib) == set(LOCKED), f'sound set changed: {sorted(set(lib) ^ set(LOCKED))}'
+
 manifest = {}
 for name, (x, peak) in sorted(lib.items()):
     write_wav(os.path.join(OUT, f'{name}.wav'), x)
     manifest[name] = {'dur': round(len(x) / SR, 4), 'peak': round(peak, 4)}
+    # the cue sheet was built against these: the manifest is written from the real output, and must agree
+    assert abs(manifest[name]['dur'] - LOCKED[name]['dur']) < 1e-3, (name, manifest[name], LOCKED[name])
+    assert abs(manifest[name]['peak'] - LOCKED[name]['peak']) < 1e-3, (name, manifest[name], LOCKED[name])
 
 with open(MANIFEST, 'w') as f:
     json.dump(manifest, f, indent=1, sort_keys=True)
