@@ -46,7 +46,9 @@ export const Glass: React.FC<{
         background: `linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.10) 38%, ${tint}00 62%, ${tint}99 100%)`,
         WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
         WebkitMaskComposite: 'xor',
-        mask: 'linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)',
+        // NOTE: 'mask' with the 'exclude' keyword is NOT supported in Chromium (the engine Remotion
+        // renders with). Using it alongside the -webkit variant caused the rim to render as a filled
+        // opaque rectangle instead of a transparent ring. The -webkit version with 'xor' is sufficient.
         pointerEvents: 'none',
       }}
     />

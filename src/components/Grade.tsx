@@ -1,4 +1,4 @@
-import React, {useId, useMemo} from 'react';
+import React, {useId, useMemo, useRef} from 'react';
 import {AbsoluteFill, random} from 'remotion';
 import {H, W} from '../theme';
 import {useDesignFrame} from '../clock';
@@ -108,7 +108,12 @@ export const LensDust: React.FC = () => {
  */
 export const Aberration: React.FC<{at: number[]; peak?: number; children: React.ReactNode}> = ({at, peak = 9, children}) => {
   const f = useDesignFrame();
-  const id = safe('ca' + useId());
+  // Bug fix: React's useId() produces IDs like ':r0:' which, after safe()-sanitising to '_r0_',
+  // collide when multiple Aberration instances render in the same frame (e.g. Shot1 + RankReveal
+  // both use Aberration). A stable random token stored in a ref makes every instance unique for
+  // the lifetime of the component, without breaking Remotion's deterministic per-frame rendering.
+  const uid = useRef(Math.random().toString(36).slice(2, 8));
+  const id = safe('ca' + uid.current + useId());
   let amt = 0;
   for (const a of at) if (f >= a && f < a + 14) amt += peak * Math.exp(-(f - a) / 4);
   if (amt < 0.4) return <AbsoluteFill>{children}</AbsoluteFill>;

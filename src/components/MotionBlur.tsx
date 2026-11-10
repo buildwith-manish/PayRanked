@@ -1,4 +1,4 @@
-import React, {useId} from 'react';
+import React, {useId, useRef} from 'react';
 
 import {blurLength} from '../motion';
 import {useDesignFrame} from '../clock';
@@ -19,7 +19,12 @@ export const MotionBlur: React.FC<{
   style?: React.CSSProperties;
   children?: React.ReactNode;
 }> = ({dx = 0, dy = 0, shutter = 0.5, cap = 60, style, children}) => {
-  const id = safeId(useId());
+  // Bug fix: safeId(useId()) alone can collide — React's ':r0:' → 'mb_r0_', and multiple
+  // MotionBlur instances in the same frame (e.g. the dozen bars in Shot3 or the coin stacks)
+  // end up with the same sanitised ID, so the wrong filter is applied to the wrong element.
+  // A stable random uid from useRef makes every instance unique for its lifetime.
+  const uid = useRef(Math.random().toString(36).slice(2, 8));
+  const id = safeId(uid.current + useId());
   const bx = blurLength(dx, shutter, cap);
   const by = blurLength(dy, shutter, cap);
   if (bx === 0 && by === 0) return <div style={style}>{children}</div>;
