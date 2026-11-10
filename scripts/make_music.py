@@ -504,6 +504,43 @@ def shot5():
                 arp(t, b, step=4, g=0.17 * fade)
 
 
+def shot55():
+    """Practical takeaways: a warm, settled groove that carries the three profile cards, then lifts for the
+    formula reveal, then settles back for the tease. Same key (D minor), same tempo (96 BPM)."""
+    t0, dur = S['shot55']['start'], S['shot55']['dur']
+    e = TM['shot55']
+    n = bars_in(dur)
+    for b in range(n):
+        loc = b * BAR
+        t = t0 + loc
+        pad_bar(t, b, 0.7)
+
+        if loc < e['profile1']:  # hook: sparse, just pad + a single bell
+            add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.25, pan=-0.2)
+        elif loc < e['profile2']:  # profile 1 (remote worker): warm groove
+            groove(t, b, 3, 0.9)
+            if b % 2 == 0:
+                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.22, pan=0.3)
+        elif loc < e['profile3']:  # profile 2 (retiree): same groove, different chord
+            groove(t, b, 3, 0.9)
+            if b % 2 == 0:
+                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.22, pan=-0.3)
+        elif loc < e['formula']:  # profile 3 (early career): same groove
+            groove(t, b, 3, 0.9)
+            if b % 2 == 0:
+                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.22, pan=0.3)
+        elif loc < e['tease']:  # formula reveal: lift — add arps + a swell
+            groove(t, b, 4, 1.0)
+            arp(t, b, step=2, g=0.28)
+            if loc + BAR > e['tease']:
+                add_swell(t, BAR, 0.15)
+        else:  # tease: settle back, pad + arps, ring out
+            fade = 1 - 0.4 * min(1.0, (loc - e['tease']) / max(1.0, dur - e['tease']))
+            arp(t, b, step=4, g=0.18 * fade)
+            if b % 2 == 0:
+                add_bell(t, D3 + 24 + chord(b)[0] + 7, 0.2 * fade, pan=-0.25)
+
+
 def shot6():
     t0, dur = S['shot6']['start'], S['shot6']['dur']
     e = TM['shot6']
@@ -547,6 +584,7 @@ def main():
     end = countdown()  # reveal and break lengths come from scripts/timing.json
     assert abs(end - S['shot5']['start']) < 1e-6, end
     shot5()
+    shot55()
     shot6()
 
     print('sidechain + room...')
