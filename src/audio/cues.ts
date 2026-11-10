@@ -219,7 +219,12 @@ export const revealCues = (names: string[], rankLabel: string, versus = false): 
 
   // 0-1s: the rank slams (a strike), then the camera winds back and whips in
   k.push(cue('hit_big', TR.slam + STRIKE + 1, 1, true));
-  k.push(cue('whoosh_l', TR.fly + 26, 0.75));
+  // the camera's speed comes from the `anticipate` curve over 2 s: a small pull-back (an inhale), a whip that peaks 17
+  // frames in (it was 26, on the way down), then a smaller ring as it settles. Each sound sits on its own part of that.
+  k.push(cue('whoosh_xs', TR.fly + 4, 0.22)); // the pull-back
+  k.push(cue('whoosh_l', TR.fly + 17, 0.75)); // the whip, its peak on the camera's top speed
+  k.push(cue('whoosh_m', TR.fly + 19, 0.3)); // air under the whip, so the zoom has weight and not only blur
+  k.push(cue('whoosh_s', TR.fly + 38, 0.2)); // the overshoot ringing back
   k.push(cue('out_xs', sec(1.1) + 4, 0.3)); // the rail folds to a strip
 
   // the state lifts out of the map, the pin falls with one bounce and rings
