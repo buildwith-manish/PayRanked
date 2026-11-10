@@ -115,6 +115,10 @@
   "dur": 0.5,
   "peak": 0.15
  },
+ "out_soft": {
+  "dur": 0.6,
+  "peak": 0.18
+ },
  "out_xs": {
   "dur": 0.22,
   "peak": 0.066
@@ -175,6 +179,18 @@
   "dur": 0.55,
   "peak": 0.275
  },
+ "tap_0": {
+  "dur": 0.12,
+  "peak": 0.0
+ },
+ "tap_1": {
+  "dur": 0.12,
+  "peak": 0.0
+ },
+ "tap_2": {
+  "dur": 0.12,
+  "peak": 0.0
+ },
  "tick_0": {
   "dur": 0.06,
   "peak": 0.0
@@ -195,11 +211,35 @@
   "dur": 1.4,
   "peak": 0.77
  },
+ "whoosh_l_b": {
+  "dur": 1.4,
+  "peak": 0.77
+ },
+ "whoosh_l_c": {
+  "dur": 1.4,
+  "peak": 0.77
+ },
  "whoosh_m": {
   "dur": 0.8,
   "peak": 0.464
  },
+ "whoosh_m_b": {
+  "dur": 0.8,
+  "peak": 0.464
+ },
+ "whoosh_m_c": {
+  "dur": 0.8,
+  "peak": 0.464
+ },
  "whoosh_s": {
+  "dur": 0.45,
+  "peak": 0.27
+ },
+ "whoosh_s_b": {
+  "dur": 0.45,
+  "peak": 0.27
+ },
+ "whoosh_s_c": {
   "dur": 0.45,
   "peak": 0.27
  },

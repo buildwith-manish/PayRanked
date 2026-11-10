@@ -87,6 +87,18 @@ LOCKED = {
     'sink_down': {'dur': 1.0, 'peak': 0.0, 'rms': -10.9},
     'stamp': {'dur': 2.1892, 'peak': 0.0, 'rms': -13.4},
     'swish': {'dur': 0.24, 'peak': 0.12, 'rms': -8.7},
+    # softer, darker alternates of the movement sounds (rotated by the cue sheet so one whoosh never plays 30 times in a row)
+    # and short muted taps that stand in for the swish under text and cards
+    'whoosh_s_b': {'dur': 0.45, 'peak': 0.27, 'rms': -10.0},
+    'whoosh_s_c': {'dur': 0.45, 'peak': 0.27, 'rms': -10.0},
+    'whoosh_m_b': {'dur': 0.8, 'peak': 0.464, 'rms': -11.2},
+    'whoosh_m_c': {'dur': 0.8, 'peak': 0.464, 'rms': -11.2},
+    'whoosh_l_b': {'dur': 1.4, 'peak': 0.77, 'rms': -12.5},
+    'whoosh_l_c': {'dur': 1.4, 'peak': 0.77, 'rms': -12.5},
+    'out_soft': {'dur': 0.6, 'peak': 0.18, 'rms': -13.0},
+    'tap_0': {'dur': 0.12, 'peak': 0.0, 'rms': -17.0},
+    'tap_1': {'dur': 0.12, 'peak': 0.0, 'rms': -17.0},
+    'tap_2': {'dur': 0.12, 'peak': 0.0, 'rms': -17.0},
     'swish_long': {'dur': 0.55, 'peak': 0.275, 'rms': -9.6},
     'tick_0': {'dur': 0.06, 'peak': 0.0, 'rms': -15.7},
     'tick_1': {'dur': 0.06, 'peak': 0.0, 'rms': -15.7},
@@ -578,6 +590,30 @@ whoosh('out_s', 0.5, 6000, 700, 0.3)
 whoosh('out_m', 0.9, 7000, 400, 0.3, body=0.3)
 whoosh('swish', 0.24, 3000, 8500, 0.5)
 whoosh('swish_long', 0.55, 2000, 8000, 0.5)
+
+# Softer alternates: lower top end (less hiss), different sweep and pan direction, so repeated moves do not sound identical.
+# Same length and impact point as the parent, so a cue can swap between them without moving.
+whoosh('whoosh_s_b', 0.45, 800, 4800, 0.6, pan=(0.35, -0.35))
+whoosh('whoosh_s_c', 0.45, 1100, 5400, 0.6, pan=(-0.15, 0.5))
+whoosh('whoosh_m_b', 0.8, 420, 5200, 0.58, body=0.25, pan=(0.4, -0.4))
+whoosh('whoosh_m_c', 0.8, 600, 6000, 0.58, body=0.3, pan=(-0.5, 0.2))
+whoosh('whoosh_l_b', 1.4, 260, 6000, 0.55, body=0.55, pan=(0.5, -0.5))
+whoosh('whoosh_l_c', 1.4, 340, 7000, 0.55, body=0.5, pan=(-0.6, 0.3))
+# a darker, quieter departure for the few things that still leave with a sound
+whoosh('out_soft', 0.6, 3500, 450, 0.3, body=0.1, width=2.6)
+
+
+def tap(name, f, dur=0.12):
+    """A muted, rounded tap: a short low sine that decays fast plus a soft filtered click. Tactile, not airy."""
+    t = t_(dur)
+    body = sine(f, t) * expd(t, 0.03)
+    click = lp(noise(dur), 2200) * expd(t, 0.006) * 0.35
+    finish(name, body + click, peak=0.0, tail_fade=0.03)
+
+
+tap('tap_0', 190.0)
+tap('tap_1', 232.0)
+tap('tap_2', 276.0)
 
 
 # ---------------------------------------------------------------- risers and reverses
