@@ -15,7 +15,8 @@ import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
 import {C, FPS, H, W} from './theme';
 import {toReal} from './clock';
-import {COUNTDOWN_TOTAL, START, timeline} from './timeline';
+import {Break} from './components/Break';
+import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
 
@@ -23,8 +24,14 @@ const Countdown: React.FC = () => (
   <AbsoluteFill>
     {timeline.map((t, i) => (
       <Sequence key={t.label} from={toReal(t.from)} durationInFrames={toReal(t.dur)} name={`${t.label} ${t.names.join(' + ')}`}>
-        <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} />
+        <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} />
         <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
+      </Sequence>
+    ))}
+    {breaks.map((b, i) => (
+      <Sequence key={b.kind} from={toReal(b.from)} durationInFrames={toReal(b.dur)} name={`Break ${b.kind}`}>
+        <Break kind={b.kind} rail={b.rail} durationInFrames={b.dur} />
+        <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />
       </Sequence>
     ))}
   </AbsoluteFill>
@@ -83,17 +90,22 @@ const GradedShot6 = graded(Shot6, START.shot6, CUES.shot6);
 const GradedCountdown = graded(Countdown, START.shot4); // the reveals carry their own cues
 const GradedReveals = timeline.map((_, i) => graded(RankReveal, START.shot4 + timeline[i].from, CUES.reveals[i]));
 
+const GradedBreaks = breaks.map((b, i) => graded(Break, START.shot4 + b.from, CUES.breaks[i]));
+
 const common = {width: W, height: H, fps: FPS};
 
 export const Root: React.FC = () => (
   <>
-    <Composition id="Video1" component={Video1} durationInFrames={toReal(16200)} {...common} />
+    <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
     <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
     <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
     <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
     <Composition id="Shot4-Countdown" component={GradedCountdown} durationInFrames={toReal(COUNTDOWN_TOTAL)} {...common} />
     <Composition id="Shot5-RealityCheck" component={GradedShot5} durationInFrames={toReal(SHOT5_FRAMES)} {...common} />
     <Composition id="Shot6-Outro" component={GradedShot6} durationInFrames={toReal(SHOT6_FRAMES)} {...common} />
+    {breaks.map((b, i) => (
+      <Composition key={b.kind} id={`Break-${b.kind}`} component={GradedBreaks[i]} durationInFrames={toReal(b.dur)} {...common} defaultProps={{kind: b.kind, rail: b.rail, durationInFrames: b.dur}} />
+    ))}
     {timeline.map((t, i) => (
       <Composition
         key={t.label}
@@ -101,7 +113,7 @@ export const Root: React.FC = () => (
         component={GradedReveals[i]}
         durationInFrames={toReal(t.dur)}
         {...common}
-        defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore}}
+        defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore, fast: t.fast}}
       />
     ))}
   </>

@@ -13,30 +13,37 @@ import {MotionBlur} from '../components/MotionBlur';
 import {Flash, Letters, SourceTag} from '../components/common';
 import {MaskWords} from '../components/MaskText';
 import {byName, fmtUSD, gap, SALARY} from '../data';
+import {SHOT_SECONDS} from '../timeline';
 import {glide, ramp, roll, slam, snap, tween} from '../motion';
 import {C, F, H, W, clamp, mix, sec} from '../theme';
 import {K, useDesignFrame} from '../clock';
 
-export const SHOT1_FRAMES = sec(30);
+export const SHOT1_FRAMES = sec(SHOT_SECONDS.shot1);
 
 export const LX = 480; // centre of the left half
 export const RX = 1440; // centre of the right half
-export const SEAM_START = 2; // a seam draws down the black frame, then the states land on it
+export const SEAM_START = 2; // a seam draws down the black frame, then California lands on it
 export const SHAPE_START = 18;
-export const COUNT_START = 30; // the payoff: both numbers roll to their result straight away
+export const COUNT_START = 30; // California's number rolls straight away
 export const COUNT_DUR = 60;
-export const HEAD_START = 78; // the claim, in words, rises as the first number brakes (done by about 4s)
-export const EXPLAIN_START = sec(6.5); // then the one line that explains it
-export const SLAM = sec(14) + 24; // bracket draws first, then the gap slams in
+export const HEAD_START = sec(2.2); // "$100,000 in California feels like $90,300"
+export const EXPLAIN_START = sec(3.4); // "Same $100,000 salary. Different prices."
+export const HEAD2_START = sec(4.8); // "One state does the opposite."
+export const BRACKET_START = sec(6); // the bracket draws, then the gap slams in
+export const SLAM = BRACKET_START + 24;
+export const REST_START = sec(5.6); // California and the "?" step back so the gap is the only bright thing
+export const REST2_START = sec(9.2); // everything but the chips steps back
+export const CHIPS_START = sec(10);
 
 /** Value on a card: 0 to the result in one roll. A pure function of the frame so the odometer can also be given last frame's value, for the blur on its fast wheels. */
 export const valueAt = (f: number, target: number, startAt: number) => target * tween(f, startAt, COUNT_DUR, roll);
 
 /**
- * Payoff first, then the reason. 0-5s: the states land and climb or sink, both numbers roll to their result and the
- * claim is written across the top ("$115,100 in Arkansas feels bigger than $90,300 in California"). 6.5-13s: one quiet
- * line says why (same salary, different prices). 14-20s: everything steps back so the gap is the only bright thing
- * on screen. 20-30s: the chips, on a quiet frame. Nothing from the gap onward moved.
+ * A question, not an answer (15 s; it was 30 s and named the winner at second 3, which spent the countdown).
+ * 0-4s: California lands on the right and its number rolls down to $90,300 (costly, red); the left half is a "?".
+ * 2-6s: the claim and the one-line reason. 5-6.5s: "One state does the opposite." 6-10s: the gap slams in alone,
+ * about $25K more than California, and the winner stays hidden. 10-15s: three chips close the door on the obvious
+ * guesses (Texas, Florida: neither is in the top 10) and promise the ranked list.
  * Accent rule: mint and red are one semantic pair (cheap and costly) and only exist while the states are the
  * subject; the gap is amber on its own; the chips are neutral except the last.
  */
@@ -76,15 +83,36 @@ const Card: React.FC<{side: -1 | 1; target: number; startAt: number}> = ({side, 
   );
 };
 
+/** The left half: the winner's number, withheld. Same glass card, same place as Card, digits replaced by question marks. */
+const MysteryCard: React.FC = () => {
+  const f = useDesignFrame();
+  const enterAt = SHAPE_START + 8;
+  const enter = tween(f, enterAt, 22, snap);
+  const y = 610 + (1 - enter) * 50 + Math.sin(f / 22) * 3;
+  return (
+    <div style={{position: 'absolute', left: LX - 320, top: y, width: 640, height: 180, pointerEvents: 'none'}}>
+      <Glass
+        radius={28}
+        tint={C.mint}
+        strength={1.1}
+        glow={18 + 8 * Math.sin(f / 14)}
+        style={{width: 640, height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: ramp(f, enterAt, enterAt + 8, glide), transform: `scale(${0.86 + 0.14 * enter})`}}
+      >
+        <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 112, color: C.mint, letterSpacing: '0.04em', opacity: 0.8 + 0.2 * Math.sin(f / 9)}}>$ ? ? ? , ? ? ?</div>
+      </Glass>
+    </div>
+  );
+};
+
 export const Shot1: React.FC = () => {
   const f = useDesignFrame();
+  // the gap is the real, unrounded Arkansas-to-California gap, but only the amount is shown: the name stays hidden until #1
   const g = gap('Arkansas', 'California');
-  const ark = byName('Arkansas');
   const cal = byName('California');
 
   // camera shake as each count lands (a damped hit, not a loop), then the 6% punch-in on the slam
   const shakeAt = (land: number) => (f >= land ? Math.exp(-(f - land) / 6) * 10 : 0);
-  const shake = shakeAt(COUNT_START + COUNT_DUR) + shakeAt(COUNT_START + 16 + COUNT_DUR);
+  const shake = shakeAt(COUNT_START + COUNT_DUR);
   const sx = Math.sin(f * 2.3) * shake;
   const sy = Math.cos(f * 3.1) * shake * 0.7;
   const punch = f >= SLAM ? 1 + 0.06 * Math.exp(-(f - SLAM) / 10) : 1;
@@ -99,16 +127,16 @@ export const Shot1: React.FC = () => {
   const seamP = tween(f, SEAM_START, SHAPE_START - SEAM_START, glide);
   const splitTint = clamp((f - SHAPE_START) / 20) * 0.1;
 
-  // beats: states step back for the gap (14-20s), then everything but the chips steps back (20s on)
-  const rest = ramp(f, sec(13.4), sec(14.4), glide);
-  const rest2 = ramp(f, sec(19.2), sec(20), glide);
-  const dimLineP = tween(f, sec(14), 24, glide);
+  // beats: states step back for the gap, then everything but the chips steps back
+  const rest = ramp(f, REST_START, REST_START + 30, glide);
+  const rest2 = ramp(f, REST2_START, REST2_START + 24, glide);
+  const dimLineP = tween(f, BRACKET_START, 24, glide);
   const gapP = (t: number) => tween(t, SLAM, 22, slam);
   const gapScale = (t: number) => 1 + 1.0 * (1 - gapP(t));
   const gapBlur = Math.min(14, Math.abs(gapScale(f) - gapScale(f - 1)) * (18 / K));
 
   return (
-    <Aberration at={[SHAPE_START, COUNT_START + COUNT_DUR, COUNT_START + 16 + COUNT_DUR, SLAM]} peak={8}>
+    <Aberration at={[SHAPE_START, COUNT_START + COUNT_DUR, SLAM]} peak={8}>
       <AbsoluteFill style={{backgroundColor: '#000'}}>
         <Background drift>
           <AbsoluteFill style={{transform: `translate(${sx}px, ${sy}px) scale(${punch})`}}>
@@ -151,13 +179,17 @@ export const Shot1: React.FC = () => {
                   gl={{antialias: true, alpha: true, preserveDrawingBuffer: true}}
                   style={{position: 'absolute', inset: 0}}
                 >
-                  <Shot1Scene frame={f} shapeStart={SHAPE_START} lxPx={LX} rxPx={RX} riseA={COUNT_START} riseB={COUNT_START + 16} />
+                  <Shot1Scene frame={f} shapeStart={SHAPE_START} lxPx={LX} rxPx={RX} riseB={COUNT_START} />
                 </ThreeCanvas>
               )}
               {f >= SHAPE_START && (
                 <>
+                  {/* the empty half: a "?" where the winner would stand. Its name is not shown until #1. */}
+                  <div style={{position: 'absolute', left: LX - 300, width: 600, top: 70, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 380, lineHeight: 1, color: C.mint, opacity: 0.85 * ramp(f, SHAPE_START + 6, SHAPE_START + 26, glide), textShadow: `0 0 60px ${C.mint}77`, transform: `translateY(${Math.sin(f / 26) * 6}px)`}}>
+                    ?
+                  </div>
                   <div style={{position: 'absolute', left: LX - 300, width: 600, top: 515, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 64, color: C.mint}}>
-                    <Letters text="ARKANSAS" start={SHAPE_START + 12} stagger={2} />
+                    <Letters text="ONE STATE" start={SHAPE_START + 12} stagger={2} />
                   </div>
                   <div style={{position: 'absolute', left: RX - 300, width: 600, top: 515, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 64, color: C.red}}>
                     <Letters text="CALIFORNIA" start={SHAPE_START + 12} stagger={2} />
@@ -166,39 +198,39 @@ export const Shot1: React.FC = () => {
               )}
 
               {/* the payoff: both results, at once */}
-              <Card side={-1} target={ark.display} startAt={COUNT_START} />
-              <Card side={1} target={cal.display} startAt={COUNT_START + 16} />
+              <MysteryCard />
+              <Card side={1} target={cal.display} startAt={COUNT_START} />
 
               {/* coin stacks arrive with the counts, not before, and grow / shrink with the value */}
               {f >= COUNT_START - 4 && (
-                <>
-                  <div style={{position: 'absolute', left: 96, top: 500 - 404, transform: 'scale(0.6)', transformOrigin: 'left bottom'}}>
-                    <CoinStack count={coinsFor(valueAt(f, ark.display, COUNT_START))} appearAt={COUNT_START} color={C.mint} />
-                  </div>
-                  <div style={{position: 'absolute', left: W - 96 - 310, top: 500 - 404, transform: 'scale(0.6)', transformOrigin: 'right bottom'}}>
-                    <CoinStack count={coinsFor(valueAt(f, cal.display, COUNT_START + 16))} appearAt={COUNT_START + 16} color={C.red} />
-                  </div>
-                </>
+                <div style={{position: 'absolute', left: W - 96 - 310, top: 500 - 404, transform: 'scale(0.6)', transformOrigin: 'right bottom'}}>
+                  <CoinStack count={coinsFor(valueAt(f, cal.display, COUNT_START))} appearAt={COUNT_START} color={C.red} />
+                </div>
               )}
             </div>
 
-            {/* 1-5s: the claim, written across the top. The two results take the data colours (mint cheap, red costly). */}
+            {/* 2-4.6s: the claim, written across the top. Only California's number is shown. */}
             <div style={{position: 'absolute', left: 0, right: 0, top: 44, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.text, whiteSpace: 'nowrap'}}>
               <MaskWords
-                text={`${fmtUSD(ark.display)} in Arkansas feels bigger than ${fmtUSD(cal.display)} in California`}
+                text={`${fmtUSD(SALARY)} in California feels like ${fmtUSD(cal.display)}`}
                 start={HEAD_START}
                 step={3}
-                leaveAt={sec(13.2)}
-                wordStyle={(_, i) => (i <= 2 ? {color: C.mint} : i >= 6 ? {color: C.red} : undefined)}
+                leaveAt={sec(4.6)}
+                wordStyle={(_, i) => (i === 2 || i >= 5 ? {color: C.red} : undefined)}
               />
             </div>
 
-            {/* 6.5-13s: the one-line reason, quiet and neutral, then it drops behind its line before the gap */}
-            <div style={{position: 'absolute', left: 0, right: 0, top: 830, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 44, color: C.muted}}>
-              <MaskWords text={`Same ${fmtUSD(SALARY)} salary. Different prices.`} start={EXPLAIN_START} step={5} leaveAt={sec(13)} />
+            {/* 4.8-9s: the turn. The question the whole video answers. */}
+            <div style={{position: 'absolute', left: 0, right: 0, top: 44, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.text, whiteSpace: 'nowrap'}}>
+              <MaskWords text="One state does the opposite." start={HEAD2_START} step={4} leaveAt={sec(9)} wordStyle={(_, i) => (i >= 3 ? {color: C.mint} : undefined)} />
             </div>
 
-            {/* 14-20s: the gap is the only bright thing on the frame. Amber, alone. */}
+            {/* 3.4-5.6s: the one-line reason, quiet and neutral, then it drops behind its line before the gap */}
+            <div style={{position: 'absolute', left: 0, right: 0, top: 830, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 44, color: C.muted}}>
+              <MaskWords text={`Same ${fmtUSD(SALARY)} salary. Different prices.`} start={EXPLAIN_START} step={5} leaveAt={sec(5.6)} />
+            </div>
+
+            {/* 6-10s: the gap is the only bright thing on the frame. Amber, alone. It says how much further, never where. */}
             <div style={{position: 'absolute', inset: 0, opacity: 1 - 0.7 * rest2}}>
               <svg width={W} height={H} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
                 <path
@@ -231,11 +263,17 @@ export const Shot1: React.FC = () => {
               )}
             </div>
 
-            {/* 20-30s: three chips, one after another, on a quiet frame. Neutral, except the last. */}
+            {f >= SLAM + 20 && (
+              <div style={{position: 'absolute', left: 0, right: 0, top: 750, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 40, color: C.text, opacity: 1 - 0.7 * rest2}}>
+                <MaskWords text="more buying power than California" start={SLAM + 20} step={4} />
+              </div>
+            )}
+
+            {/* 10-15s: three chips close the door on the obvious guesses. Neither state is in the top 10. */}
             <div style={{position: 'absolute', left: 0, right: 0, top: 870, display: 'flex', justifyContent: 'center', gap: 28}}>
-              <Chip text="TOP 10 STATES" delay={sec(20)} size={36} />
-              <Chip text="BOTTOM 5" delay={sec(20) + 14} size={36} />
-              <Chip text="WHAT MOST VIDEOS LEAVE OUT" delay={sec(20) + 28} color={C.amber} size={36} pulse />
+              <Chip text="NOT TEXAS" delay={CHIPS_START} size={44} />
+              <Chip text="NOT FLORIDA" delay={CHIPS_START + 14} size={44} />
+              <Chip text="TOP 10, RANKED" delay={CHIPS_START + 28} color={C.amber} size={44} pulse />
             </div>
           </AbsoluteFill>
         </Background>

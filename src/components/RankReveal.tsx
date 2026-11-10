@@ -22,7 +22,7 @@ import {anticipate, drop as dropEase, exitIn, glide, ramp, slam, snap, tween} fr
 import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
 // COUNT_DUR lives in timeline.ts so revealSeconds() stays in sync with the
 // count duration — changing one frame budget can't drift away from the other.
-import {COUNT_DUR, MIN_REVEAL_SECONDS} from '../timeline';
+import {COUNT_DUR} from '../timeline';
 import {K, useDesignFrame} from '../clock';
 
 export type RankRevealProps = {
@@ -31,10 +31,14 @@ export type RankRevealProps = {
   durationInFrames: number;
   /** entries already locked into the rail before this reveal */
   railBefore?: RailEntry[];
+  /** the 15 s version of the beats (#10 to #6) */
+  fast?: boolean;
 };
 
 /** Frames between letters of the state name (the cue sheet needs it to time the underline). */
 export const NAME_STEP = 1.6;
+/** The tie stamp lands this many frames after the name starts (1 s in the full reveal). */
+export const TIE_STAMP_AFTER_NAME = 30;
 
 /** Zoom is fitted to the state(s) and then clamped to this range (1 = the whole country fills the frame). */
 const ZOOM_MIN = 1.7;
@@ -58,16 +62,40 @@ export const T = {
   railOpen: sec(20.4),
   lock: sec(21),
   mapOut: sec(23.2),
+  /** total length of the reveal, in design frames (the exit blur runs up to it) */
+  end: sec(25),
 };
 
-// Guard: the dollar count must finish before the hand-over, and every beat must fit inside the shortest reveal
-// (timeline.ts). If you change COUNT_DUR, a beat time above or revealSeconds(), this fails the build instead of
-// letting the rail timing and the audio cues drift apart.
-if (T.dollars + COUNT_DUR > T.panelOut || T.mapOut > sec(MIN_REVEAL_SECONDS)) {
-  throw new Error(
-    `RankReveal timing no longer fits: count ends at frame ${T.dollars + COUNT_DUR}, hand-over starts at ${T.panelOut}, ` +
-      `map leaves at ${T.mapOut}, shortest reveal is ${sec(MIN_REVEAL_SECONDS)} frames (timeline.ts).`,
-  );
+/**
+ * The same beats, in the same order, in 15 s instead of 25. Used for #10 to #6 so the countdown escalates: the early
+ * reveals move, the last ones (#5 to #1) take their full time. Nothing is removed; every gap between beats is shorter.
+ */
+export const T_FAST: typeof T = {
+  slam: 0,
+  fly: sec(0.8),
+  name: sec(2.6),
+  bea: sec(4.2),
+  dollars: sec(6.6),
+  fact: sec(8.8),
+  panelOut: sec(12.6),
+  railOpen: sec(12.8),
+  lock: sec(13.4),
+  mapOut: sec(14.4),
+  end: sec(15),
+};
+
+export const timing = (fast: boolean): typeof T => (fast ? T_FAST : T);
+
+// Guard: in both variants the dollar count must finish before the hand-over, and every beat must fit inside the
+// reveal. If you change COUNT_DUR or a beat time, this fails the build instead of letting the rail timing and the
+// audio cues drift apart.
+for (const [label, t] of [['full', T], ['fast', T_FAST]] as const) {
+  if (t.dollars + COUNT_DUR > t.panelOut || t.mapOut > t.end) {
+    throw new Error(
+      `RankReveal (${label}) timing no longer fits: count ends at frame ${t.dollars + COUNT_DUR}, hand-over starts at ${t.panelOut}, ` +
+        `map leaves at ${t.mapOut}, reveal is ${t.end} frames.`,
+    );
+  }
 }
 
 /**
@@ -83,8 +111,9 @@ if (T.dollars + COUNT_DUR > T.panelOut || T.mapOut > sec(MIN_REVEAL_SECONDS)) {
  * lifts with a ringing settle; the pin falls under gravity with a bounce; type rises from behind a mask line; numbers
  * roll on odometer wheels; fast moves carry directional motion blur measured from their real speed.
  */
-export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = []}) => {
+export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = [], fast = false}) => {
   const frame = useDesignFrame();
+  const T = timing(fast);
   const states = names.map(byName);
   const tie = states.length > 1;
   const lead = states[0];
@@ -111,7 +140,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
     const settle = tween(f, 0, 40, glide);
     // wind-up (the camera backs off a little), whip in, overshoot, settle
     const flyP = tween(f, T.fly, sec(2), anticipate);
-    const drift = ramp(f, T.name, sec(25)) * 9;
+    const drift = ramp(f, T.name, T.end) * 9;
     return {
       target: [lerp(0, wx, flyP), lerp(20, wy, flyP), lerp(0, topZ * 0.5, flyP)] as [number, number, number],
       dist: lerp(lerp(1.3, 1.08, settle) * CAM_D, CAM_D / targetZoom, flyP),
@@ -179,7 +208,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   // ---- 20-25s hand-over to the rail: the panel leaves, the rail opens, the new row locks in ----
   const panelOut = (f: number) => tween(f, T.panelOut, 18, exitIn);
   const recede = ramp(frame, T.panelOut, T.lock + 8, glide);
-  const exit = ramp(frame, T.mapOut, sec(25), glide);
+  const exit = ramp(frame, T.mapOut, T.end, glide);
   const rail: RailEntry[] = [...railBefore, {label: rankLabel, names, lockAt: T.lock}];
   const open = railOpenAt(frame, sec(1.1), T.railOpen);
 
@@ -296,7 +325,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 <MaskRule start={ruleAt} color={C.emerald} height={7} style={{marginTop: 14}} />
                 {tie && (
                   <div style={{marginTop: 20}}>
-                    <TieStamp at={sec(4)} />
+                    <TieStamp at={T.name + TIE_STAMP_AFTER_NAME} />
                   </div>
                 )}
               </div>

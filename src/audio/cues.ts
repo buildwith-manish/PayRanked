@@ -14,13 +14,19 @@
  */
 import {byName, gap, NO_WAGE_TAX, BOTTOM_FIVE} from '../data';
 import {coinsFor} from '../components/CoinStack';
-import {NAME_STEP, T as TR} from '../components/RankReveal';
-import {COUNT_DUR as REVEAL_COUNT} from '../timeline';
+import {BREAK_BEATS} from '../components/Break';
+import {NAME_STEP, TIE_STAMP_AFTER_NAME, timing} from '../components/RankReveal';
+import {breaks as countdownBreaks, COUNT_DUR as REVEAL_COUNT, isFast} from '../timeline';
 import {
+  BRACKET_START,
+  CHIPS_START,
   COUNT_DUR as S1_COUNT,
   COUNT_START as S1_COUNT_START,
   EXPLAIN_START,
+  HEAD2_START,
   HEAD_START,
+  REST2_START,
+  REST_START,
   SEAM_START,
   SHAPE_START,
   SLAM as S1_SLAM,
@@ -106,78 +112,71 @@ const coinLandings = (appearAt: number, countAt: (f: number) => number, gain: nu
 // =============================================================== Shot 1: cold open
 export const shot1Cues = (): Cue[] => {
   const k: Cue[] = [];
-  const ark = byName('Arkansas');
   const cal = byName('California');
   const dollars = (target: number, startAt: number) => (f: number) => coinsFor(s1ValueAt(f, target, startAt));
 
-  // 0-1s: a seam draws down the black frame, then the states land on it (the opening sting)
+  // 0-1s: a seam draws down the black frame, then California lands on it (the opening sting)
   k.push(cue('whoosh_xs', 3, 0.3));
   k.push(cue('seam', SEAM_START + 12, 0.5));
   k.push(cue('whoosh_m', SEAM_START + 13, 0.6));
   k.push(cue('hit_big', SHAPE_START, 0.8, true));
   k.push(cue('swish', SHAPE_START + 20, 0.45));
 
-  // 1-4s: the payoff. The counts roll and land, the states climb and sink; coins pour in with them
-  k.push(cue('rise_up', S1_COUNT_START + 26, 0.5));
-  k.push(cue('sink_down', S1_COUNT_START + 16 + 18, 0.42));
+  // 1-4s: California's count rolls down and lands, the state sinks; coins pour in with it
+  k.push(cue('sink_down', S1_COUNT_START + 18, 0.42));
   k.push(...ticks(S1_COUNT_START, S1_COUNT, 16, 0.42));
-  k.push(...ticks(S1_COUNT_START + 16, S1_COUNT, 16, 0.34, 1));
-  k.push(...coinLandings(S1_COUNT_START, dollars(ark.display, S1_COUNT_START), 0.27));
-  k.push(...coinLandings(S1_COUNT_START + 16, dollars(cal.display, S1_COUNT_START + 16), 0.21));
+  k.push(...coinLandings(S1_COUNT_START, dollars(cal.display, S1_COUNT_START), 0.24));
   k.push(cue('hit_med', S1_COUNT_START + S1_COUNT, 0.85, true));
-  k.push(cue('ding', S1_COUNT_START + S1_COUNT, 0.35));
-  k.push(cue('hit_med', S1_COUNT_START + 16 + S1_COUNT, 0.85, true));
 
-  // 4-13s: the claim is written across the top as the second number lands, then one quiet line says why
+  // 2-6s: the claim, the one-line reason, then the turn
   k.push(cue('swish', HEAD_START, 0.35));
   k.push(cue('swish', EXPLAIN_START, 0.25));
+  k.push(cue('swish', HEAD2_START, 0.4));
+  k.push(cue('rise_up', HEAD2_START + 10, 0.3)); // "the opposite": the unseen state goes the other way
 
-  // 14-20s: everything steps back, a riser builds under the drawn bracket, the gap slams in alone
-  k.push(cue('out_m', sec(13.4) + 2, 0.5));
+  // 6-10s: everything steps back, a riser builds under the drawn bracket, the gap slams in alone
+  k.push(cue('out_m', REST_START + 2, 0.5));
   k.push(cue('riser', S1_SLAM, 0.8));
   k.push(cue('hit_big', S1_SLAM + STRIKE, 1, true));
   k.push(...ticks(S1_SLAM, 24, 8, 0.45));
   k.push(cue('ding_hi', S1_SLAM + 24, 0.4));
-  k.push(cue('out_s', sec(19.2) + 2, 0.4));
+  k.push(cue('out_s', REST2_START + 2, 0.4));
+  void BRACKET_START;
 
-  // 20-30s: three chips, each a small glass tap; the last one (amber) gets a bell
+  // 10-15s: three chips, each a small glass tap; the last one (amber) gets a bell
   [0, 14, 28].forEach((d, i) => {
-    const at = sec(20) + d;
+    const at = CHIPS_START + d;
     k.push(cue('whoosh_xs', at + 2, 0.25));
     k.push(cue(`chip_${i}` as SfxName, at + 5, 0.75));
   });
-  k.push(cue('ding_hi', sec(20) + 28 + 8, 0.35));
+  k.push(cue('ding_hi', CHIPS_START + 28 + 8, 0.35));
   return k;
 };
 
 // =============================================================== Shot 3: method
 export const shot3Cues = (): Cue[] => {
   const k: Cue[] = [];
-  const cal = byName('California');
-  const ark = byName('Arkansas');
 
   // gauge draws itself
   k.push(cue('whoosh_m', 30, 0.35));
 
   // needle: wind-up, whip, settle. The sweep peaks on the whip, a tap marks where it settles.
-  [T3.avg, T3.toCal, T3.toArk].forEach((at, i) => {
+  [T3.avg, T3.toCal].forEach((at, i) => {
     k.push(cue('gauge_sweep', at + 17, 0.5));
     k.push(cue('hit_small', at + 30, i === 1 ? 0.5 : 0.4));
     k.push(cue('tick_0', at + 34, 0.3));
   });
   k.push(cue('sink_down', T3.toCal + 18, 0.3)); // the needle heads into the red
-  k.push(cue('rise_up', T3.toArk + 18, 0.3)); // and back out to the cheap end
 
   // pop labels: rise from behind the line, leave behind it
   [
     [T3.avg + 14, T3.toCal + 6],
-    [T3.toCal + 28, T3.toArk + 4],
-    [T3.toArk + 28, T3.formula - 2],
+    [T3.toCal + 28, T3.formula - 2],
   ].forEach(([s, e]) => {
     k.push(cue('swish', s + 8, 0.42));
     k.push(cue('out_xs', e - 2, 0.25));
   });
-  k.push(cue('out_m', sec(18) + 6, 0.45)); // the gauge leaves
+  k.push(cue('out_m', T3.formula - 24, 0.45)); // the gauge leaves
 
   // formula: every token lands on a rung of the ladder, so it plays as a phrase going up
   const tokens = 8;
@@ -192,15 +191,6 @@ export const shot3Cues = (): Cue[] => {
   k.push(cue('hit_med', resultDelay + 54, 0.7, true));
   k.push(cue('ding', resultDelay + 54, 0.38));
   k.push(cue('swish_long', resultDelay + 44 + 8, 0.4));
-  k.push(cue('out_s', T3.chips - 2, 0.4));
-
-  // three limits, each dropping in from the top with a tilt
-  [0, 20, 40].forEach((d, i) => {
-    const at = T3.chips + d;
-    k.push(cue('whoosh_s', at + 4, 0.35));
-    k.push(cue(`chip_${i}` as SfxName, at + 5, 0.8));
-    k.push(cue('icon_draw', at + 18, 0.35));
-  });
   k.push(cue('out_m', T3.rail - 2, 0.4));
 
   // rail slides in: nine rows trail each other, so nine rising notes
@@ -219,6 +209,7 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   const lead = byName(names[0]);
   const tie = names.length > 1;
   const rank = parseInt(rankLabel.replace('#', ''), 10);
+  const TR = timing(isFast(rank));
   const hasFact = !!(lead.fact && lead.factSource);
   const nameLen = names.join('  ·  ').length;
   const ruleAt = TR.name + Math.round(nameLen * NAME_STEP) + 4;
@@ -236,7 +227,7 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   // 3-6s: name rises letter by letter, the rule draws under it
   k.push(cue('swish_long', TR.name + 8, 0.55));
   k.push(cue('swish', ruleAt + 4, 0.35));
-  if (tie) k.push(cue('stamp', sec(4) + STRIKE, 0.9, true));
+  if (tie) k.push(cue('stamp', TR.name + TIE_STAMP_AFTER_NAME + STRIKE, 0.9, true));
 
   // 6-10s: BEA chip flips in, gauge sweeps, formula line rises
   k.push(cue('chip_1', TR.bea + 4 + 5, 0.75));
@@ -276,6 +267,25 @@ export const revealCues = (names: string[], rankLabel: string): Cue[] => {
   return k;
 };
 
+// =============================================================== Countdown breaks
+export const breakCues = (kind: 'notHere' | 'prices'): Cue[] => {
+  const k: Cue[] = [];
+  k.push(cue('out_m', 2, 0.4)); // the last reveal's panel clears
+  k.push(cue('whoosh_s', BREAK_BEATS.line1 + 6, 0.4));
+  k.push(cue('swish_long', BREAK_BEATS.line1 + 14, 0.45));
+  if (kind === 'notHere') {
+    [0, 14].forEach((d, i) => {
+      k.push(cue('whoosh_xs', BREAK_BEATS.chips + d + 2, 0.25));
+      k.push(cue(`chip_${i}` as SfxName, BREAK_BEATS.chips + d + 5, 0.7));
+    });
+    k.push(cue('swish', sec(5.4) + 8, 0.3));
+  } else {
+    k.push(cue('hit_small', sec(2.4), 0.45));
+    k.push(cue('swish', sec(4.6) + 8, 0.3));
+  }
+  return k;
+};
+
 // =============================================================== Shot 5: reality check
 export const shot5Cues = (): Cue[] => {
   const k: Cue[] = [];
@@ -283,10 +293,11 @@ export const shot5Cues = (): Cue[] => {
   const cal = byName('California');
   const g = gap('Arkansas', 'California');
 
-  // 0-25s: the colour wave spreads from Arkansas outward
+  // 0-7s: the colour wave spreads from Arkansas outward, the legend rises, one salary line
   k.push(cue('whoosh_l', 24, 0.45));
-  k.push(cue('wave_swell', 150, 0.35));
-  k.push(cue('whoosh_s', sec(18) + 10, 0.35)); // legend rises
+  k.push(cue('wave_swell', 60, 0.35));
+  k.push(cue('whoosh_s', sec(3) + 10, 0.35)); // legend rises
+  k.push(cue('swish', sec(1) + 8, 0.3));
 
   // 25-60s: map steps back, five rows slide in and count up. California is the focal row.
   k.push(cue('whoosh_m', T5.rows, 0.55));
@@ -329,14 +340,14 @@ export const shot5Cues = (): Cue[] => {
     k.push(cue(`blip_${i}` as SfxName, T5.lights + i * 4 + 3, 0.6));
     k.push(cue(`tick_${i % 3}` as SfxName, T5.lights + 30 + i * 8 + 4, 0.35)); // each name rising into view
   }
-  // 115s: sonar rings on Washington
+  // sonar rings on Washington
   [0, 1, 2, 3].forEach((n) => k.push(cue('ping_lo', T5.ring + n * 45, [0.5, 0.4, 0.3, 0.2][n])));
 
-  // 116-130s: three cards, one at a time
+  // 31-44s: three cards, one at a time
   const cards = [
-    {start: sec(116), end: sec(122), words: [8 + 8, 14 + 8]},
-    {start: sec(121.5), end: sec(126), words: [8 + 8]},
-    {start: sec(125.5), end: -1, words: [8 + 8]},
+    {start: T5.card1, end: T5.card2 + sec(0.5), words: [8 + 8, 14 + 8]},
+    {start: T5.card2, end: T5.card3 + sec(0.5), words: [8 + 8]},
+    {start: T5.card3, end: -1, words: [8 + 8]},
   ];
   cards.forEach((c) => {
     k.push(cue('whoosh_s', c.start + 8, 0.5));
@@ -390,6 +401,7 @@ export const CUES = {
   shot5: shot5Cues(),
   shot6: shot6Cues(),
   reveals: timeline.map((t) => revealCues(t.names, t.label)),
+  breaks: countdownBreaks.map((b) => breakCues(b.kind)),
 };
 
 /** Master-timeline frames of the big strikes: the music dips around these (see AUDIO.dip* and duck.ts). */

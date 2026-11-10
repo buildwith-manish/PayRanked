@@ -13,21 +13,26 @@ import {Flash, SourceTag, win} from '../components/common';
 import {BOTTOM_FIVE, NO_WAGE_TAX, STATES, byName, fmtUSD, gap} from '../data';
 import {C, F, H, MARGIN, W, mix, ordinal, sec, tabular} from '../theme';
 import {K, useDesignFrame} from '../clock';
+import {SHOT_SECONDS} from '../timeline';
 
-export const SHOT5_FRAMES = sec(130); // 5:35 to 7:45
+export const SHOT5_FRAMES = sec(SHOT_SECONDS.shot5); // was 130 s; the payoff has already landed, so this is the short version
 
-/** Shot-local times (0 = 5:35). */
+/**
+ * Shot-local times (0 = the end of #1). Was 130 s with a 20 s "pivot bridge" up front. The bridge ("Cheap doesn't
+ * mean you'd earn $100K there") now lives inside the countdown (Break.tsx, kind "prices"), so the tension holds
+ * until #1; this shot opens straight on the map and goes: where it sits, where it shrinks, the gap, the tax angle,
+ * the cliffhanger.
+ */
 export const T = {
-  // Fix 2: the pivot bridge occupies the first 20 s of this shot (was ~0 s —
-  // the old one-sentence slam lived at the tail of Shot4). The map wave and
-  // content beats shift right accordingly so their absolute timestamps are
-  // unchanged (the extra time is absorbed into the bridge hold).
-  bridge: 0,          // 5:35 — pivot card in
-  rows:   sec(25),    // 6:00
-  bars:   sec(60),    // 6:35
-  interrupt: sec(85), // 7:00
-  lights: sec(88),    // 7:03
-  ring:   sec(115),   // 7:30
+  rows:      sec(7),
+  bars:      sec(16),
+  interrupt: sec(24),
+  lights:    sec(26),
+  ring:      sec(30),
+  /** the three closing cards */
+  card1:     sec(31.5),
+  card2:     sec(35.5),
+  card3:     sec(39),
 };
 
 const ark = byName('Arkansas');
@@ -70,7 +75,7 @@ const Row: React.FC<{name: string; i: number}> = ({name, i}) => {
           <MaskLine start={d + 4} dur={18}>{name}</MaskLine>
         </div>
         <div style={{width: 780, height: 44, borderRadius: 22, background: 'rgba(232,238,247,0.08)'}}>
-          <div style={{width: barW, height: 44, borderRadius: 22, background: C.red, opacity: isCal ? 1 : 0.7, boxShadow: isCal ? \`0 0 20px \${C.red}88\` : 'none'}} />
+          <div style={{width: barW, height: 44, borderRadius: 22, background: C.red, opacity: isCal ? 1 : 0.7, boxShadow: isCal ? `0 0 20px ${C.red}88` : 'none'}} />
         </div>
         <div style={{flex: 1, textAlign: 'right'}}>
           <Count to={s.display} start={d + 10} duration={50} size={54} color={isCal ? C.red : C.text} />
@@ -88,7 +93,7 @@ const BarCol: React.FC<{x: number; height: number; color: string; label: string;
   return (
     <>
       <MotionBlur dy={-(h - prevH)} shutter={0.5} cap={26} style={{position: 'absolute', left: x, top: 860 - Math.max(0, h), width: 320, height: Math.max(0, h)}}>
-        <div style={{width: 320, height: Math.max(0, h), borderRadius: '24px 24px 0 0', background: \`linear-gradient(\${color}, \${mix('#050E1D', color, 0.4)})\`, boxShadow: \`0 0 40px \${color}55\`}} />
+        <div style={{width: 320, height: Math.max(0, h), borderRadius: '24px 24px 0 0', background: `linear-gradient(${color}, ${mix('#050E1D', color, 0.4)})`, boxShadow: `0 0 40px ${color}55`}} />
       </MotionBlur>
       <div style={{position: 'absolute', left: x - 40, width: 400, top: 860 - Math.max(0, h) - 96, textAlign: 'center', opacity: ramp(f, delay + 6, delay + 14)}}>
         <Count to={value} start={delay + 8} duration={50} size={78} color={color} />
@@ -117,7 +122,7 @@ const InfoCard: React.FC<{start: number; end: number; children: React.ReactNode}
           alignItems: 'center',
           justifyContent: 'center',
           opacity: ramp(f, start, start + 10, glide) * (1 - out),
-          transform: \`translateY(\${(1 - inAt(f)) * 120 + out * 30}px)\`,
+          transform: `translateY(${(1 - inAt(f)) * 120 + out * 30}px)`,
         }}
       >
         {children}
@@ -133,19 +138,11 @@ export const Shot5: React.FC = () => {
   const waRank = STATES.filter((s) => s.rpp > wa.rpp).length + 1;
   const g = gap('Arkansas', 'California');
 
-  // Fix 2: pivot bridge — three lines over ~20 s, one at a time, same dark
-  // overlay the #1 reveal ends on. Each line builds the counter-argument:
-  //   Line 1 (0-7 s)   "Cheap doesn't mean you'd earn $100K there."
-  //   Line 2 (7-14 s)  Salary context: AR median ~$56K vs CA ~$91K
-  //   Line 3 (14-20 s) The real point: buying-power gap narrows with income
-  const bridgeExit  = ramp(f, sec(19), sec(22), exitIn);
-  const bridgeShow  = f < sec(22);
-
   // map colours: wave outward from Arkansas, then amber for the no-wage-tax states
   const fillFor = (name: string) => {
     const row = STATES.find((s) => s.name === name);
     if (!row) return BASE;
-    const delay = (distFromArkansas(geoOf(name)) / maxDist) * sec(18);
+    const delay = (distFromArkansas(geoOf(name)) / maxDist) * sec(5);
     let col = mix(BASE, waveColor(row.rpp), (f - delay) / 20);
     const idx = taxStates.findIndex((t) => t.name === name);
     if (idx >= 0) col = mix(col, C.amber, (f - (T.lights + idx * 4)) / 10);
@@ -156,7 +153,7 @@ export const Shot5: React.FC = () => {
 
   const mapOpacity = interpolate(
     f,
-    [0, sec(24), sec(26), sec(59), sec(61), sec(84), sec(85), sec(115), sec(117)],
+    [0, T.rows - sec(1), T.rows + sec(1), T.bars - sec(1), T.bars + sec(1), T.interrupt - sec(1), T.interrupt, T.ring, T.ring + sec(2)],
     [1, 1,       0.28,    0.28,    0.12,    0.12,    1,       1,        0.4],
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
   );
@@ -175,75 +172,10 @@ export const Shot5: React.FC = () => {
 
   const litAt = (t: number) => taxStates.reduce((a, _, idx) => a + tween(t, T.lights + idx * 4 + 10, 8, glide), 0);
 
-  const legendIn = tween(f, sec(18), 26, glide);
+  const legendIn = tween(f, sec(3), 26, glide);
 
   return (
     <AbsoluteFill>
-      {/* Fix 2: pivot bridge — full-bleed dark overlay, fades out at sec(22) */}
-      {bridgeShow && (
-        <AbsoluteFill
-          style={{
-            background: 'rgba(5,14,29,0.92)',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 48,
-            padding: '0 180px',
-            opacity: 1 - bridgeExit,
-          }}
-        >
-          {/* Line 1: the hook — arrives immediately */}
-          <div
-            style={{
-              fontFamily: F.display,
-              fontWeight: 700,
-              fontSize: 88,
-              color: C.text,
-              textAlign: 'center',
-              lineHeight: 1.1,
-              opacity: win(f, sec(0.5), sec(20), 10),
-            }}
-          >
-            <MaskWords text="Cheap doesn’t mean you’d earn $100K there." start={sec(0.5)} step={4} dur={22} />
-          </div>
-          {/* Line 2: salary context — arrives at 7 s */}
-          <div
-            style={{
-              fontFamily: F.body,
-              fontWeight: 500,
-              fontSize: 52,
-              color: C.muted,
-              textAlign: 'center',
-              lineHeight: 1.3,
-              opacity: win(f, sec(7), sec(20), 10),
-            }}
-          >
-            <MaskLine start={sec(7)} dur={24}>
-              Arkansas median household income: ~$56K.{'  '}
-              <span style={{color: C.red}}>California: ~$91K.</span>
-            </MaskLine>
-          </div>
-          {/* Line 3: the real point — arrives at 13 s */}
-          <div
-            style={{
-              fontFamily: F.body,
-              fontWeight: 500,
-              fontSize: 46,
-              color: C.muted,
-              textAlign: 'center',
-              lineHeight: 1.3,
-              opacity: win(f, sec(13), sec(20), 10),
-            }}
-          >
-            <MaskLine start={sec(13)} dur={22}>
-              The buying-power gap narrows fast when the salary itself is lower.
-            </MaskLine>
-          </div>
-        </AbsoluteFill>
-      )}
-
       <div style={{position: 'absolute', inset: 0, filter: inverted ? 'invert(1) hue-rotate(180deg)' : undefined}}>
         <Background glowX={W * 0.5} glowY={H * 0.5} glowColor={f < T.interrupt ? C.emerald : C.amber}>
           {/* map */}
@@ -283,7 +215,13 @@ export const Shot5: React.FC = () => {
             )}
           </AbsoluteFill>
 
-          {/* 0-25s: legend */}
+          {/* 0-7s: legend, and the one salary line that stays after the bridge moved into the countdown */}
+          <div style={{position: 'absolute', left: 0, right: 0, top: 70, textAlign: 'center', fontFamily: F.body, fontWeight: 500, fontSize: 44, color: C.muted, opacity: win(f, sec(1), T.rows - sec(0.5), 12)}}>
+            <MaskLine start={sec(1)} dur={24}>
+              Median household income: Arkansas ~$56K.{'  '}
+              <span style={{color: C.red}}>California ~$91K.</span>
+            </MaskLine>
+          </div>
           <div
             style={{
               position: 'absolute',
@@ -293,7 +231,7 @@ export const Shot5: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              opacity: win(f, sec(18), sec(25), 12),
+              opacity: win(f, sec(3), T.rows, 12),
               transform: `translateY(${(1 - legendIn) * 120}px)`,
             }}
           >
@@ -304,7 +242,7 @@ export const Shot5: React.FC = () => {
             </div>
           </div>
 
-          {/* 25-60s: five expensive states */}
+          {/* 7-16s: five expensive states */}
           <div style={{position: 'absolute', inset: 0, opacity: win(f, T.rows - 4, T.bars - 2, 12)}}>
             <div style={{position: 'absolute', left: MARGIN, top: 70, fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.text}}>
               <MaskWords text="Where $100,000 shrinks the most" start={T.rows - 2} step={4} dur={20} />
@@ -312,7 +250,7 @@ export const Shot5: React.FC = () => {
             {BOTTOM_FIVE.map((n, i) => <Row key={n} name={n} i={i} />)}
           </div>
 
-          {/* 60-85s: bars + bracket + +27% */}
+          {/* 16-24s: bars + bracket + +27% */}
           <div style={{position: 'absolute', inset: 0, opacity: win(f, T.bars, T.interrupt, 10)}}>
             <div style={{position: 'absolute', inset: 0, opacity: 1 - 0.62 * barsBack}}>
               <BarCol x={380}  height={hArk} color={C.mint} label="ARKANSAS"   value={ark.display} delay={T.bars + 6}  />
@@ -341,7 +279,7 @@ export const Shot5: React.FC = () => {
             )}
           </div>
 
-          {/* 7:03-7:30: tax-state counter */}
+          {/* 26-30s: tax-state counter */}
           <div
             style={{
               position: 'absolute',
@@ -364,24 +302,24 @@ export const Shot5: React.FC = () => {
             <span>/ {NO_WAGE_TAX.length} · NO STATE TAX ON WAGES</span>
           </div>
 
-          {/* 7:30-7:45: info cards */}
+          {/* 31-44s: info cards */}
           {/* Card 1: Washington split — most expensive + no wage tax */}
-          <InfoCard start={sec(116)} end={sec(122)}>
+          <InfoCard start={T.card1} end={T.card2 + sec(0.5)}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.text}}>
-                <MaskLine start={sec(116) + 8} dur={20}>{ordinal(waRank)} most expensive</MaskLine>
+                <MaskLine start={T.card1 + 8} dur={20}>{ordinal(waRank)} most expensive</MaskLine>
               </div>
               <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.amber}}>
-                <MaskLine start={sec(116) + 14} dur={20}>No wage tax</MaskLine>
+                <MaskLine start={T.card1 + 14} dur={20}>No wage tax</MaskLine>
               </div>
             </div>
           </InfoCard>
 
           {/* Card 2: Texas */}
-          <InfoCard start={sec(121.5)} end={sec(126)}>
+          <InfoCard start={T.card2} end={T.card3 + sec(0.5)}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', ...tabular}}>
-              <MaskLine start={sec(121.5) + 8} dur={22}>
+              <MaskLine start={T.card2 + 8} dur={22}>
                 {tx.rpp.toFixed(1)} → about <span style={{color: C.amber}}>{fmtUSD(tx.display)}</span>, and no state wage tax
               </MaskLine>
             </div>
@@ -390,14 +328,14 @@ export const Shot5: React.FC = () => {
           {/* Fix 3: replace generic conclusion card with a cliffhanger tease.
               Old: "Total cost matters more than one tax line"  (conclusion, low retention)
               New: a question that makes the next video feel essential, feeds Shot6 subscribe ask */}
-          <InfoCard start={sec(125.5)} end={SHOT5_FRAMES + 60}>
+          <InfoCard start={T.card3} end={SHOT5_FRAMES + 20}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 52, color: C.text, padding: '0 40px', lineHeight: 1.2}}>
-              <MaskLine start={sec(125.5) + 8} dur={22}>
+              <MaskLine start={T.card3 + 8} dur={22}>
                 So which state actually{' '}
                 <span style={{color: C.mint}}>wins</span>
                 {' '}when you combine buying power, no wage tax, and typical salaries?
               </MaskLine>
-              <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 36, color: C.muted, opacity: ramp(f, sec(129), sec(129) + 14, glide)}}>
+              <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 36, color: C.muted, opacity: ramp(f, T.card3 + sec(2.4), T.card3 + sec(2.4) + 14, glide)}}>
                 That’s the next video.
               </div>
             </div>

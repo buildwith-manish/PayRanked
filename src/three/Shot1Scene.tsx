@@ -11,9 +11,10 @@ const NEUTRAL = new THREE.Color('#3a5a85');
 const FIT = 0.8; // how much of the old 400 x 380 box the state fills, so the height has room
 
 /**
- * Cold open: Arkansas and California as 3D states on a faint "US average" plane.
- * Both rise to the plane first. When the counts land, Arkansas climbs high and turns emerald while California sinks
- * below the plane and turns red, so the numbers on the cards are also the shape of the states.
+ * Cold open: California as a 3D state on a faint "US average" plane. It rises to the plane first; when the count lands
+ * it sinks below the plane and turns red, so the number on the card is also the shape of the state.
+ * The other side of the split is deliberately empty (a "?" is drawn over it in Shot1.tsx): the winner is not shown
+ * until #1. Pass `leftName` to draw a second state there.
  */
 export const Shot1Scene: React.FC<{
   frame: number;
@@ -21,9 +22,11 @@ export const Shot1Scene: React.FC<{
   lxPx: number;
   rxPx: number;
   /** frame at which each state starts moving to its true height */
-  riseA: number;
+  riseA?: number;
   riseB: number;
-}> = ({frame, shapeStart, lxPx, rxPx, riseA, riseB}) => {
+  /** optional state for the left half; the cold open leaves it out so the winner stays hidden */
+  leftName?: string;
+}> = ({frame, shapeStart, lxPx, rxPx, riseA = 0, riseB, leftName}) => {
   const trace = tween(frame, shapeStart, 20, glide);
   // the states rise to the neutral plane with a long calm curve: nothing else is moving yet
   const grow = tween(frame, shapeStart + 14, 40, glide);
@@ -76,7 +79,7 @@ export const Shot1Scene: React.FC<{
         offsetY={H / 2 - 300}
       />
       <primitive object={grid} position={[0, mid[1], 0]} />
-      {one('Arkansas', lxPx, riseA, C.mint)}
+      {leftName && one(leftName, lxPx, riseA, C.mint)}
       {one('California', rxPx, riseB, C.red)}
       <Sync />
     </>

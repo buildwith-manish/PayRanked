@@ -9,23 +9,22 @@ import {MaskLine, MaskWords} from '../components/MaskText';
 import {MotionBlur} from '../components/MotionBlur';
 import {glide, ramp, snap, tween} from '../motion';
 import {byName, fmtUSD, SALARY} from '../data';
+import {SHOT_SECONDS} from '../timeline';
 import {C, F, H, W, sec, tabular} from '../theme';
 import {useDesignFrame} from '../clock';
 
-// Fix 1 (retention): collapsed the three animated limit chips into a single
-// inline footnote that appears beneath the formula result. This removes ~15 s
-// of stationary explanation from the methodology section and moves the
-// leaderboard / "Let's count down" beat 15 s earlier.
-export const SHOT3_FRAMES = sec(42); // was sec(57); saved 15 s
+// Method, cut from 42 s to 20 s. Two changes:
+//  1. The worked example is California, not Arkansas. The old one walked the winner's score and its $115,100 result
+//     across the screen, which gave away #1 before the countdown began. California is already on screen from the hook.
+//  2. The gauge leaves, the formula lands, and the leaderboard opens straight after it: no idle stretch in between.
+export const SHOT3_FRAMES = sec(SHOT_SECONDS.shot3);
 
-/** Shot-local times (0 = 0:33). */
+/** Shot-local times (0 = the start of the shot). */
 export const T = {
-  avg:     sec(3.5),  // needle springs to 100
-  toCal:   sec(7),    // 0:40
-  toArk:   sec(13),   // 0:46
-  formula: sec(19),   // 0:52
-  // chips beat removed — replaced by inline footnote at formula + result
-  rail:    sec(34),   // 1:07  (was 1:22)
+  avg:     sec(2.5),  // needle springs to 100
+  toCal:   sec(5),    // and swings to California
+  formula: sec(9.5),
+  rail:    sec(16.5), // leaderboard opens, "Let's count down"
 };
 
 /** Label under the gauge: rises from behind a line, holds, then drops back. */
@@ -58,20 +57,17 @@ const DIRS: [number, number][] = [[-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1
 export const Shot3: React.FC = () => {
   const f = useDesignFrame();
   const cal = byName('California');
-  const ark = byName('Arkansas');
 
   const needle = useNeedle([
     {at: T.avg,   value: 100},
     {at: T.toCal, value: cal.rpp},
-    {at: T.toArk, value: ark.rpp},
   ]);
-  const tint    = f < T.toCal ? C.text : f < T.toArk ? C.red : C.emerald;
+  const tint    = f < T.toCal ? C.text : C.red;
   const pricier = Math.round(cal.rpp - 100);
-  const cheaper = Math.round(100 - ark.rpp);
-  const gaugeOpacity = 1 - ramp(f, sec(18), sec(18) + 15, glide);
+  const gaugeOpacity = 1 - ramp(f, T.formula - 30, T.formula - 15, glide);
 
   // formula tokens, built from the data
-  const tokens     = ['$100,000', '÷', '(', ark.rpp.toFixed(1), '÷', '100', ')', '='];
+  const tokens     = ['$100,000', '÷', '(', cal.rpp.toFixed(1), '÷', '100', ')', '='];
   const resultDelay = T.formula + tokens.length * 5 + 6;
   const formulaOpacity = win(f, T.formula, T.rail - 6, 10);
 
@@ -89,9 +85,8 @@ export const Shot3: React.FC = () => {
         <div style={{position: 'absolute', left: W / 2 - 450, top: 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
           <Gauge value={needle} size={900} tint={tint} drawFrames={60} jitter={f > T.toCal && f < T.formula} />
         </div>
-        <PopLabel text="US average"                                            start={T.avg   + 14} end={T.toCal + 6}  color={C.text}    />
-        <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.toArk + 4}  color={C.red}     />
-        <PopLabel text={`Arkansas ${ark.rpp.toFixed(1)}: about ${cheaper}% cheaper`}   start={T.toArk + 28} end={T.formula - 2} color={C.mint}    />
+        <PopLabel text="US average" start={T.avg + 14} end={T.toCal + 6} color={C.text} />
+        <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.formula - 2} color={C.red}     />
 
         {/* formula, token by token */}
         <div
@@ -128,7 +123,7 @@ export const Shot3: React.FC = () => {
                     display: 'inline-block',
                     opacity: ramp(f, d, d + 6),
                     transform: `translate(${dx * 520 * (1 - p)}px, ${dy * 360 * (1 - p)}px) scale(${pulse})`,
-                    color: isEq ? C.mint : t === '÷' ? C.muted : C.text,
+                    color: t === '÷' ? C.muted : C.text,
                   }}
                 >
                   {t}
@@ -137,7 +132,7 @@ export const Shot3: React.FC = () => {
             );
           })}
           <span style={{opacity: ramp(f, resultDelay, resultDelay + 6)}}>
-            <Count to={ark.display} start={resultDelay} duration={54} size={104} color={C.mint} glow={20} />
+            <Count to={cal.display} start={resultDelay} duration={54} size={104} color={C.red} glow={20} />
           </span>
         </div>
 
@@ -157,7 +152,7 @@ export const Shot3: React.FC = () => {
           }}
         >
           <MaskLine start={resultDelay + 44} dur={22}>
-            {fmtUSD(SALARY)} salary in {ark.name} buys what {fmtUSD(ark.display)} buys at the US average
+            {fmtUSD(SALARY)} salary in {cal.name} buys what {fmtUSD(cal.display)} buys at the US average
           </MaskLine>
         </div>
 

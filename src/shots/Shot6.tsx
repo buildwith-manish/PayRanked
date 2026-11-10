@@ -10,17 +10,18 @@ import {SourceTag, win} from '../components/common';
 import {byName, fmtUSD, gap} from '../data';
 import {C, F, H, W, clamp, sec, tabular} from '../theme';
 import {useDesignFrame} from '../clock';
+import {SHOT_SECONDS} from '../timeline';
 
-export const SHOT6_FRAMES = sec(75); // 7:45 to 9:00
+export const SHOT6_FRAMES = sec(SHOT_SECONDS.shot6); // was 75 s; the payoff has landed, so the outro is a recap, one ask and an end screen
 
-/** Shot-local times (0 = 7:45). */
+/** Shot-local times (0 = the end of the reality check). End screen: 7 s. */
 export const T = {
-  cards: sec(1),
-  pct: sec(25), // 8:10
-  next: sec(35), // 8:20
-  cursor: sec(40),
-  click: sec(43.5),
-  end: sec(55), // 8:40
+  cards: sec(0.5),
+  pct: sec(3),
+  next: sec(5.5),
+  cursor: sec(8.5),
+  click: sec(11),
+  end: sec(13),
 };
 
 export const BUTTON = {x: 1500, y: 560};
