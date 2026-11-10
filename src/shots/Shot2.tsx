@@ -9,8 +9,8 @@ import {useDesignFrame} from '../clock';
 export const SHOT2_FRAMES = sec(3.5);
 
 /** Design frames for the fade in from black (matching Shot 1's fade-out) and the dissolve to black at the end. */
-const FADE_IN = 6;   // 0.2 s fade in from black — matches Shot 1's fade-out so there is no hard cut
-const FADE_OUT = 8;  // 0.27 s dissolve to black at the end — smoother than the old 0.2 s
+const FADE_IN = 3;   // 0.1 s — quick fade, barely shows background   // 0.2 s fade in from black — matches Shot 1's fade-out so there is no hard cut
+const FADE_OUT = 4;  // 0.13 s — quick fade out  // 0.27 s dissolve to black at the end — smoother than the old 0.2 s
 
 /**
  * The 3.5 s PayRanked intro. It has its own audio, so the music bed must be muted during this shot.

@@ -370,13 +370,13 @@ export const Shot1: React.FC = () => {
             </div>
 
             {f >= SLAM + 20 && (
-              <div style={{position: 'absolute', left: 0, right: 0, top: 750, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 40, color: C.text, opacity: 1 - 0.7 * rest2}}>
+              <div style={{position: 'absolute', left: 0, right: 0, top: 730, textAlign: 'center', fontFamily: F.display, fontWeight: 500, fontSize: 40, color: C.text, opacity: 1 - 0.7 * rest2}}>
                 <MaskWords text="more buying power than California" start={SLAM + 20} step={4} />
               </div>
             )}
 
             {/* 10-15s: three chips close the door on the obvious guesses. Neither state is in the top 10. */}
-            <div style={{position: 'absolute', left: 0, right: 0, top: 870, display: 'flex', justifyContent: 'center', gap: 28}}>
+            <div style={{position: 'absolute', left: 0, right: 0, top: 820, display: 'flex', justifyContent: 'center', gap: 28}}>
               <Chip text="NOT TEXAS" delay={CHIPS_START} size={44} />
               <Chip text="NOT FLORIDA" delay={CHIPS_START + 14} size={44} />
               <Chip text="TOP 10, RANKED" delay={CHIPS_START + 28} color={C.amber} size={44} pulse />

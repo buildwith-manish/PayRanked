@@ -18,7 +18,7 @@ export const Background: React.FC<{
   const {durationInFrames} = useVideoConfig();
   const camera = drift ? interpolate(frame, [0, durationInFrames / K], [1, 1.04], {extrapolateRight: 'clamp'}) : 1;
   const gridShift = (frame * 0.25) % 80;
-  const pulse = 0.28 + 0.07 * Math.sin(frame / 14);
+  const pulse = 0.18 + 0.05 * Math.sin(frame / 14);
   return (
     <AbsoluteFill
       style={{
@@ -35,7 +35,7 @@ export const Background: React.FC<{
       />
       <AbsoluteFill
         style={{
-          background: `radial-gradient(circle at ${glowX + Math.sin(frame / 90) * 30 - parallax[0] * 0.25}px ${glowY + parallax[1] * 0.25}px, ${glowColor} 0%, transparent 42%)`,
+          background: `radial-gradient(circle at ${glowX + Math.sin(frame / 90) * 30 - parallax[0] * 0.25}px ${glowY + parallax[1] * 0.25}px, ${glowColor} 0%, transparent 35%)`,
           opacity: pulse + tint,
         }}
       />
