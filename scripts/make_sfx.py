@@ -245,18 +245,34 @@ def widen(x, amt=0.3, lo=220.0):
     return np.stack([m + s, m - s], axis=1)
 
 
-def room(x, rt=0.9, wet=0.25, bright=4200, pre=0.008):
-    """Short synthetic room: decaying noise, different in each ear. The tail is a bright part plus a darker, longer
-    part, so it gets softer as it dies (a gentle low-pass that deepens with time). Returns stereo."""
+def room(x, rt=0.9, wet=0.25, bright=4200, pre=0.008, early=True):
+    """Short synthetic room, built the way a real small room actually works: a handful of discrete early
+    reflections first (what your ear uses to judge the size and the surfaces of a space), THEN the dense
+    diffuse tail (what the old version had on its own). Filtered noise alone has no early reflections, so
+    even a good one reads as "a reverb plug-in" rather than "a space" -- the reflections are most of what
+    was missing. Returns stereo."""
     n = int(rt * 1.4 * SR)
     tt = np.arange(n) / SR
     tau = rt / 6.9 * 2.2
     out = []
-    for _ in range(2):
+    for ear in range(2):
         ir = lp(rng.standard_normal(n), bright) * np.exp(-tt / tau)
         ir += 0.9 * lp(rng.standard_normal(n), 1500) * np.exp(-tt / (tau * 1.7))
         ir = hp(ir, 140)  # no sub in the reverb: the low end stays tight and in the dry thump
         ir[: int(pre * SR)] = 0
+        if early:
+            # 5-6 discrete early reflections per ear, at co-prime-ish millisecond delays (avoids the comb-y
+            # ringing you get from evenly spaced taps) and slightly different per ear, so the space feels
+            # like it has real walls instead of being perfectly symmetric. Amplitude falls off with delay
+            # the way a reflection off a farther surface arrives quieter, and each tap is a touch darker
+            # than the last (a real surface absorbs more high end than low on every bounce).
+            taps_ms = [7, 11, 17, 23, 31, 41] if ear == 0 else [9, 13, 19, 29, 37, 47]
+            refl = np.zeros(n)
+            for k, ms in enumerate(taps_ms):
+                d = int(ms / 1000 * SR)
+                if d < n:
+                    refl[d] += 0.55 * (0.72 ** k)
+            ir += lp(refl, bright * 0.65)
         ir /= np.sqrt(np.sum(ir ** 2)) + 1e-9
         out.append(np.pad(signal.fftconvolve(x, ir), (0, 1))[: len(x) + n])
     dry = np.pad(x, (0, n))
@@ -293,6 +309,12 @@ def true_peak_limit(x, ceiling=0.89):
         gain = np.maximum(gain, np.where(np.abs(up) > ceiling, ceiling / (np.abs(up) + 1e-9), 1.0))
         up = up * gain
     return signal.resample_poly(up, 1, 4)[:len(x)]
+
+
+def _true_peak(x):
+    """Measure the true peak (max of 4x oversampled signal). Used for true-peak-aware normalization."""
+    up = signal.resample_poly(x, 4, 1)
+    return float(np.max(np.abs(up)))
 
 
 def transient_shaper(x, attack_gain=1.3, sustain_gain=0.85, freq=2500.0):
@@ -364,14 +386,32 @@ def finish(name, x, peak=0.0, mono=False, tail_fade=0.02, drives=DRIVES):
     if name in ('hit_big', 'hit_med', 'hit_small', 'stamp', 'lock', 'pin_land', 'pop', 'click'):
         x = transient_shaper(x, attack_gain=1.25, sustain_gain=0.88, freq=2500.0)
 
-    # True-peak limiter: prevent inter-sample peaks from clipping on playback
+    # True-peak limiter: smooth gain reduction for inter-sample peaks over ceiling.
     x = true_peak_limit(x, LEVEL)
 
-    x = x / (np.max(np.abs(x)) + 1e-9) * LEVEL
+    # Normalize to LEVEL based on TRUE peak (4x oversampled), not sample peak.
+    # The old code used sample peak here, which undid the limiter: after true_peak_limit
+    # reduced the gain to bring true peak down to LEVEL, sample peak was now < LEVEL,
+    # so this line scaled back UP to sample peak LEVEL — pushing true peak back above
+    # LEVEL. Measuring true peak instead means the output's true peak is exactly LEVEL.
+    if x.ndim == 2:
+        tp = max(_true_peak(x[:, i]) for i in range(x.shape[1]))
+    else:
+        tp = _true_peak(x)
+    if tp > 1e-9:
+        x = x * (LEVEL / tp)
     target = LOCKED[name]['rms'] - 2.0
     for drive in drives:
         y = x if drive is None else sat(x / LEVEL, drive) * LEVEL
-        y = y / (np.max(np.abs(y)) + 1e-9) * LEVEL
+        # Normalize to LEVEL based on TRUE peak, not sample peak. The old code used
+        # sample peak here too, which meant every iteration of the soft-clip loop
+        # pushed true peak back above LEVEL — the same bug as the pre-loop normalize.
+        if y.ndim == 2:
+            tp_y = max(_true_peak(y[:, i]) for i in range(y.shape[1]))
+        else:
+            tp_y = _true_peak(y)
+        if tp_y > 1e-9:
+            y = y * (LEVEL / tp_y)
         if _rms_db(y) >= target:
             break
     lib[name] = (y, peak)
@@ -392,6 +432,19 @@ def glass(f, dur, decay=0.9, atk=0.002, tick=0.0, ratios=(1.0, 2.0, 3.0, 4.2, 5.
     return x
 
 
+# ---------------------------------------------------------------- multiband saturation
+def multiband_sat(x, lo=1.8, mid=1.25, hi=0.85, split_lo=220, split_hi=2800):
+    """Saturate three bands separately instead of the whole signal at once. One global tanh makes the
+    highs just as fuzzy as the lows the moment the low end pushes it hard, which is what "digital-sounding
+    distortion" usually is. Splitting first means the sub/body can be driven hard for thickness while the
+    crack stays comparatively clean, the way an analogue channel strip with separate saturating stages
+    behaves."""
+    low = lp(x, split_lo)
+    high = hp(x, split_hi)
+    mid_band = x - low - high
+    return sat(low, lo) + sat(mid_band, mid) + sat(high, hi)
+
+
 # ---------------------------------------------------------------- hits
 def hit(name, big=1.0, dur=2.4, tail=1.1, wet=0.28, sub=(D2, D1), crack=1.0, body=1.0, metal=0.0, drive=1.7):
     """Layered impact. big scales the length and weight of the low layers. sub = (start, end) pitch of the sub drop."""
@@ -404,7 +457,7 @@ def hit(name, big=1.0, dur=2.4, tail=1.1, wet=0.28, sub=(D2, D1), crack=1.0, bod
     mid = sine(fsub * 2.0, t) * expd(t, 0.11 * big + 0.03) * 0.42 * body
     mid += bp(noise(dur), 140, 700) * expd(t, 0.07 * big + 0.035) * 0.9 * body
     mid += lp(noise(dur), 200) * expd(t, 0.16 * big) * 0.8 * body
-    low = sat(s + mid, drive)  # saturation on the body only, the crack stays clean
+    low = multiband_sat(s + mid, lo=drive, mid=drive * 0.8, hi=drive * 0.55)  # band-split: push the sub/body hard for thickness without the crack inheriting that same fuzz
     # 3. crack: the transient, so the hit has an edge
     c = bp(noise(dur), 1800, 9000) * expd(t, 0.010 + 0.005 * big) * 0.8 * crack
     c += hp(noise(dur), 500) * expd(t, 0.0035) * 0.55 * crack
@@ -414,7 +467,7 @@ def hit(name, big=1.0, dur=2.4, tail=1.1, wet=0.28, sub=(D2, D1), crack=1.0, bod
         for fr, a, tau in [(1180, 1.0, 0.22), (2630, 0.6, 0.14), (4210, 0.35, 0.09)]:
             m += (tone(fr, t) + 0.4 * tone(fr * 1.006, t, phase=0.7)) * a * expd(t, tau)
         m *= 0.3 * metal
-    x = sat(low + c + m, 1.25)  # glue: rounds the crack so it sits on the body instead of sticking out of it
+    x = multiband_sat(low + c + m, lo=1.1, mid=1.3, hi=0.95)  # glue stage, band-split for the same reason
     x = room(x, rt=tail, wet=wet)  # stereo, tail darkens as it dies
     x = widen(x, 0.28)
     finish(name, x, peak=0.0, tail_fade=0.06)
@@ -435,17 +488,29 @@ for i, (ft, fl) in enumerate([(1760.0, A2), (2093.0, C3), (2349.3, D3)]):
 
 
 # ---------------------------------------------------------------- coins
-def coin(name, f0):
+def chladni_ratios(n_partials=5, p=2.05, m0=2):
+    """Partial ratios from Chladni's law for a free circular plate: f is proportional to (m + 2n)^p, where
+    m counts nodal diameters, n counts nodal circles, and p sits around 2 for a flat disc (it runs 1.4-2.4
+    for bell-like non-flat shapes, so a coin's slight dish and milled edge land inside that range too).
+    Walking the mode index m up from a starting mode m0 at n=0 gives a real, derived inharmonic ratio
+    series instead of a hand-picked one -- and it lands close to the ratios this file already used by ear
+    (2.32, 4.25, 6.63...), which says the original guess was already in the right family."""
+    return [((m0 + k) / m0) ** p for k in range(n_partials)]
+
+
+def coin(name, f0, p=2.05):
     dur = 0.9
     t = t_(dur)
-    phases = rng.uniform(0, 6.28, 6)
+    phases = rng.uniform(0, 6.28, 7)
+    ratios = chladni_ratios(n_partials=6, p=p)  # one more partial than before: a denser, more metallic ring
+    amps = [1.0, 0.72, 0.5, 0.33, 0.21, 0.13]
 
     def strike(f, short=1.0):
         y = np.zeros_like(t)
-        # inharmonic partials; the higher the partial the faster it dies (tau ~ 1 / ratio)
-        for k, (ratio, a) in enumerate([(1.0, 1.0), (2.32, 0.7), (4.25, 0.5), (6.63, 0.32), (9.38, 0.2)]):
+        # inharmonic partials from Chladni's law; the higher the partial the faster it dies (tau ~ 1 / ratio)
+        for k, (ratio, a) in enumerate(zip(ratios, amps)):
             y += tone(f * ratio, t, phases[k]) * a * expd(t, 0.22 / ratio * short)
-        y += 0.5 * tone(f * 1.004, t, phases[5]) * expd(t, 0.22 * short)  # detuned twin, slow beating shimmer
+        y += 0.5 * tone(f * 1.004, t, phases[6]) * expd(t, 0.22 * short)  # detuned twin, slow beating shimmer
         return y
 
     x = strike(f0)
@@ -456,11 +521,14 @@ def coin(name, f0):
         d = int(delay * SR)
         b = strike(f0 * ratio, 0.5)
         x[d:] += g * b[:-d]
+    x = multiband_sat(x, lo=1.15, mid=1.3, hi=1.0, split_lo=600, split_hi=4000)  # light glue, same reason as hit()
     finish(name, x, peak=0.0, mono=True)
 
 
-for i, f0 in enumerate([1568.0, 1760.0, 2093.0, 2349.3]):  # G6 A6 C7 D7, so a pour of coins stays in the key
-    coin(f'coin_{i}', f0)
+# G6 A6 C7 D7, so a pour of coins stays in the key; p varies a touch per coin, like four coins of slightly
+# different alloy/thickness would
+for i, (f0, p_val) in enumerate(zip([1568.0, 1760.0, 2093.0, 2349.3], [2.0, 2.05, 2.08, 2.12])):
+    coin(f'coin_{i}', f0, p=p_val)
 
 
 # ---------------------------------------------------------------- whooshes
