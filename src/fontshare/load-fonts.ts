@@ -13,7 +13,74 @@
  *    style={{ fontFamily: PAYRANKED_FONTS.body }}
  */
 
-import "./fonts.css";
+import {staticFile} from "remotion";
+
+// Self-hosted Fontshare fonts loaded via staticFile() so Remotion's webpack doesn't try to resolve the
+// absolute /fonts/... URLs in fonts.css at build time. The @font-face rules are injected at runtime instead.
+const FONT_BASE = "fonts/fontshare";
+const fontFaceCSS = `
+@font-face {
+  font-family: "Satoshi";
+  src: url("${staticFile(`${FONT_BASE}/satoshi/Satoshi-Variable.woff2`)}") format("woff2-variations");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("${staticFile(`${FONT_BASE}/satoshi/Satoshi-VariableItalic.woff2`)}") format("woff2-variations");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Clash Display";
+  src: url("${staticFile(`${FONT_BASE}/clash-display/ClashDisplay-Variable.woff2`)}") format("woff2-variations");
+  font-weight: 200 700;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("${staticFile(`${FONT_BASE}/general-sans/GeneralSans-Variable.woff2`)}") format("woff2-variations");
+  font-weight: 300 700;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("${staticFile(`${FONT_BASE}/general-sans/GeneralSans-VariableItalic.woff2`)}") format("woff2-variations");
+  font-weight: 300 700;
+  font-display: swap;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("${staticFile(`${FONT_BASE}/cabinet-grotesk/CabinetGrotesk-Variable.woff2`)}") format("woff2-variations");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Cabinet Grotesk Static";
+  src: url("${staticFile(`${FONT_BASE}/cabinet-grotesk/CabinetGrotesk-Extrabold.woff2`)}") format("woff2");
+  font-weight: 800;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Cabinet Grotesk Static";
+  src: url("${staticFile(`${FONT_BASE}/cabinet-grotesk/CabinetGrotesk-Black.woff2`)}") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+}
+`;
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = fontFaceCSS;
+  document.head.appendChild(style);
+}
 
 import { loadFont as loadJakarta } from "@remotion/google-fonts/PlusJakartaSans";
 import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";

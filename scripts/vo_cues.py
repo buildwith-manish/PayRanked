@@ -23,7 +23,7 @@ out = ['# Voice-over cue sheet', '',
        '`public/vo.wav` is one file that starts at 0:00 of the video. Then run `npm run vo-envelope` and set `vo: true` in',
        '`src/audio/config.ts`. Re-run this after any cut: the times below move with the timeline.', '',
        '## Sections', '', '| Section | Start | End | Length |', '|---|---|---|---|']
-names = {'shot1': 'Cold open', 'shot2': 'Intro (own sound, no voice)', 'shot3': 'Method', 'countdown': 'Countdown', 'shot5': 'Reality check', 'shot6': 'Outro'}
+names = {'shot1': 'Cold open', 'shot2': 'Intro (own sound, no voice)', 'shot3': 'Method', 'countdown': 'Countdown', 'shot5': 'Reality check', 'shot55': 'Practical takeaways', 'shot6': 'Outro'}
 for k, v in S.items():
     out.append(f"| {names[k]} | {mmss(v['start'])} | {mmss(v['start'] + v['dur'])} | {v['dur']:.1f} s |")
 
@@ -50,6 +50,7 @@ for _, label, r in sorted(rows, key=lambda x: x[0]):
         out.append(f"| {label} | {mmss(a)} | | | | | {mmss(a + r['dur'])} |")
 
 beats('Reality check beats', S['shot5']['start'], TM['shot5'])
+beats('Practical takeaways beats', S['shot55']['start'], TM['shot55'])  # EXTEND-4
 beats('Outro beats', S['shot6']['start'], TM['shot6'])
 out.append('')
 os.makedirs(os.path.join(ROOT, 'review'), exist_ok=True)

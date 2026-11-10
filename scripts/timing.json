@@ -22,13 +22,13 @@
       "start": 275.5,
       "dur": 100
     },
-    "shot6": {
-      "start": 485.5,
-      "dur": 23
-    },
     "shot55": {
       "start": 375.5,
       "dur": 110
+    },
+    "shot6": {
+      "start": 485.5,
+      "dur": 23
     }
   },
   "shot1": {
@@ -65,6 +65,14 @@
     "card5": 50,
     "card6": 58,
     "card7": 68
+  },
+  "shot55": {
+    "hook": 0,
+    "profile1": 5,
+    "profile2": 30,
+    "profile3": 55,
+    "formula": 80,
+    "tease": 100
   },
   "shot6": {
     "cards": 0.5,
@@ -215,13 +223,5 @@
       "from": 137.5,
       "dur": 10
     }
-  ],
-  "shot55": {
-    "hook": 0,
-    "profile1": 5,
-    "profile2": 30,
-    "profile3": 55,
-    "formula": 80,
-    "tease": 100
-  }
+  ]
 }
