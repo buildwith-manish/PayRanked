@@ -31,3 +31,22 @@ The clips are half size (960x540) to keep the render short; `npm run review` re-
 ## Not verified
 Clips were judged from frame sheets, not played back, and not with a voice-over. Motion feel (easing, weight) needs a
 look at full speed on your machine.
+
+## Production checklist addition (Fix 4)
+
+### 2× speed test — run before every final render
+
+Watch the half-resolution render at **2× playback speed** in your media player
+before you export the final. Anywhere that feels slow at 2× will feel slow to a
+first-time viewer at 1×. This catches pacing drag that individual frame checks miss.
+
+Known places to watch:
+- **0:33–0:52 (Shot 3 open):** gauge swings + labels. Should feel brisk at 2×.
+- **5:35–5:55 (Shot 5 bridge):** the three pivot lines. Should land one-two-three,
+  not drift. If the gaps between lines feel long at 2×, shorten the `sec(7)` and
+  `sec(13)` delays in `Shot5.tsx → T.bridge` lines.
+- **7:30–7:45 (Shot 5 close):** the cliffhanger card. Should feel like a question
+  being asked, not a card sitting on screen. If it lingers, trim `InfoCard end` from
+  `SHOT5_FRAMES + 60` down toward `SHOT5_FRAMES + 20`.
+- **Any countdown reveal:** if a state feels slow at 2×, the fact card or coin
+  animation is probably holding too long — trim `T.fact` or the `compact` tween.
