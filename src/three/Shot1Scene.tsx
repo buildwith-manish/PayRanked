@@ -79,16 +79,6 @@ export const Shot1Scene: React.FC<{
     );
   };
 
-  const grid = React.useMemo(() => {
-    const g = new THREE.GridHelper(2200, 44, C.mint, C.mint);
-    const m = g.material as THREE.LineBasicMaterial;
-    m.transparent = true;
-    m.opacity = 0.14;
-    m.toneMapped = false;
-    g.rotation.x = Math.PI / 2;
-    return g;
-  }, []);
-
   const mid = toWorld(W / 2, 300);
   return (
     <>
@@ -100,7 +90,6 @@ export const Shot1Scene: React.FC<{
         yaw={Math.sin(frame / 70) * 3}
         offsetY={H / 2 - 300}
       />
-      <primitive object={grid} position={[0, mid[1], 0]} />
       {leftName && one(leftName, lxPx, riseA, C.mint)}
       {one('California', rxPx, riseB, C.red)}
       <Sync />

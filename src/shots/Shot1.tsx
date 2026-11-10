@@ -202,12 +202,6 @@ export const Shot1: React.FC = () => {
   const sy = Math.cos(f * 3.1) * shake * 0.7;
   const punch = f >= SLAM ? 1 + 0.06 * Math.exp(-(f - SLAM) / 10) : 1;
 
-  // 0-1s: grid lines draw outward from the centre, quickly, as texture rather than as the subject
-  const gridP = tween(f, 0, 30, glide);
-  const gridOpacity = interpolate(f, [20, 80], [0.3, 0.06], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const lines: number[] = [];
-  for (let k = -6; k <= 6; k++) lines.push(k * 160);
-
   // 0-1s: a seam wipes the black frame into a split, and the states land on it
   const seamP = tween(f, SEAM_START, SHAPE_START - SEAM_START, glide);
   const splitTint = clamp((f - SHAPE_START) / 20) * 0.1;
@@ -225,15 +219,8 @@ export const Shot1: React.FC = () => {
       <AbsoluteFill style={{backgroundColor: '#000'}}>
         <Background drift>
           <AbsoluteFill style={{transform: `translate(${sx}px, ${sy}px) scale(${punch})`}}>
-            {/* grid draw-out */}
-            <svg width={W} height={H} style={{position: 'absolute', inset: 0, opacity: gridOpacity * (1 - 0.6 * rest)}}>
-              {lines.map((d) => (
-                <React.Fragment key={d}>
-                  <line x1={W / 2 + d} y1={H / 2 - (H / 2) * gridP} x2={W / 2 + d} y2={H / 2 + (H / 2) * gridP} stroke={C.mint} strokeWidth={2} />
-                  <line x1={W / 2 - (W / 2) * gridP} y1={H / 2 + d * 0.6} x2={W / 2 + (W / 2) * gridP} y2={H / 2 + d * 0.6} stroke={C.mint} strokeWidth={2} />
-                </React.Fragment>
-              ))}
-            </svg>
+            {/* The cold open used to draw two more grids on top of Background's own (a 160 px SVG one and a 3D floor grid),
+                which read as doubled lines. Background's grid is now the only one, like the rest of the video. */}
 
             {/* split tints and seam */}
             <div style={{position: 'absolute', left: 0, top: 0, width: W / 2, height: H, background: C.emerald, opacity: splitTint * (1 - rest)}} />
@@ -325,7 +312,8 @@ export const Shot1: React.FC = () => {
                 const postSlam = clamp((f - SLAM) / 8);        // 0→1 over 8 frames after slam
                 const breathe = drawn > 0 ? 0.6 + 0.4 * Math.sin(f / 14) : 0;
                 // Glow radius: grows as it draws, jumps on the slam, then breathes
-                const glowR = drawn * (8 + 4 * breathe) + postSlam * 10 * Math.exp(-(f - SLAM) / 12);
+                // was 8 + 4*breathe and a 10 px slam bump: the three stacked amber glows (drop-shadow, blurred copy, text) bloomed into a haze
+                const glowR = drawn * (3 + 2 * breathe) + postSlam * 4 * Math.exp(-(f - SLAM) / 12);
                 const glowOpacity = drawn * (0.75 + 0.25 * breathe);
                 return (
                   <svg width={W} height={H} style={{position: 'absolute', inset: 0, overflow: 'visible', filter: glowR > 0.5 ? `drop-shadow(0 0 ${glowR}px ${C.amber})` : undefined}}>
@@ -340,12 +328,12 @@ export const Shot1: React.FC = () => {
                       d="M 830 680 v 40 M 830 700 H 1090 M 1090 680 v 40"
                       fill="none"
                       stroke={C.amber}
-                      strokeWidth={22}
+                      strokeWidth={14}
                       strokeLinecap="round"
                       pathLength={1}
                       strokeDasharray={1}
                       strokeDashoffset={1 - dimLineP}
-                      opacity={glowOpacity * 0.55}
+                      opacity={glowOpacity * 0.3}
                       filter="url(#bracketGlow)"
                     />
                     {/* main stroke: thickened from 7 to 11px */}
@@ -376,7 +364,7 @@ export const Shot1: React.FC = () => {
                     opacity: Math.min(1, gapP(f) * 3),
                   }}
                 >
-                  <Count to={Math.round(g.amount / 1000)} from={0} start={SLAM} duration={24} size={132} color={C.amber} glow={22} prefix="≈ $" suffix="K" />
+                  <Count to={Math.round(g.amount / 1000)} from={0} start={SLAM} duration={24} size={132} color={C.amber} glow={9} prefix="≈ $" suffix="K" />
                 </div>
               )}
             </div>
