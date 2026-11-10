@@ -173,8 +173,8 @@
     "name": "Kansas",
     "rpp": 90.1,
     "rppExact": 90.068,
-    "fact": "[RESEARCH \u2014 Kansas median rent or notable stat]",
-    "factSource": "[RESEARCH \u2014 verify against Census ACS 2024]"
+    "fact": "Median rent $1,029 \u2014 24% below US",
+    "factSource": "Census ACS 2019\u20132023"
   },
   {
     "name": "West Virginia",
