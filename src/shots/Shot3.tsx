@@ -87,6 +87,22 @@ export const Shot3: React.FC = () => {
   return (
     <AbsoluteFill>
       <Background glowX={W / 2} glowY={H * 0.45}>
+        {/* v06 welcome overlay — "Welcome to PayRanked..." plays during Shot3 frames 0-4s.
+            The gauge is already on screen but the needle hasn't moved yet (T.avg = 11.6s).
+            This text fills the blank so the viewer has something to read while they hear the line. */}
+        <div style={{
+          position: 'absolute', left: 0, right: 0, top: 160,
+          textAlign: 'center',
+          opacity: win(f, 0, sec(5), 10),
+        }}>
+          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 72, color: C.text}}>
+            <MaskWords text="Welcome to PayRanked" start={2} step={3} dur={22} />
+          </div>
+          <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted}}>
+            <MaskWords text="where we rank places by what your money actually buys" start={16} step={2} dur={20} />
+          </div>
+        </div>
+
         {/* gauge */}
         <div style={{position: 'absolute', left: W / 2 - 450, top: 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
           <Gauge value={needle} size={900} tint={tint} drawFrames={60} jitter={f > T.toCal && f < T.formula} />
