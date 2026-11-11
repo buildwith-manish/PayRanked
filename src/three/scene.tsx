@@ -12,9 +12,9 @@ import {FLOOR} from './geometry';
 export const TUNE = {
   ambient: 0.25,
   hemi: 0.55,
-  key: 2.6, // warm key, upper left
+  key: 2.1, // warm key, upper left (was 2.6: flat map tops blew out to near-white)
   rim: 2.4, // cold back light, makes the bevels read
-  env: 0.55, // image-based light from the procedural studio
+  env: 0.38, // image-based light from the procedural studio (was 0.55)
   shadow: 0.55, // darkness of cast shadows on the floor
   fogNear: 2600,
   fogFar: 6500,
@@ -132,12 +132,12 @@ export const MapLights: React.FC<{
     <directionalLight position={[500, 1400, 260]} intensity={TUNE.rim} color="#5ad8ff" />
     {glow && glow.amount > 0.01 && (
       <>
-        <pointLight position={[glow.x, glow.y, glow.z]} color={glow.color} intensity={42000 * glow.amount} distance={800} decay={2} />
+        <pointLight position={[glow.x, glow.y, glow.z]} color={glow.color} intensity={9000 * glow.amount} distance={1100} decay={2} />
         <sprite position={[glow.x, glow.y, glow.z]} scale={[460, 460, 1]}>
           <spriteMaterial
             map={radialTexture()}
             color={glow.color}
-            opacity={0.16 * glow.amount}
+            opacity={0.09 * glow.amount}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
             transparent
@@ -175,12 +175,12 @@ export const Pin3D: React.FC<{
     <>
       {/* ripple: a dark under-ring gives the amber ring an edge against the pale state top, then the amber ring on top */}
       <mesh position={[x, y, z + 0.5]} scale={[r, r, 1]}>
-        <ringGeometry args={[0.8, 1.08, 64]} />
-        <meshBasicMaterial color="#06142B" transparent opacity={0.55 * (1 - ring) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
+        <ringGeometry args={[0.9, 1.05, 96]} />
+        <meshBasicMaterial color="#06142B" transparent opacity={0.4 * Math.pow(1 - ring, 1.6) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[x, y, z + 0.6]} scale={[r, r, 1]}>
-        <ringGeometry args={[0.86, 1, 64]} />
-        <meshBasicMaterial color="#FFB020" transparent opacity={Math.min(1, (1 - ring) * 1.4) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
+        <ringGeometry args={[0.95, 1, 96]} />
+        <meshBasicMaterial color="#FFB020" transparent opacity={0.85 * Math.pow(1 - ring, 1.6) * Math.min(1, drop * 2)} toneMapped={false} side={THREE.DoubleSide} />
       </mesh>
       <group position={[x, y, z + (1 - drop) * 90 * scale]} scale={[s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5), s * Math.min(1, drop * 1.5)]}>
         <mesh position={[0, 0, 0.27]} rotation={[-Math.PI / 2, 0, 0]} castShadow>

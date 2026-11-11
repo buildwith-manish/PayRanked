@@ -1,6 +1,6 @@
 import React from 'react';
 import * as THREE from 'three';
-import {snap, tween} from '../motion';
+import {glide, snap, tween} from '../motion';
 import {GEO} from '../components/USMap';
 import {FLOOR, rppColor, rppOf} from './geometry';
 import {State3D} from './State3D';
@@ -50,7 +50,9 @@ export const Map3D: React.FC<{
         if (hot) {
           // rises from the flat map on a snap curve (small overshoot, then it settles), colour fading in with it
           const rise = tween(frame, riseAt, RISE_DUR, snap);
-          const colour = UNREVEALED.clone().lerp(rppColor(rppOf(g.name)), clamp(rise));
+          // the target charges up into its own colour over the 1.3 s before it lifts (anticipation), so it never sits there as a pale grey patch
+          const arm = 0.55 * tween(frame, riseAt - 40, 40, glide);
+          const colour = UNREVEALED.clone().lerp(rppColor(rppOf(g.name)), Math.max(clamp(rise), arm));
           return (
             <State3D
               key={g.name}

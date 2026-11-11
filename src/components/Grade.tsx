@@ -27,18 +27,18 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
           {BLOOM && (
             <>
               {/* bright-pass: keeps only the hot, still-coloured parts */}
-              <feColorMatrix in="SourceGraphic" type="matrix" values="2 0 0 0 -1.15  0 2 0 0 -1.15  0 0 2 0 -1.15  0 0 0 1 0" result="hot" />
+              <feColorMatrix in="SourceGraphic" type="matrix" values="2 0 0 0 -1.4  0 2 0 0 -1.4  0 0 2 0 -1.4  0 0 0 1 0" result="hot" />
               <feGaussianBlur in="hot" stdDeviation="7" result="bloomA" />
               <feGaussianBlur in="hot" stdDeviation="16" result="bloomB" />
               <feComponentTransfer in="bloomA" result="bloomA2">
-                <feFuncR type="linear" slope="0.25" />
-                <feFuncG type="linear" slope="0.25" />
-                <feFuncB type="linear" slope="0.25" />
+                <feFuncR type="linear" slope="0.16" />
+                <feFuncG type="linear" slope="0.16" />
+                <feFuncB type="linear" slope="0.16" />
               </feComponentTransfer>
               <feComponentTransfer in="bloomB" result="bloomB2">
-                <feFuncR type="linear" slope="0.4" />
-                <feFuncG type="linear" slope="0.4" />
-                <feFuncB type="linear" slope="0.4" />
+                <feFuncR type="linear" slope="0.24" />
+                <feFuncG type="linear" slope="0.24" />
+                <feFuncB type="linear" slope="0.24" />
               </feComponentTransfer>
               <feBlend in="SourceGraphic" in2="bloomA2" mode="screen" result="b1" />
               <feBlend in="b1" in2="bloomB2" mode="screen" result="lit" />

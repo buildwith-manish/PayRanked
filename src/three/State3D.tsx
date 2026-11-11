@@ -40,10 +40,10 @@ export const State3D: React.FC<{
         color={c}
         emissive={base}
         emissiveIntensity={glow * (1 - dim)}
-        roughness={0.38 + dim * 0.3}
+        roughness={0.5 + dim * 0.25}
         metalness={0.12}
-        clearcoat={0.6 * (1 - dim)}
-        clearcoatRoughness={0.28}
+        clearcoat={0.22 * (1 - dim)}
+        clearcoatRoughness={0.4}
         envMapIntensity={1 - dim * 0.6}
       />
       <lineSegments

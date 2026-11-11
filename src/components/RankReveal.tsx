@@ -238,7 +238,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const camBlurY = (Math.abs(cam.target[1] - camPrev.target[1]) / camScale) * 0.8 + zoomPx * 0.6;
 
   // ---- 0-1s rank slam; 1-3s the number shrinks into a label above the name ----
-  const slamScale = (f: number) => 1 + 1.2 * (1 - tween(f, 0, 26, slam));
+  // lands on a long expo-out with no overshoot: a clean, heavy settle instead of a bouncing neon slab
+  const slamScale = (f: number) => 1 + 0.55 * (1 - tween(f, 0, 30, glide));
   const travel = (f: number) => tween(f, T.fly, 46, glide);
   const rankScale = (f: number) => slamScale(f) * lerp(1, 0.2, travel(f));
   const rankBlur = Math.min(16, Math.abs(rankScale(frame) - rankScale(frame - 1)) * (16 / K));
@@ -246,12 +247,12 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const rankX = lerp(W / 2, PANEL_X + est * 0.1, travel(frame));
   const rankY = lerp(H / 2, 118, travel(frame));
   // was lerp(80, 26) at full emerald: with the grade's bloom on top the slam blew out to a flat neon slab
-  const rankGlow = lerp(30, 10, travel(frame));
+  const rankGlow = lerp(14, 5, travel(frame));
 
   // ---- map state: the highlighted state lifts out of the map, the others fall back into the dark ----
   // the state rises when the camera is 70% in; the extra lift follows the same 12 frames behind it as before (1.1 s then 1.5 s)
   const riseAt = riseAtOf(fast);
-  const pop = tween(frame, riseAt + 12, 30, slam) * 30;
+  const pop = tween(frame, riseAt + 12, 40, glide) * 30;
   const dimOthers = ramp(frame, T.fly, sec(2.2), glide);
   const trace = tween(frame, sec(1.4), 36, glide);
   const pulse = 0.5 + 0.5 * Math.sin(frame / 14);
@@ -313,7 +314,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const showPanel = frame >= T.name;
 
   return (
-    <Aberration at={[0, T.dollars + COUNT_DUR]}>
+    <Aberration at={[0, T.dollars + COUNT_DUR]} peak={4}>
       <Background glowX={W * 0.62} glowY={H * 0.5} tint={0.2 * (1 - clamp(tween(frame, 0, 26, slam)))} parallax={[cam.target[0], cam.target[1]]}>
         {/* 3D map: extruded states, height = buying power */}
         <AbsoluteFill
@@ -322,7 +323,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             opacity: (1 - 0.5 * recede) * (1 - exit * 0.4),
           }}
         >
-          <MotionBlur dx={camBlurX} dy={camBlurY} shutter={0.5} cap={34} style={{position: 'absolute', inset: 0}}>
+          <MotionBlur dx={camBlurX} dy={camBlurY} shutter={0.38} cap={22} style={{position: 'absolute', inset: 0}}>
             <ThreeCanvas
               width={W}
               height={H}
@@ -381,7 +382,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             fontSize: 520,
             color: C.mint,
             lineHeight: 1,
-            textShadow: `0 0 ${rankGlow}px ${C.emerald}99`,
+            textShadow: `0 ${lerp(26, 8, travel(frame))}px ${lerp(60, 18, travel(frame))}px rgba(2,8,18,0.55), 0 0 ${rankGlow}px ${C.emerald}44`,
             whiteSpace: 'nowrap',
             ...tabular,
           }}
@@ -439,14 +440,14 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                         radius={22}
                         tint={C.emerald}
                         strength={1.2}
-                        glow={20}
+                        glow={10}
                         style={{
                           padding: '16px 40px',
                           fontFamily: F.display,
                           fontWeight: 700,
                           fontSize: 80,
                           color: C.mint,
-                          textShadow: `0 0 22px ${C.emerald}88`,
+                          textShadow: `0 0 12px ${C.emerald}44`,
                           opacity: ramp(frame, T.bea + 4, T.bea + 12, glide),
                           transform: `perspective(800px) rotateX(${flip}deg) translateX(${(1 - chipP(frame)) * -90}px)`,
                           ...tabular,
@@ -477,7 +478,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 >
                   <div style={{display: 'flex', alignItems: 'flex-end', gap: 18}}>
                     <div>
-                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? 110 : 128} color={C.mint} glow={14} />
+                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? 110 : 128} color={C.mint} glow={7} />
                       {/* follow-through: the gain rises into view once the wheels have settled */}
                       {/* fades out before the fact card arrives so it never peeks out behind the card */}
                       <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.mint, opacity: 0.9 * gainFade, ...tabular}}>
