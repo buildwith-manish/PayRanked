@@ -1,3 +1,4 @@
+import React, {createContext, useContext} from 'react';
 import {useCurrentFrame} from 'remotion';
 
 /**
@@ -15,9 +16,14 @@ export const DESIGN_FPS = 30;
 export const FPS = 60;
 /** Render frames per design frame. */
 export const K = FPS / DESIGN_FPS;
+const FRAME_OFFSET = createContext(0);
 
 /** Design frames -> render frames (for Composition, Sequence and Audio props). */
 export const toReal = (designFrames: number) => Math.round(designFrames * K);
 
 /** The current frame on the 30 fps design clock. Fractional at 60 fps (0, 0.5, 1, 1.5 ...). */
-export const useDesignFrame = () => useCurrentFrame() / K;
+export const useDesignFrame = () => useCurrentFrame() / K + useContext(FRAME_OFFSET);
+
+export const FrameOffset: React.FC<{offset: number; children: React.ReactNode}> = ({offset, children}) => (
+  React.createElement(FRAME_OFFSET.Provider, {value: offset}, children)
+);

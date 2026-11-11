@@ -15,8 +15,8 @@ import {Shot55, SHOT55_FRAMES} from './shots/Shot55'; // EXTEND-4: practical tak
 import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
 import {Watermark} from './components/Watermark';
-import {C, FPS, H, W} from './theme';
-import {K, toReal} from './clock';
+import {C, FPS, H, W, sec} from './theme';
+import {FrameOffset, K, toReal} from './clock';
 import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
@@ -26,18 +26,18 @@ import voManifest from './audio/voiceover-manifest.json';
 import {AUDIO} from './audio/config';
 import {musicGain} from './audio/duck';
 
-const Countdown: React.FC = () => (
+const Countdown: React.FC<{withAudio?: boolean}> = ({withAudio = true}) => (
   <AbsoluteFill>
     {timeline.map((t, i) => (
       <Sequence key={t.label} from={toReal(t.from)} durationInFrames={toReal(t.dur)} name={`${t.label} ${t.names.join(' + ')}`}>
         <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} versus={t.versus} />
-        <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
+        {withAudio && <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />}
       </Sequence>
     ))}
     {breaks.map((b, i) => (
       <Sequence key={b.kind} from={toReal(b.from)} durationInFrames={toReal(b.dur)} name={`Break ${b.kind}`}>
         <Break kind={b.kind} rail={b.rail} durationInFrames={b.dur} />
-        <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />
+        {withAudio && <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />}
       </Sequence>
     ))}
   </AbsoluteFill>
@@ -58,43 +58,128 @@ const graded =
     </>
   );
 
-const Video1: React.FC = () => (
+export const Video1: React.FC<{withAudio?: boolean}> = ({withAudio = true}) => (
   <Grade>
   <AbsoluteFill style={{backgroundColor: C.navy3}}>
     {/* voice-over and music bed (ducked by the voice, dipped on impacts); every sound effect is inside its shot's Sequence */}
-    <MasterAudio />
+    {withAudio && <MasterAudio />}
     <Sequence from={toReal(START.shot1)} durationInFrames={toReal(SHOT1_FRAMES)} name="Shot 1 Cold open">
       <Shot1 />
-      <SfxTrack cues={CUES.shot1} offset={START.shot1} />
+      {withAudio && <SfxTrack cues={CUES.shot1} offset={START.shot1} />}
     </Sequence>
     <Sequence from={toReal(START.shot2)} durationInFrames={toReal(SHOT2_FRAMES)} name="Shot 2 Intro">
       <Shot2 />
     </Sequence>
     <Sequence from={toReal(START.shot3)} durationInFrames={toReal(SHOT3_FRAMES)} name="Shot 3 Method">
       <Shot3 />
-      <SfxTrack cues={CUES.shot3} offset={START.shot3} />
+      {withAudio && <SfxTrack cues={CUES.shot3} offset={START.shot3} />}
     </Sequence>
     <Sequence from={toReal(START.shot4)} durationInFrames={toReal(COUNTDOWN_TOTAL)} name="Shot 4 Countdown">
-      <Countdown />
+      <Countdown withAudio={withAudio} />
     </Sequence>
     <Sequence from={toReal(START.shot5)} durationInFrames={toReal(SHOT5_FRAMES)} name="Shot 5 Reality check">
       <Shot5 />
-      <SfxTrack cues={CUES.shot5} offset={START.shot5} />
+      {withAudio && <SfxTrack cues={CUES.shot5} offset={START.shot5} />}
     </Sequence>
     {/* EXTEND-4: Shot 5.5 Practical Takeaways — 80s, sits between Reality Check and Outro */}
     <Sequence from={toReal(START.shot55)} durationInFrames={toReal(SHOT55_FRAMES)} name="Shot 5.5 Practical">
       <Shot55 />
-      <SfxTrack cues={CUES.shot55} offset={START.shot55} />
+      {withAudio && <SfxTrack cues={CUES.shot55} offset={START.shot55} />}
     </Sequence>
     <Sequence from={toReal(START.shot6)} durationInFrames={toReal(SHOT6_FRAMES)} name="Shot 6 Outro">
       <Shot6 />
-      <SfxTrack cues={CUES.shot6} offset={START.shot6} />
+      {withAudio && <SfxTrack cues={CUES.shot6} offset={START.shot6} />}
     </Sequence>
     {/* Channel watermark — fades in at 5s, fades out 18s before end. Sits on top of every shot. */}
     <Watermark />
   </AbsoluteFill>
   </Grade>
 );
+
+type ShortSpec = {id: 2 | 3 | 4 | 5 | 6 | 7; sourceStart: number; seconds: number};
+export const SHORTS_2_TO_7: ShortSpec[] = [
+  {id: 2, sourceStart: 109, seconds: 55},
+  {id: 3, sourceStart: 164, seconds: 40},
+  {id: 4, sourceStart: 204, seconds: 50},
+  {id: 5, sourceStart: 254, seconds: 40},
+  {id: 6, sourceStart: 429, seconds: 30},
+  {id: 7, sourceStart: 484, seconds: 45},
+];
+
+const SegmentAudio: React.FC<{sourceStart: number; seconds: number}> = ({sourceStart, seconds}) => {
+  const sourceEnd = sourceStart + seconds;
+  return (
+    <>
+      {AUDIO.vo && voManifest.map((clip: any) => {
+        const shotStart = clip.shot === 'shot1' ? 0 : clip.shot === 'shot3' ? 30.5 : clip.shot === 'shot4' ? 109 : clip.shot === 'shot5' ? 344 : clip.shot === 'shot55' ? 429 : 539;
+        const clipStart = shotStart + clip.at - clip.lead;
+        const clipEnd = clipStart + clip.duration;
+        if (clipEnd <= sourceStart || clipStart >= sourceEnd) return null;
+        const trim = Math.max(0, sourceStart - clipStart);
+        const localStart = Math.max(0, clipStart - sourceStart);
+        const duration = Math.min(clipEnd, sourceEnd) - Math.max(clipStart, sourceStart);
+        return (
+          <Sequence key={clip.id} from={toReal(localStart)} durationInFrames={toReal(duration) + 10} layout="none" name={`short vo ${clip.id}`}>
+            <Audio src={staticFile(clip.file)} startFrom={toReal(trim)} volume={AUDIO.voLevel} />
+          </Sequence>
+        );
+      })}
+      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sourceStart)} volume={(f) => musicGain(sourceStart + f / K)} />}
+    </>
+  );
+};
+
+const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, seconds}) => (
+  <AbsoluteFill>
+    {timeline.map((t, i) => {
+      const from = t.from - offset;
+      const end = from + t.dur;
+      if (end <= 0 || from >= sec(seconds)) return null;
+      return (
+        <Sequence key={t.label} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(t.dur, seconds - Math.max(0, from)))} name={`${t.label} ${t.names.join(' + ')}`}>
+          <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} versus={t.versus} />
+          <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
+        </Sequence>
+      );
+    })}
+    {breaks.map((b, i) => {
+      const from = b.from - offset;
+      const end = from + b.dur;
+      if (end <= 0 || from >= sec(seconds)) return null;
+      return (
+        <Sequence key={b.kind} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(b.dur, seconds - Math.max(0, from)))} name={`Break ${b.kind}`}>
+          <Break kind={b.kind} rail={b.rail} durationInFrames={b.dur} />
+          <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />
+        </Sequence>
+      );
+    })}
+  </AbsoluteFill>
+);
+
+export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
+  const isCountdown = spec.id <= 5;
+  const localOffset = isCountdown ? sec(spec.sourceStart) - START.shot4 : sec(spec.sourceStart) - START.shot55;
+  return (
+    <AbsoluteFill style={{backgroundColor: C.navy3}}>
+      <Short1Landscape>
+        <Grade>
+          <AbsoluteFill>
+            {isCountdown ? (
+              <CountdownSegment offset={localOffset} seconds={spec.seconds} />
+            ) : (
+              <FrameOffset offset={localOffset}>
+                <Shot55 />
+                <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
+              </FrameOffset>
+            )}
+            <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
+            <Watermark />
+          </AbsoluteFill>
+        </Grade>
+      </Short1Landscape>
+    </AbsoluteFill>
+  );
+};
 
 // Each standalone composition plays the same sound as it does inside Video1 (same cues, same voice-over slice).
 const GradedShot1 = graded(Shot1, START.shot1, CUES.shot1);
@@ -180,6 +265,18 @@ export const Root: React.FC = () => (
   <>
     <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
     <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={1080} height={1920} fps={FPS} />
+    {SHORTS_2_TO_7.map((spec) => (
+      <Composition
+        key={spec.id}
+        id={`Short${spec.id}-Vertical`}
+        component={ShortSegment}
+        durationInFrames={toReal(sec(spec.seconds))}
+        width={1080}
+        height={1920}
+        fps={FPS}
+        defaultProps={{spec}}
+      />
+    ))}
     <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
     <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
     <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
