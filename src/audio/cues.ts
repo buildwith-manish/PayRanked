@@ -495,6 +495,12 @@ export const shot55Cues = (): Cue[] => {
   k.push(cue('bell_ring', T55.tease + 8, 0.5));
   k.push(cue('hit_small', T55.tease + 12, 0.38));
   k.push(cue('shimmer', T55.tease + 18, 0.3));
+  // subscribe button: pops in, the cursor lands (soft tick), the click, then the "Subscribed" chime + bell
+  k.push(cue('blip_2', T55.subIn + 6, 0.3));
+  k.push(cue('tick_1', T55.subHover, 0.3));
+  k.push(cue('click', T55.subClick, 0.55));
+  k.push(cue('ding_hi', T55.subClick + 6, 0.4));
+  k.push(cue('bell_ring', T55.subClick + 10, 0.3));
   return tidy(k);
 };
 

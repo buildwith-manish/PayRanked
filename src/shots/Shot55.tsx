@@ -36,6 +36,11 @@ export const T = {
   profile3:  sec(55),    // Early career card flips in (25 s read time)
   formula:   sec(80),    // The formula reveal with count-up (20 s, was 10 s — more time to read)
   tease:     sec(100),   // "Cities next. Where does $50K actually go?" (10 s, was 5 s)
+  // subscribe button, all inside the tease window (+300 frames): appears, cursor travels to it, hovers, clicks
+  subIn:     sec(100) + 84,
+  subMove:   sec(100) + 112,
+  subHover:  sec(100) + 146,
+  subClick:  sec(100) + 176,
 };
 
 const PROFILE_CARDS: {
@@ -227,7 +232,7 @@ export const Shot55: React.FC = () => {
                 position: 'absolute',
                 left: 0,
                 right: 0,
-                top: 96,
+                top: 64,
                 display: 'flex',
                 justifyContent: 'center',
                 opacity: ramp(f, T.tease, T.tease + 10, glide),
@@ -256,7 +261,7 @@ export const Shot55: React.FC = () => {
             </div>
 
             {/* headline + line */}
-            <div style={{position: 'absolute', left: 0, right: 0, top: 190, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 88, color: C.text, letterSpacing: '-0.02em'}}>
+            <div style={{position: 'absolute', left: 0, right: 0, top: 150, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 88, color: C.text, letterSpacing: '-0.02em'}}>
               <MaskWords text="Cities next." start={T.tease + 6} step={3} dur={16} />
               <div style={{marginTop: 14, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted, letterSpacing: 0}}>
                 <MaskLine start={T.tease + 20} dur={18}>Where does $50K actually go?</MaskLine>
@@ -268,7 +273,7 @@ export const Shot55: React.FC = () => {
               const inAt = (t: number) => tween(t, T.tease + 26, 28, snap);
               const p = inAt(f);
               return (
-                <MotionBlur dy={60 * (inAt(f) - inAt(f - 1)) * -1} style={{position: 'absolute', left: W / 2 - 400, top: 450, width: 800, height: 450}}>
+                <MotionBlur dy={60 * (inAt(f) - inAt(f - 1)) * -1} style={{position: 'absolute', left: W / 2 - 400, top: 370, width: 800, height: 450}}>
                   <Glass
                     radius={28}
                     tint={C.mint}
@@ -321,6 +326,94 @@ export const Shot55: React.FC = () => {
                     </div>
                   </Glass>
                 </MotionBlur>
+              );
+            })()}
+
+            {/* Subscribe button: pops in under the card, a mouse cursor glides to it, hovers (button lifts and glows),
+                clicks (press + ripple), and the button flips to "Subscribed" with a ringing bell. */}
+            {(() => {
+              const BW = 420;
+              const BH = 96;
+              const bx = W / 2 - BW / 2;
+              const by = 862;
+              const inP = tween(f, T.subIn, 22, snap);
+              const travel = tween(f, T.subMove, 34, glide);
+              const hover = ramp(f, T.subHover, T.subHover + 8, glide);
+              const press = ramp(f, T.subClick, T.subClick + 3) * (1 - ramp(f, T.subClick + 6, T.subClick + 14));
+              const done = ramp(f, T.subClick + 4, T.subClick + 12, glide); // 0 = Subscribe, 1 = Subscribed
+              const ripple = ramp(f, T.subClick, T.subClick + 22, glide);
+              const sinceDone = Math.max(0, f - (T.subClick + 8));
+              const bell = done > 0 ? Math.sin(sinceDone * 0.9) * 22 * Math.exp(-sinceDone / 16) : 0; // rings, then settles
+              const scale = (0.9 + 0.1 * inP) * (1 + 0.05 * hover * (1 - done)) * (1 - 0.06 * press);
+              // cursor path: in from the lower right, tip lands slightly right of the button centre
+              const cx = W / 2 + 520 + (W / 2 + 60 - (W / 2 + 520)) * travel;
+              const cy = 1090 + (by + BH / 2 + 8 - 1090) * travel;
+              const cursorOpacity = ramp(f, T.subMove - 4, T.subMove + 6) * (1 - ramp(f, T.subClick + 44, T.subClick + 60));
+              return (
+                <>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: bx,
+                      top: by,
+                      width: BW,
+                      height: BH,
+                      opacity: ramp(f, T.subIn, T.subIn + 8, glide),
+                      transform: `translateY(${(1 - inP) * 30}px) scale(${scale})`,
+                      borderRadius: BH / 2,
+                      overflow: 'hidden',
+                      background: done > 0.5 ? 'rgba(232,238,247,0.16)' : `rgb(${255},${Math.round(30 + 40 * hover)},${Math.round(50 + 30 * hover)})`,
+                      boxShadow: done > 0.5 ? 'none' : `0 0 ${10 + 36 * hover}px rgba(255,40,60,${0.35 + 0.4 * hover})`,
+                      border: done > 0.5 ? '2px solid rgba(232,238,247,0.35)' : '2px solid transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 16,
+                      fontFamily: F.display,
+                      fontWeight: 700,
+                      fontSize: 42,
+                      color: '#fff',
+                    }}
+                  >
+                    <span style={{opacity: 1 - done, position: 'absolute'}}>Subscribe</span>
+                    <span style={{opacity: done, display: 'flex', alignItems: 'center', gap: 16}}>
+                      <span style={{display: 'inline-block', transform: `rotate(${bell}deg)`, transformOrigin: '50% 10%'}}>
+                        <DrawIcon kind="bell" start={T.subClick + 8} size={46} color="#fff" strokeWidth={3} />
+                      </span>
+                      Subscribed
+                    </span>
+                    {/* click ripple from the cursor tip */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: BW / 2 + 60 - 100 * ripple,
+                        top: BH / 2 + 8 - 100 * ripple,
+                        width: 200 * ripple,
+                        height: 200 * ripple,
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.35)',
+                        opacity: ripple > 0 ? 1 - ripple : 0,
+                      }}
+                    />
+                  </div>
+                  {/* mouse cursor (arrow), shrinks a little on the click */}
+                  <svg
+                    width={56}
+                    height={72}
+                    viewBox="0 0 28 36"
+                    style={{
+                      position: 'absolute',
+                      left: cx,
+                      top: cy,
+                      opacity: cursorOpacity,
+                      transform: `scale(${1 - 0.14 * press})`,
+                      transformOrigin: '0 0',
+                      filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))',
+                    }}
+                  >
+                    <path d="M2 2 L2 28 L9 21.5 L14 33 L19 31 L14 19.5 L24 19.5 Z" fill="#fff" stroke="#111" strokeWidth={2} strokeLinejoin="round" />
+                  </svg>
+                </>
               );
             })()}
           </div>
