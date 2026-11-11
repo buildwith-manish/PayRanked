@@ -122,16 +122,20 @@ jobs:
             SCALE_FLAG="--scale=1"
           fi
 
-          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 2)..."
-          # --concurrency=2: GitHub Pro's ubuntu-latest runner has 2 cores; Remotion caps at os.cpus().length.
-          # preset=medium is the right balance: 2x slower than ultrafast but visibly cleaner at 4K.
+          echo "Rendering frames $START-$END at $QUALITY (preset fast, crf 14, concurrency 4)..."
+          # --concurrency=4: the repo is public, so ubuntu-latest has 4 vCPUs (private repos get 2, and Remotion refuses a
+          #   concurrency above the core count). If the repo goes private again, set this back to 2.
+          # preset=fast, crf=14: a high-quality master for YouTube, which re-encodes the upload anyway, so the cleaner the
+          #   source the cleaner the result. --color-space=bt709 tags the video as HD/4K (Remotion's h264 default is bt601,
+          #   which makes YouTube shift the colours slightly).
           # 4K + 60fps + motion blur all stay ON (config-level, not flag-level).
           npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
             --frames=$START-$END \
-            --codec=h264 --crf=16 \
-            --x264-preset=medium \
+            --codec=h264 --crf=14 \
+            --x264-preset=fast \
+            --color-space=bt709 \
             --audio-codec=aac --audio-bitrate=320k \
-            --concurrency=2 \
+            --concurrency=4 \
             --log=error \
             $SCALE_FLAG
 
@@ -229,9 +233,10 @@ jobs:
           fi
 
           echo "All 40 clips present. Concatenating..."
-          # Re-encode with preset slow for the final master: this is the one place where slow is worth it.
-          # The per-clip renders use medium; this concat pass produces the actual upload master.
-          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v libx264 -crf 16 -preset medium -c:a aac -b:a 320k -movflags +faststart final_video.mp4
+          # Every clip was rendered with identical settings, so the video is joined by stream copy: no second lossy encode
+          # (the clips already carry crf 14), and this step takes seconds instead of an hour. Only the audio is re-encoded
+          # (320k AAC) so the joins between clips stay seamless.
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart final_video.mp4
           ls -la final_video.mp4
           FINAL_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 final_video.mp4)
           echo "Final video duration: ${FINAL_DUR}s (expected ~556s)"
