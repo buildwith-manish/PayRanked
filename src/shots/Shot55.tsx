@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Background} from '../components/Background';
 import {Glass} from '../components/Glass';
+import {DrawIcon} from '../components/Icons';
 import {MaskLine, MaskWords} from '../components/MaskText';
 import {MotionBlur} from '../components/MotionBlur';
 import {Count} from '../components/Count';
@@ -215,27 +216,113 @@ export const Shot55: React.FC = () => {
           </div>
         )}
 
-        {/* 75-80s: tease next video — "Cities next. Where does $50K actually go?" */}
+        {/* Tease of the NEXT video (same timing as before: appears at T.tease, leaves with the shot).
+            Laid out like a video end card so it reads as "the next video", not as more of this one:
+            a NEXT VIDEO badge, the line, then a thumbnail-style card with a play button. */}
         {f >= T.tease - 6 && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 420,
-              textAlign: 'center',
-              fontFamily: F.display,
-              fontWeight: 700,
-              fontSize: 88,
-              color: C.text,
-              letterSpacing: '-0.02em',
-              opacity: win(f, T.tease, SHOT55_FRAMES, 12),
-            }}
-          >
-            <MaskWords text="Cities next." start={T.tease} step={3} dur={16} />
-            <div style={{marginTop: 18, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted}}>
-              <MaskLine start={T.tease + 16} dur={18}>Where does $50K actually go?</MaskLine>
+          <div style={{position: 'absolute', inset: 0, opacity: win(f, T.tease, SHOT55_FRAMES, 12)}}>
+            {/* badge */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 96,
+                display: 'flex',
+                justifyContent: 'center',
+                opacity: ramp(f, T.tease, T.tease + 10, glide),
+                transform: `translateY(${(1 - tween(f, T.tease, 20, snap)) * 24}px)`,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: '10px 30px',
+                  borderRadius: 999,
+                  border: `2px solid ${C.mint}`,
+                  background: `${C.mint}1F`,
+                  fontFamily: F.display,
+                  fontWeight: 700,
+                  fontSize: 30,
+                  letterSpacing: '0.2em',
+                  color: C.mint,
+                }}
+              >
+                <span style={{width: 12, height: 12, borderRadius: 6, background: C.mint, opacity: 0.6 + 0.4 * Math.sin(f / 6)}} />
+                NEXT VIDEO
+              </div>
             </div>
+
+            {/* headline + line */}
+            <div style={{position: 'absolute', left: 0, right: 0, top: 190, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 88, color: C.text, letterSpacing: '-0.02em'}}>
+              <MaskWords text="Cities next." start={T.tease + 6} step={3} dur={16} />
+              <div style={{marginTop: 14, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted, letterSpacing: 0}}>
+                <MaskLine start={T.tease + 20} dur={18}>Where does $50K actually go?</MaskLine>
+              </div>
+            </div>
+
+            {/* thumbnail-style card */}
+            {(() => {
+              const inAt = (t: number) => tween(t, T.tease + 26, 28, snap);
+              const p = inAt(f);
+              return (
+                <MotionBlur dy={60 * (inAt(f) - inAt(f - 1)) * -1} style={{position: 'absolute', left: W / 2 - 400, top: 450, width: 800, height: 450}}>
+                  <Glass
+                    radius={28}
+                    tint={C.mint}
+                    strength={1.1}
+                    glow={18}
+                    style={{
+                      width: 800,
+                      height: 450,
+                      overflow: 'hidden',
+                      opacity: ramp(f, T.tease + 26, T.tease + 36, glide),
+                      transform: `translateY(${(1 - p) * 60}px) scale(${0.96 + 0.04 * p})`,
+                    }}
+                  >
+                    {/* skyline icon + big figure, like a thumbnail */}
+                    <div style={{position: 'absolute', left: 48, top: 44, opacity: ramp(f, T.tease + 40, T.tease + 52, glide)}}>
+                      <DrawIcon kind="buildings" start={T.tease + 40} size={150} color={C.mint} strokeWidth={3} />
+                    </div>
+                    <div style={{position: 'absolute', right: 56, top: 40, textAlign: 'right', fontFamily: F.display, fontWeight: 700, fontSize: 150, lineHeight: 1, color: C.amber, opacity: ramp(f, T.tease + 44, T.tease + 58, glide), ...tabular}}>
+                      $50K
+                    </div>
+                    <div style={{position: 'absolute', left: 48, right: 48, top: 232, fontFamily: F.display, fontWeight: 700, fontSize: 54, lineHeight: 1.12, color: C.text, opacity: ramp(f, T.tease + 50, T.tease + 64, glide)}}>
+                      Same salary. Now by city.
+                    </div>
+                    <div style={{position: 'absolute', left: 48, right: 48, top: 318, fontFamily: F.body, fontWeight: 500, fontSize: 32, color: C.muted, opacity: ramp(f, T.tease + 58, T.tease + 72, glide)}}>
+                      PayRanked · City edition
+                    </div>
+                    {/* play button */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 48,
+                        bottom: 48,
+                        width: 96,
+                        height: 96,
+                        borderRadius: 48,
+                        background: C.mint,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: ramp(f, T.tease + 62, T.tease + 74, glide),
+                        transform: `scale(${1 + 0.05 * Math.sin(f / 8)})`,
+                        boxShadow: `0 0 36px ${C.mint}88`,
+                      }}
+                    >
+                      <div style={{width: 0, height: 0, marginLeft: 8, borderTop: '22px solid transparent', borderBottom: '22px solid transparent', borderLeft: '36px solid #06222A'}} />
+                    </div>
+                    {/* fake progress bar, like a video player */}
+                    <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, height: 8, background: 'rgba(232,238,247,0.15)'}}>
+                      <div style={{width: `${ramp(f, T.tease + 40, T.tease + 90) * 22}%`, height: '100%', background: C.mint}} />
+                    </div>
+                  </Glass>
+                </MotionBlur>
+              );
+            })()}
           </div>
         )}
       </Background>
