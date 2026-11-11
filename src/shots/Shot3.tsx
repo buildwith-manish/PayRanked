@@ -21,6 +21,7 @@ export const SHOT3_FRAMES = sec(SHOT_SECONDS.shot3);
 
 /** Shot-local times (0 = the start of the shot). */
 export const T = {
+  gaugeIn:    sec(6.3),                       // gauge appears only after the "Welcome to PayRanked..." line (v06 ends ~6.4 s, v07 starts 6.3 s)
   avg:        sec(voLayout.shot3.avg),        // needle springs to 100, on "A hundred is the national average"
   toCal:      sec(voLayout.shot3.toCal),      // and swings to California
   toArk:      sec(voLayout.shot3.toArk),      // swings back to Arkansas 86.9, on "Arkansas scores eighty-six point nine"
@@ -70,7 +71,7 @@ export const Shot3: React.FC = () => {
   ]);
   const tint    = f >= T.toArk ? C.mint : f >= T.toCal ? C.red : C.text;
   const pricier = Math.round(cal.rpp - 100);
-  const gaugeOpacity = 1 - ramp(f, T.formula - 30, T.formula - 15, glide);
+  const gaugeOpacity = ramp(f, T.gaugeIn, T.gaugeIn + 12, glide) * (1 - ramp(f, T.formula - 30, T.formula - 15, glide));
 
   // formula tokens, built from the data
   const tokens     = ['$100,000', '÷', '(', ark.rpp.toFixed(1), '÷', '100', ')', '='];
@@ -90,12 +91,11 @@ export const Shot3: React.FC = () => {
     <AbsoluteFill>
       <Background glowX={W / 2} glowY={H * 0.45}>
         {/* v06 welcome overlay — "Welcome to PayRanked..." plays during Shot3 frames 0-4s.
-            The gauge is already on screen but the needle hasn't moved yet (T.avg = 11.6s).
-            This text fills the blank so the viewer has something to read while they hear the line. */}
+            The welcome text owns the screen until T.gaugeIn (6.3 s); only then does the gauge draw in. */}
         <div style={{
           position: 'absolute', left: 0, right: 0, top: 160,
           textAlign: 'center',
-          opacity: win(f, 0, sec(5), 10),
+          opacity: win(f, 0, T.gaugeIn, 10),
         }}>
           <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 72, color: C.text}}>
             <MaskWords text="Welcome to PayRanked" start={2} step={3} dur={22} />
@@ -107,7 +107,7 @@ export const Shot3: React.FC = () => {
 
         {/* gauge */}
         <div style={{position: 'absolute', left: W / 2 - 450, top: 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
-          <Gauge value={needle} size={900} tint={tint} drawFrames={60} jitter={f > T.toCal && f < T.formula} />
+          <Gauge value={needle} size={900} tint={tint} drawFrames={60} drawDelay={T.gaugeIn} jitter={f > T.toCal && f < T.formula} />
         </div>
         <PopLabel text="US average" start={T.avg + 14} end={T.toCal + 6} color={C.text} />
         <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.toArk - 2} color={C.red} />

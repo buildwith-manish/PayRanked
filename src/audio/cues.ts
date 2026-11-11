@@ -199,7 +199,7 @@ export const shot3Cues = (): Cue[] => {
   const k: Cue[] = [];
 
   // gauge draws itself
-  k.push(cue('whoosh_m', 30, 0.35));
+  k.push(cue('whoosh_m', T3.gaugeIn, 0.35));
 
   // needle: wind-up, whip, settle. The sweep peaks on the whip, a tap marks where it settles.
   [T3.avg, T3.toCal].forEach((at, i) => {

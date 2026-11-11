@@ -16,13 +16,15 @@ export const Gauge: React.FC<{
   drawFrames?: number;
   label?: string;
   jitter?: boolean;
-}> = ({value, size = 640, tint = C.text, drawFrames = 30, label, jitter = false}) => {
+  /** frames to wait before the arc starts drawing (default 0) */
+  drawDelay?: number;
+}> = ({value, size = 640, tint = C.text, drawFrames = 30, label, jitter = false, drawDelay = 0}) => {
   const frame = useDesignFrame();
   const r = size / 2 - 40;
   const cx = size / 2;
   const cy = size / 2;
   const arcLen = Math.PI * r;
-  const draw = tween(frame, 0, drawFrames, glide);
+  const draw = tween(frame, drawDelay, drawFrames, glide);
   // a needle at rest on a real gauge trembles a little; it is the only thing that moves once the reading is in
   const ang = angleFor(value) + (jitter ? Math.sin(frame * 1.7) * 0.5 : 0);
   const arc = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
