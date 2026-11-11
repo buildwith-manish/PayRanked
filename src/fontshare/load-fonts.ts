@@ -82,19 +82,6 @@ if (typeof document !== "undefined") {
   document.head.appendChild(style);
 }
 
-import { loadFont as loadJakarta } from "@remotion/google-fonts/PlusJakartaSans";
-import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
-
-const jakarta = loadJakarta("normal", {
-  weights: ["400", "500", "600", "700", "800"],
-  subsets: ["latin", "latin-ext"],
-});
-
-const jetbrainsMono = loadJetBrainsMono("normal", {
-  weights: ["400", "500", "700"],
-  subsets: ["latin", "latin-ext"],
-});
-
 export const PAYRANKED_FONTS = {
   body: "Satoshi, Plus Jakarta Sans, system-ui, sans-serif",
   numbers: `'JetBrains Mono', 'Courier New', monospace`,
@@ -130,8 +117,8 @@ export const FONT_WEIGHTS = {
 } as const;
 
 export const GOOGLE_FONTS = {
-  plusJakartaSans: jakarta.fontFamily,
-  jetbrainsMono: jetbrainsMono.fontFamily,
+  plusJakartaSans: "'Plus Jakarta Sans', Satoshi, system-ui, sans-serif",
+  jetbrainsMono: "'JetBrains Mono', 'Courier New', monospace",
 };
 
 export const FONTSHARE_FONTS = {
