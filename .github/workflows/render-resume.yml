@@ -111,7 +111,20 @@ jobs:
         run: npm ci
 
       - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        # Only needed for the duration check after rendering; Remotion bundles its own ffmpeg, so don't fail the render.
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          # Runner DNS/mirror hiccups made a plain apt-get hang for 10+ minutes. Retry with short timeouts instead.
+          for i in 1 2 3 4 5; do
+            if sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+               && sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 ffmpeg; then
+              exit 0
+            fi
+            echo "apt attempt $i failed, retrying in 20s..."
+            sleep 20
+          done
+          exit 1
 
       - name: Render piece (group ${{ matrix.group }}, piece ${{ matrix.piece }})
         run: |
@@ -144,8 +157,12 @@ jobs:
             echo "ERROR: piece is too small - render likely failed"
             exit 1
           fi
-          python3 -c "import sys; sys.exit(0 if abs(float('$ACTUAL') - float('${{ matrix.dur }}')) < 0.3 else 1)" \
-            || { echo "ERROR: piece duration differs from expected by more than 0.3s"; exit 1; }
+          if command -v ffprobe >/dev/null 2>&1; then
+            python3 -c "import sys; sys.exit(0 if abs(float('$ACTUAL') - float('${{ matrix.dur }}')) < 0.3 else 1)" \
+              || { echo "ERROR: piece duration differs from expected by more than 0.3s"; exit 1; }
+          else
+            echo "ffprobe not installed - skipping duration check (size check passed; concat job re-checks durations)"
+          fi
 
       - name: Upload piece
         uses: actions/upload-artifact@v4
@@ -172,7 +189,18 @@ jobs:
           node-version: '20'
 
       - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        timeout-minutes: 12
+        run: |
+          # Runner DNS/mirror hiccups made a plain apt-get hang for 10+ minutes. Retry with short timeouts instead.
+          for i in 1 2 3 4 5; do
+            if sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+               && sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 ffmpeg; then
+              exit 0
+            fi
+            echo "apt attempt $i failed, retrying in 20s..."
+            sleep 20
+          done
+          exit 1
 
       - name: Download finished clips from the old run
         uses: actions/download-artifact@v4
