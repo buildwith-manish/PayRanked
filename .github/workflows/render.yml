@@ -38,15 +38,16 @@ jobs:
       - name: Determine frame range for this job
         id: clips
         run: |
-          # Total frames: 32400 (16200 design frames × 2 for 60fps)
-          TOTAL=32400
+          # Total frames, read from the video itself (totalSeconds in vo-layout.json × 60 fps) so it cannot go stale.
+          TOTAL=$(node -e "console.log(Math.round(require('./src/audio/vo-layout.json').totalSeconds * 60))")
           GROUP=${{ matrix.group }}
           NUM_GROUPS=40
           PER_GROUP=$(( (TOTAL + NUM_GROUPS - 1) / NUM_GROUPS ))
           START=$(( (GROUP - 1) * PER_GROUP ))
-          END=$(( START + PER_GROUP ))
-          if [ $END -gt $TOTAL ]; then
-            END=$TOTAL
+          # --frames is inclusive on both ends, so the last frame of a group is START+PER_GROUP-1 (no frame rendered twice)
+          END=$(( START + PER_GROUP - 1 ))
+          if [ $END -gt $(( TOTAL - 1 )) ]; then
+            END=$(( TOTAL - 1 ))
           fi
           if [ $START -ge $TOTAL ]; then
             START=0
