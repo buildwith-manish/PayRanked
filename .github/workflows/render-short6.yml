@@ -1,0 +1,52 @@
+name: Render Short 6
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to render
+        required: true
+        default: feat/short-1-vertical
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ${{ inputs.ref }}}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - id: range
+        run: |
+          TOTAL=1800
+          PER_CHUNK=$(( (TOTAL + 3) / 4 ))
+          START=$(( (${{ matrix.chunk }} - 1) * PER_CHUNK ))
+          END=$(( START + PER_CHUNK - 1 ))
+          if [ "$END" -ge "$TOTAL" ]; then END=$((TOTAL - 1)); fi
+          echo "start=$START" >> "$GITHUB_OUTPUT"
+          echo "end=$END" >> "$GITHUB_OUTPUT"
+      - run: |
+          mkdir -p out
+          npx remotion render src/index.ts Short6-Vertical out/chunk-${{ matrix.chunk }}.mp4 \
+            --frames=${{ steps.range.outputs.start }}-${{ steps.range.outputs.end }} \
+            --codec=h264 --crf=16 --x264-preset=slow --audio-codec=aac \
+            --audio-bitrate=320k --scale=1 --concurrency=4 --color-space=bt709 --log=error
+      - uses: actions/upload-artifact@v4
+        with: {name: short6-chunk-${{ matrix.chunk }}, path: out/chunk-${{ matrix.chunk }}.mp4}
+  concatenate:
+    needs: render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: short6-chunk-*, path: out/chunks, merge-multiple: true}
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: |
+          : > concat.txt
+          for i in 1 2 3 4; do echo "file 'out/chunks/chunk-$i.mp4'" >> concat.txt; done
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart out/short6-vertical.mp4
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=nw=1 out/short6-vertical.mp4
+      - uses: actions/upload-artifact@v4
+        with: {name: short6-vertical, path: out/short6-vertical.mp4}
