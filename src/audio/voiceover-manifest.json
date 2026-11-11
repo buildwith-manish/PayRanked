@@ -262,5 +262,21 @@
     "at": 11.404,
     "lead": 0.465,
     "duration": 4.67
+  },
+  {
+    "id": "034_v35_reveal_8",
+    "file": "voiceover/clips_wav/034_v35_reveal_8.wav",
+    "shot": "shot4",
+    "at": 56.0,
+    "lead": 0.127,
+    "duration": 11.84
+  },
+  {
+    "id": "035_v36_reveal_7",
+    "file": "voiceover/clips_wav/035_v36_reveal_7.wav",
+    "shot": "shot4",
+    "at": 71.0,
+    "lead": 0.142,
+    "duration": 12.0
   }
 ]

@@ -108,7 +108,7 @@ S3['rail'] = max(a['v10_method'] + wt('v10_method', 'okay') - 0.5, S3['honesty']
 shot3_len = ceil_half(max(end_of(a, 'v10_method') + 1.2, S3['rail'] + 4.0))
 
 # ---------------------------------------------------------------- Shot 4: countdown
-REVEALS = [(10, 'v11_reveal_10', 2), (9, 'v12_reveal_9', 1), (8, None, 1), (7, None, 1), ('notHere', 'v13_break', 0),
+REVEALS = [(10, 'v11_reveal_10', 2), (9, 'v12_reveal_9', 1), (8, 'v35_reveal_8', 1), (7, 'v36_reveal_7', 1), ('notHere', 'v13_break', 0),
            (6, 'v14_reveal_6', 1), (5, 'v15_reveal_5', 1), (3, 'v16_reveal_3', 2), ('prices', 'v17_break', 0),
            (2, 'v18_reveal_2', 1), (1, 'v19_reveal_1', 1)]
 BREAK_ONSET = {'notHere': 1.2, 'prices': 1.0}     # first word lands so "Texas / Florida" meets the chips, "prices, not paychecks" its line
