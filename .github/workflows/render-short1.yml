@@ -2,6 +2,11 @@ name: Render Short 1
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to render'
+        required: true
+        default: 'feat/short-1-vertical'
 
 jobs:
   render:
@@ -9,6 +14,8 @@ jobs:
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
