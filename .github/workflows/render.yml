@@ -18,7 +18,9 @@ on:
 
 jobs:
   render:
-    runs-on: ubuntu-latest
+    # Use the 4-core larger runner so Remotion's --concurrency=4 is accepted (it caps at os.cpus().length).
+    # Available for free on public repos; falls back to ubuntu-latest (2 cores) if unavailable.
+    runs-on: ubuntu-latest-4-cores
     strategy:
       fail-fast: false
       matrix:
@@ -119,17 +121,16 @@ jobs:
             SCALE_FLAG="--scale=1"
           fi
 
-          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 1)..."
-          # --concurrency=1: GitHub free runners have 2 cores, but two Chromium instances each
-          # compiling 50-state WebGL geometry on the first frame can blow past the delayRender
-          # timeout. Concurrency 1 = one Chromium, no contention, more reliable for 3D scenes.
+          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 4)..."
+          # --concurrency=4: the 4-core larger runner (ubuntu-latest-4-cores) reports 4 CPUs,
+          # so Remotion accepts concurrency=4. Four Chromium instances render frames in parallel.
           # preset=medium is the right balance: 2x slower than ultrafast but visibly cleaner at 4K.
           npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
             --frames=$START-$END \
             --codec=h264 --crf=16 \
             --x264-preset=medium \
             --audio-codec=aac --audio-bitrate=320k \
-            --concurrency=1 \
+            --concurrency=4 \
             --log=error \
             $SCALE_FLAG
 
