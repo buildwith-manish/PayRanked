@@ -12,15 +12,17 @@ export const AUDIO = {
   music: true,
   sfx: true,
 
-  voLevel: 1,
+  voLevel: 0.9, // clips in public/voiceover are levelled to -15 LUFS (scripts/normalize_vo.py); 0.9 leaves headroom for music + SFX
   /** Music bed level before ducking. Per-section levels are in `musicGain` (master.ts). */
-  musicLevel: 0.5,
-  sfxLevel: 0.6,
+  musicLevel: 0.4,
+  sfxLevel: 0.26,
 
   /** Sidechain: how far the music drops while the voice is speaking (0.7 = about -10 dB). */
-  musicDuck: 0.7,
-  /** The SFX bus ducks a little too, so a tick never masks a word. Cues marked `hero` skip this. */
-  sfxDuck: 0.28,
+  musicDuck: 0.6,
+  /** The SFX bus ducks while the voice speaks (0.55 = about -7 dB), so a tick never masks a word. */
+  sfxDuck: 0.55,
+  /** Cues marked `hero` (the big impacts) duck less, so they still punch, but never sit on top of a word. */
+  heroDuck: 0.45,
 
   /** Impacts (cues marked `hero`) pull the music down just before and just after they land. */
   dipDepth: 0.65,

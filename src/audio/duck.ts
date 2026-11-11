@@ -21,8 +21,8 @@ export const voEnv = (f: number) => {
   return v === undefined ? 0 : v / 100;
 };
 
-/** Gain for the SFX bus. Hero cues are never ducked. */
-export const sfxDuck = (f: number, hero?: boolean) => (hero ? 1 : 1 - AUDIO.sfxDuck * voEnv(f));
+/** Gain for the SFX bus. Hero cues duck less (AUDIO.heroDuck) so they punch without masking the voice. */
+export const sfxDuck = (f: number, hero?: boolean) => 1 - (hero ? AUDIO.heroDuck : AUDIO.sfxDuck) * voEnv(f);
 
 /** Music dips for the big hits: down just before the strike, back up slowly after it. 0 = no dip, 1 = full. */
 const dipAt = (f: number) => {

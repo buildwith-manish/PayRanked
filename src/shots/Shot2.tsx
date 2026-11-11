@@ -18,7 +18,7 @@ export const Shot2: React.FC = () => (
   <AbsoluteFill style={{background: 'linear-gradient(160deg, #143A66 0%, #0A1D38 55%, #050E1D 100%)'}}>
     <Aberration at={[0]} peak={7}>
       <AbsoluteFill>
-        <OffthreadVideo src={staticFile('intro.mp4')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+        <OffthreadVideo src={staticFile('intro.mp4')} volume={0.8} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
       </AbsoluteFill>
     </Aberration>
   </AbsoluteFill>

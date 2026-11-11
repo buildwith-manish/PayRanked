@@ -21,12 +21,36 @@ import numpy as np
 
 FPS = 30
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'public', 'vo.mp3')
 out = os.path.join(ROOT, 'src', 'audio', 'vo-envelope.json')
 
 SR = 16000
-raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', src, '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
-x = np.frombuffer(raw, dtype='<f4')
+
+
+def decode(path):
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+    return np.frombuffer(raw, dtype='<f4')
+
+
+if len(sys.argv) > 1:
+    # legacy: one concatenated file
+    src = sys.argv[1]
+    x = decode(src)
+else:
+    # Default: the voice-over plays as separate clips (src/audio/Sfx.tsx), so build the envelope from the clips placed
+    # exactly where the video places them (voiceover-manifest.json + shot starts from scripts/timing.json).
+    # Run `node scripts/export-timing.mjs` first if the timeline changed.
+    src = 'voiceover-manifest.json'
+    manifest = json.load(open(os.path.join(ROOT, 'src', 'audio', 'voiceover-manifest.json')))
+    timing = json.load(open(os.path.join(ROOT, 'scripts', 'timing.json')))
+    starts = {k: v['start'] for k, v in timing['shots'].items()}
+    starts['shot4'] = starts['countdown']
+    x = np.zeros(int((timing['total'] + 5) * SR), dtype=np.float32)
+    for c in manifest:
+        y = decode(os.path.join(ROOT, 'public', c['file']))
+        a = int(round((starts[c['shot']] + c['at'] - c['lead']) * SR))
+        a = max(0, a)
+        b = min(len(x), a + len(y))
+        x[a:b] += y[: b - a]
 hop = SR // FPS
 n = len(x) // hop
 rms = np.sqrt(np.mean(x[: n * hop].reshape(n, hop) ** 2, axis=1) + 1e-12)
