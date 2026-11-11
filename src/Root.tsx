@@ -5,7 +5,7 @@
 import './fontshare/load-fonts';
 
 import React from 'react';
-import {AbsoluteFill, Composition, Sequence} from 'remotion';
+import {AbsoluteFill, Audio, Composition, Sequence, staticFile} from 'remotion';
 import {RankReveal} from './components/RankReveal';
 import {Shot1, SHOT1_FRAMES} from './shots/Shot1';
 import {Shot2, SHOT2_FRAMES} from './shots/Shot2';
@@ -16,11 +16,15 @@ import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
 import {Grade} from './components/Grade';
 import {Watermark} from './components/Watermark';
 import {C, FPS, H, W} from './theme';
-import {toReal} from './clock';
+import {K, toReal} from './clock';
 import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
+import {Short1EndCard, Short1Landscape, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import voManifest from './audio/voiceover-manifest.json';
+import {AUDIO} from './audio/config';
+import {musicGain} from './audio/duck';
 
 const Countdown: React.FC = () => (
   <AbsoluteFill>
@@ -104,11 +108,78 @@ const GradedReveals = timeline.map((_, i) => graded(RankReveal, START.shot4 + ti
 
 const GradedBreaks = breaks.map((b, i) => graded(Break, START.shot4 + b.from, CUES.breaks[i]));
 
+const SHORT1_METHOD_OFFSET = 27;
+const SHORT1_SOURCE_METHOD_START = START.shot3;
+const MUTED_WORDS: Record<string, [number, number]> = {
+  '002_v02_cold_open': [1.04, 1.48],
+  '003_v03_cold_open': [0.48, 0.94],
+};
+
+const Short1Audio: React.FC = () => (
+  <>
+    {AUDIO.vo && voManifest.map((clip: any) => {
+      const isShot1 = clip.shot === 'shot1';
+      const isMethod = clip.shot === 'shot3' && clip.at < SHORT1_METHOD_SECONDS;
+      if (!isShot1 && !isMethod) return null;
+      const sourceStart = isShot1 ? clip.at - clip.lead : SHORT1_SOURCE_METHOD_START + clip.at - clip.lead;
+      const localStart = isShot1 ? sourceStart : SHORT1_METHOD_OFFSET + clip.at - clip.lead;
+      const mute = MUTED_WORDS[clip.id];
+      const maxDuration = isMethod ? SHORT1_METHOD_SECONDS - clip.at + clip.lead : clip.duration;
+      return (
+        <Sequence key={clip.id} from={toReal(localStart)} durationInFrames={toReal(Math.min(clip.duration, maxDuration)) + 10} layout="none" name={`short vo ${clip.id}`}>
+          <Audio
+            src={staticFile(clip.file)}
+            volume={(f) => {
+              const seconds = f / FPS;
+              return mute && seconds >= mute[0] && seconds <= mute[1] ? 0 : AUDIO.voLevel;
+            }}
+          />
+        </Sequence>
+      );
+    })}
+    {AUDIO.music && (
+      <>
+        <Sequence from={0} durationInFrames={toReal(27)} layout="none">
+          <Audio src={staticFile('music.mp3')} startFrom={0} volume={(f) => musicGain(f / K)} />
+        </Sequence>
+        <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} layout="none">
+          <Audio src={staticFile('music.mp3')} startFrom={toReal(SHORT1_SOURCE_METHOD_START)} volume={(f) => musicGain(SHORT1_SOURCE_METHOD_START + f / K)} />
+        </Sequence>
+      </>
+    )}
+  </>
+);
+
+const Short1: React.FC = () => (
+  <AbsoluteFill style={{backgroundColor: C.navy3}}>
+    <Short1Landscape>
+      <Grade>
+        <AbsoluteFill>
+          <Sequence from={0} durationInFrames={toReal(27)} name="Short 1 cold open">
+            <Shot1 />
+            <SfxTrack cues={CUES.shot1} offset={START.shot1} />
+          </Sequence>
+          <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} name="Short 1 method opener">
+            <Shot3 />
+            <SfxTrack cues={CUES.shot3} offset={START.shot3} />
+          </Sequence>
+          <Sequence from={toReal(27 + SHORT1_METHOD_SECONDS)} durationInFrames={toReal(3.5)} name="Short 1 end card">
+            <Short1EndCard />
+          </Sequence>
+          <Short1Audio />
+          <Watermark />
+        </AbsoluteFill>
+      </Grade>
+    </Short1Landscape>
+  </AbsoluteFill>
+);
+
 const common = {width: W, height: H, fps: FPS};
 
 export const Root: React.FC = () => (
   <>
     <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
+    <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={1080} height={1920} fps={FPS} />
     <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
     <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
     <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
