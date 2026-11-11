@@ -11,6 +11,10 @@ on:
         description: 'Upload to YouTube after render (true/false)'
         required: false
         default: 'false'
+      force_rerender:
+        description: 'Re-render every clip even if a valid one already exists (true/false)'
+        required: false
+        default: 'false'
 
 jobs:
   render:
@@ -53,12 +57,48 @@ jobs:
             START=0
             END=0
           fi
+          # Expected duration for this group's clip (frames / 60 fps). Used to validate a cached clip on resume.
+          if [ "$START" = "0" ] && [ "$END" = "0" ]; then
+            EXPECTED_DUR=0
+          else
+            EXPECTED_DUR=$(python3 -c "print(round(($END - $START + 1) / 60.0, 3))")
+          fi
           echo "start=$START" >> $GITHUB_OUTPUT
           echo "end=$END" >> $GITHUB_OUTPUT
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
-          echo "Group $GROUP: frames $START-$END of $TOTAL"
+          echo "expected_dur=$EXPECTED_DUR" >> $GITHUB_OUTPUT
+          echo "Group $GROUP: frames $START-$END of $TOTAL (expected duration ${EXPECTED_DUR}s)"
+
+      - name: Try to resume from previous run
+        if: ${{ inputs.force_rerender != 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: clips-group-${{ matrix.group }}
+          path: out/clips
+        continue-on-error: true
+
+      - name: Check if cached clip is valid (skip render if so)
+        id: cache
+        run: |
+          mkdir -p out/clips
+          CLIP="out/clips/group-${{ matrix.group }}.mp4"
+          EXPECTED="${{ steps.clips.outputs.expected_dur }}"
+          if [ -f "$CLIP" ] && [ "$EXPECTED" != "0" ]; then
+            ACTUAL=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$CLIP" 2>/dev/null || echo "0")
+            # Valid if duration is within 0.3s of expected (handles rounding) and file is non-trivial in size
+            DIFF=$(python3 -c "print(abs(float('$ACTUAL') - float('$EXPECTED')))" 2>/dev/null || echo "999")
+            SIZE=$(stat -c%s "$CLIP" 2>/dev/null || echo 0)
+            echo "Cached clip: ${ACTUAL}s (expected ${EXPECTED}s, diff ${DIFF}s, size ${SIZE}B)"
+            if (( $(python3 -c "print(1 if float('$DIFF') < 0.3 else 0)") )) && [ "$SIZE" -gt 100000 ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+              echo "Cached clip is valid — skipping render"
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
 
       - name: Render clip
+        if: steps.cache.outputs.skip != 'true'
         run: |
           START=${{ steps.clips.outputs.start }}
           END=${{ steps.clips.outputs.end }}
@@ -66,7 +106,7 @@ jobs:
 
           mkdir -p out/clips
 
-          # Skip empty groups
+          # Skip empty groups (shouldn't happen at 40 groups over 33360 frames, but keep the safety)
           if [ "$START" = "0" ] && [ "$END" = "0" ]; then
             echo "Group ${{ matrix.group }}: no frames — skipping"
             ffmpeg -f lavfi -i color=c=black:s=3840x2160:d=1/60 -c:v libx264 -y "out/clips/group-${{ matrix.group }}.mp4" 2>/dev/null
@@ -79,16 +119,26 @@ jobs:
             SCALE_FLAG="--scale=1"
           fi
 
-          echo "Rendering frames $START-$END at $QUALITY..."
+          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 2)..."
+          # GitHub free runners have 2 cores; --concurrency=2 is the max Remotion allows on them.
+          # preset=medium is the right balance: 2x slower than ultrafast but visibly cleaner at 4K.
           npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
             --frames=$START-$END \
             --codec=h264 --crf=16 \
-            --x264-preset=ultrafast \
+            --x264-preset=medium \
             --audio-codec=aac --audio-bitrate=320k \
-            --concurrency=4 \
+            --concurrency=2 \
             --log=error \
             $SCALE_FLAG
 
+          # Validate the rendered clip
+          ACTUAL=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "out/clips/group-${{ matrix.group }}.mp4" 2>/dev/null || echo "0")
+          SIZE=$(stat -c%s "out/clips/group-${{ matrix.group }}.mp4" 2>/dev/null || echo 0)
+          echo "Rendered clip: ${ACTUAL}s, ${SIZE} bytes"
+          if [ "$SIZE" -lt 100000 ]; then
+            echo "ERROR: clip is too small ($SIZE bytes) — render likely failed"
+            exit 1
+          fi
           echo "Done: $(ls -la out/clips/group-${{ matrix.group }}.mp4)"
 
       - name: Upload clip
@@ -96,7 +146,8 @@ jobs:
         with:
           name: clips-group-${{ matrix.group }}
           path: out/clips/*.mp4
-          retention-days: 3
+          retention-days: 7
+          overwrite: true
 
   concat-and-upload:
     needs: render
@@ -130,33 +181,67 @@ jobs:
             exit 1
           fi
 
-          # Build concat list in group order (1-40), skip clips < 1s
+          # Verify expected total duration
+          TOTAL=$(node -e "console.log(Math.round(require('./src/audio/vo-layout.json').totalSeconds * 60))")
+          NUM_GROUPS=40
+          PER_GROUP=$(( (TOTAL + NUM_GROUPS - 1) / NUM_GROUPS ))
+
+          # Build concat list in group order (1-40), skip clips < 1s (the empty-group placeholders)
           > concat.txt
+          MISSING=()
           for i in $(seq 1 40); do
             CLIP="out/clips/group-$i.mp4"
+            # Compute this group's expected frame range
+            START=$(( (i - 1) * PER_GROUP ))
+            END=$(( START + PER_GROUP - 1 ))
+            if [ $END -gt $(( TOTAL - 1 )) ]; then
+              END=$(( TOTAL - 1 ))
+            fi
+            if [ $START -ge $TOTAL ]; then
+              echo "  group-$i.mp4: no frames expected — skipped"
+              continue
+            fi
+            EXPECTED_DUR=$(python3 -c "print(round(($END - $START + 1) / 60.0, 3))")
             if [ -f "$CLIP" ]; then
               DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$CLIP" 2>/dev/null || echo "0")
               if (( $(echo "$DURATION > 1.0" | bc -l 2>/dev/null || echo 0) )); then
                 echo "file '$CLIP'" >> concat.txt
-                echo "  group-$i.mp4: ${DURATION}s — included"
+                echo "  group-$i.mp4: ${DURATION}s (expected ${EXPECTED_DUR}s) — included"
               else
-                echo "  group-$i.mp4: ${DURATION}s — SKIPPED"
+                echo "  group-$i.mp4: ${DURATION}s — SKIPPED (too short)"
+                MISSING+=("$i")
               fi
+            else
+              echo "  group-$i.mp4: MISSING"
+              MISSING+=("$i")
             fi
           done
 
           echo ""
-          echo "Concatenating..."
-          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 320k -movflags +faststart final_video.mp4
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "ERROR: ${#MISSING[@]} clip(s) missing or too short: ${MISSING[*]}"
+            echo "Re-run the workflow to render the missing clips (resume mode will skip the ones already done)."
+            exit 1
+          fi
+
+          echo "All 40 clips present. Concatenating..."
+          # Re-encode with preset slow for the final master: this is the one place where slow is worth it.
+          # The per-clip renders use medium; this concat pass produces the actual upload master.
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v libx264 -crf 16 -preset medium -c:a aac -b:a 320k -movflags +faststart final_video.mp4
           ls -la final_video.mp4
-          ffprobe -v error -show_entries format=duration -of csv=p=0 final_video.mp4
+          FINAL_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 final_video.mp4)
+          echo "Final video duration: ${FINAL_DUR}s (expected ~556s)"
+          if (( $(echo "$FINAL_DUR < 550" | bc -l 2>/dev/null || echo 0) )); then
+            echo "WARNING: final video is shorter than expected"
+          fi
 
       - name: Upload final video artifact
         uses: actions/upload-artifact@v4
         with:
           name: final-video
           path: final_video.mp4
-          retention-days: 7
+          retention-days: 14
+          overwrite: true
 
       - name: Upload to YouTube
         if: ${{ inputs.upload_to_youtube == 'true' }}
