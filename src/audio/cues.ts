@@ -407,12 +407,12 @@ export const shot5Cues = (): Cue[] => {
 
   // 31-100s: seven cards, one at a time (EXTEND-3 added cards 4-7; they used to be silent)
   const cards: {start: number; end: number; words: number[]}[] = [
-    {start: T5.card1, end: T5.card2 + sec(0.5), words: [8 + 8, 14 + 8]},
-    {start: T5.card2, end: T5.card3 + sec(0.5), words: [8 + 8]},
-    {start: T5.card3, end: T5.card4 + sec(0.5), words: [8 + 8]},
-    {start: T5.card4, end: T5.card5 + sec(0.5), words: []}, // two count-ups instead of a text line (see below)
-    {start: T5.card5, end: T5.card6 + sec(0.5), words: [8 + 8]}, // "No wage tax" rises, the 1.7% rolls up beside it
-    {start: T5.card6, end: T5.card7 + sec(0.5), words: [8 + 8]},
+    {start: T5.card1, end: T5.card2, words: [8 + 8, 14 + 8]},
+    {start: T5.card2, end: T5.card3, words: [8 + 8]},
+    {start: T5.card3, end: T5.card4, words: [8 + 8]},
+    {start: T5.card4, end: T5.card5, words: []}, // two count-ups instead of a text line (see below)
+    {start: T5.card5, end: T5.card6, words: [8 + 8]}, // "No wage tax" rises, the 1.7% rolls up beside it
+    {start: T5.card6, end: T5.card7, words: [8 + 8]},
     {start: T5.card7, end: -1, words: [8 + 8]}, // the last card stays to the end of the shot
   ];
   cards.forEach((c) => {

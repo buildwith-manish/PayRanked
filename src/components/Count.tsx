@@ -19,8 +19,10 @@ export const Count: React.FC<{
   size?: number;
   color?: string;
   glow?: number;
+  /** digits after the decimal point, e.g. 1 for 1.4% */
+  decimals?: number;
   style?: React.CSSProperties;
-}> = ({from = 0, to, start = 0, duration = 50, prefix = '$', suffix = '', size = 120, color, glow = 0, style}) => {
+}> = ({from = 0, to, start = 0, duration = 50, prefix = '$', suffix = '', size = 120, color, glow = 0, decimals = 0, style}) => {
   const frame = useDesignFrame();
   const v = countValue(frame, from, to, start, duration);
   const pv = countValue(frame - 1, from, to, start, duration);
@@ -31,7 +33,8 @@ export const Count: React.FC<{
       sinceLanding={frame - (start + duration)}
       // Bug 6 fix: pre-compute digit count from the final target so Odometer never shifts
       // layout when the rolling value crosses a power-of-ten boundary mid-animation.
-      targetDigits={Math.max(String(Math.floor(Math.abs(to))).length, String(Math.floor(Math.abs(from))).length)}
+      targetDigits={Math.max(String(Math.floor(Math.abs(to))).length, String(Math.floor(Math.abs(from))).length) + decimals}
+      decimals={decimals}
       size={size}
       color={color ?? (to >= from ? C.mint : C.red)}
       prefix={prefix}

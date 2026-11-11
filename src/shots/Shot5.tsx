@@ -329,7 +329,7 @@ export const Shot5: React.FC = () => {
 
           {/* 31-44s: info cards */}
           {/* Card 1: Washington split — most expensive + no wage tax */}
-          <InfoCard start={T.card2} end={T.card3 + sec(0.5)}>
+          <InfoCard start={T.card2} end={T.card3}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.text}}>
                 <MaskLine start={T.card2 + 8} dur={20}>{ordinal(waRank)} most expensive</MaskLine>
@@ -343,7 +343,7 @@ export const Shot5: React.FC = () => {
 
           {/* Card 2: how many no-wage-tax states made the top 10. Not Texas: the "Not on this list" break already
               showed Texas and Florida, so repeating Texas here said the same thing twice. */}
-          <InfoCard start={T.card1} end={T.card2 + sec(0.5)}>
+          <InfoCard start={T.card1} end={T.card2}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', ...tabular}}>
               <MaskLine start={T.card1 + 8} dur={22}>
                 {topTax.length === 0
@@ -360,7 +360,7 @@ export const Shot5: React.FC = () => {
 
           {/* card3 (39-43 s): the cliffhanger tease is moved into Shot 5.5 (Practical Takeaways), which opens on it.
               Here card3 is a short bridge that just states the gap once more before the four new cards land. */}
-          <InfoCard start={T.card3} end={T.card4 + sec(0.5)}>
+          <InfoCard start={T.card3} end={T.card4}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.text, padding: '0 40px', lineHeight: 1.2}}>
               <MaskLine start={T.card3 + 8} dur={20}>
                 Same salary. <span style={{color: C.amber}}>+27%</span> gap.
@@ -371,7 +371,7 @@ export const Shot5: React.FC = () => {
           {/* EXTEND-3 card4 (43-50 s): housing comparison — San Francisco vs rural Arkansas.
               Source: Zillow Observed Rent Index (ZORI) Sept 2024 for SF (~$3,500/mo); Census ACS 2024 for
               Arkansas non-metro median rent (~$800/mo). The point: state averages hide a 4× city-vs-rural spread. */}
-          <InfoCard start={T.card4} end={T.card5 + sec(0.5)}>
+          <InfoCard start={T.card4} end={T.card5}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.red, ...tabular}}>
                 <Count to={3500} start={T.card4 + 8} duration={40} size={50} color={C.red} prefix="$" suffix="/mo" />
@@ -387,7 +387,7 @@ export const Shot5: React.FC = () => {
 
           {/* EXTEND-3 card5 (50-58 s): property tax angle. Texas: no wage tax, but property tax 1.4% — top ten.
               Source: Tax Foundation 2026 state and local property tax rankings. The point: no wage tax ≠ low total tax. */}
-          <InfoCard start={T.card5} end={T.card6 + sec(0.5)}>
+          <InfoCard start={T.card5} end={T.card6}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.amber}}>
                 <MaskLine start={T.card5 + 8} dur={18}>No wage tax</MaskLine>
@@ -395,7 +395,7 @@ export const Shot5: React.FC = () => {
               </div>
               <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.red, ...tabular}}>
-                <Count to={1.4} start={T.card5 + 14} duration={30} size={50} color={C.red} prefix="" suffix="%" />
+                <Count to={1.4} decimals={1} start={T.card5 + 14} duration={30} size={50} color={C.red} prefix="" suffix="%" />
                 <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Property tax — top ten</div>
               </div>
             </div>
@@ -404,7 +404,7 @@ export const Shot5: React.FC = () => {
           {/* EXTEND-3 card6 (58-68 s): healthcare access. Cheapest states have ~30% fewer specialists per capita.
               Source: HRSA Area Health Resources File (AHRF) 2024; per-capita specialist count by state.
               The point: cheap states are cheap partly because they offer fewer services. */}
-          <InfoCard start={T.card6} end={T.card7 + sec(0.5)}>
+          <InfoCard start={T.card6} end={T.card7}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', lineHeight: 1.2, ...tabular}}>
               <MaskLine start={T.card6 + 8} dur={20}>
                 Cheapest states have <span style={{color: C.red}}>~30% fewer</span> specialists

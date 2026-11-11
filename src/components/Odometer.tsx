@@ -90,20 +90,23 @@ export const Odometer: React.FC<{
    * a comma, shifting all following elements). Pass String(Math.floor(to)).length from Count.
    */
   targetDigits?: number;
+  /** digits after the decimal point (default 0); the point sits between wheels, so 1.4 reads 1.4, not a half-rolled 1 */
+  decimals?: number;
   size?: number;
   color?: string;
   prefix?: string;
   suffix?: string;
   glow?: number;
   style?: React.CSSProperties;
-}> = ({value, prevValue, sinceLanding = 0, targetDigits, size = 120, color = C.text, prefix = '', suffix = '', glow = 0, style}) => {
-  const v = Math.max(0, value);
-  const pv = Math.max(0, prevValue ?? value);
+}> = ({value, prevValue, sinceLanding = 0, targetDigits, decimals = 0, size = 120, color = C.text, prefix = '', suffix = '', glow = 0, style}) => {
+  const scale = Math.pow(10, decimals);
+  const v = Math.max(0, value) * scale;
+  const pv = Math.max(0, prevValue ?? value) * scale;
   // Bug fix: deriving `places` from Math.round(v) caused a 1-frame jump whenever the rolling
   // value crossed a power-of-ten boundary (9999.6 rounds to 10000 → suddenly 5 digits instead
   // of 4), adding a comma slot and shifting the layout. We now prefer `targetDigits`, which is
   // the digit count of the final target value and stays constant throughout the animation.
-  const places = targetDigits ?? Math.max(1, String(Math.floor(Math.round(v))).length);
+  const places = Math.max(decimals + 1, targetDigits ?? String(Math.floor(Math.round(v))).length);
   const t = Math.max(0, sinceLanding);
   // mechanical settle: a third of a digit of overshoot that rings out in about 14 frames
   const wobble = sinceLanding > 0 ? 0.3 * Math.exp(-t / 3.2) * Math.sin(t * 0.85) : 0;
@@ -112,7 +115,13 @@ export const Odometer: React.FC<{
   for (let i = places - 1; i >= 0; i--) {
     const wob = i === 0 ? wobble : wobble * 0.55;
     nodes.push(<Wheel key={`w${i}`} pos={wheelPos(v, i) + wob} prevPos={wheelPos(pv, i)} size={size} />);
-    if (i > 0 && i % 3 === 0) {
+    if (decimals > 0 && i === decimals) {
+      nodes.push(
+        <div key="dp" style={{width: '0.32ch', textAlign: 'center', height: `${LINE}em`, lineHeight: `${LINE}em`}}>
+          .
+        </div>
+      );
+    } else if (i > decimals && (i - decimals) % 3 === 0) {
       nodes.push(
         <div key={`c${i}`} style={{width: '0.3ch', textAlign: 'center', height: `${LINE}em`, lineHeight: `${LINE}em`, opacity: 0.85}}>
           ,
