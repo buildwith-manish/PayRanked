@@ -2,9 +2,10 @@ import React from 'react';
 import {AbsoluteFill, OffthreadVideo, staticFile} from 'remotion';
 import {Aberration} from '../components/Grade';
 import {sec} from '../theme';
+import {SHOT_SECONDS} from '../timeline';
 
-// intro.mp4 is 4.0 s (extended from 3.0 s: +0.5 s hold + fade-in) (v9); the shot has to be as long as the clip or its last 0.4 s is cut off
-export const SHOT2_FRAMES = sec(4.0);
+// the slot is exactly as long as public/intro.mp4 (SHOT_SECONDS.shot2 = voLayout.introSeconds)
+export const SHOT2_FRAMES = sec(SHOT_SECONDS.shot2);
 
 /**
  * The 4.0 s PayRanked intro. It has its own audio, so the music bed is muted during this shot.

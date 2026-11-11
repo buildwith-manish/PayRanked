@@ -14,6 +14,7 @@ import {BOTTOM_FIVE, NO_WAGE_TAX, STATES, byName, fmtUSD, gap} from '../data';
 import {C, F, H, MARGIN, W, mix, ordinal, sec, tabular} from '../theme';
 import {K, useDesignFrame} from '../clock';
 import {SHOT_SECONDS} from '../timeline';
+import voLayout from '../audio/vo-layout.json';
 
 export const SHOT5_FRAMES = sec(SHOT_SECONDS.shot5); // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
 
@@ -30,20 +31,21 @@ export const SHOT5_FRAMES = sec(SHOT_SECONDS.shot5); // EXTEND-3: restored from 
  * better. It's just cheaper." — a more honest summary.
  */
 export const T = {
-  rows:      sec(7),
-  bars:      sec(16),
-  interrupt: sec(24),
-  lights:    sec(26),
-  ring:      sec(30),
-  /** the three closing cards (unchanged) */
-  card1:     sec(31.5),
-  card2:     sec(35.5),
-  card3:     sec(39),
-  /** EXTEND-3: four new cards (43-100 s) */
-  card4:     sec(43),    // housing comparison: SF vs rural Arkansas
-  card5:     sec(50),    // property tax: Texas 1.7%, 6th highest
-  card6:     sec(58),    // healthcare access: cheaper states, fewer specialists
-  card7:     sec(68),    // the honest catch: "Cheap ≠ better. It's just cheaper."
+  rows:      sec(voLayout.shot5.rows),
+  bars:      sec(voLayout.shot5.bars),
+  /** the "+27%" slams in on the spoken "twenty-seven percent" */
+  pct:       sec(voLayout.shot5.pct),
+  interrupt: sec(voLayout.shot5.interrupt),
+  lights:    sec(voLayout.shot5.lights),
+  ring:      sec(voLayout.shot5.ring),
+  /** the narration says "only one of those, South Dakota" before it gets to Washington, so card1 is the South Dakota card and card2 the Washington one */
+  card1:     sec(voLayout.shot5.card1),
+  card2:     sec(voLayout.shot5.card2),
+  card3:     sec(voLayout.shot5.card3),
+  card4:     sec(voLayout.shot5.card4),    // housing comparison: SF vs rural Arkansas
+  card5:     sec(voLayout.shot5.card5),    // property tax: Texas 1.7%, 6th highest
+  card6:     sec(voLayout.shot5.card6),    // healthcare access: cheaper states, fewer specialists
+  card7:     sec(voLayout.shot5.card7),    // the honest catch: "Cheap ≠ better. It's just cheaper."
 };
 
 /**
@@ -185,10 +187,10 @@ export const Shot5: React.FC = () => {
 
   const hArk = 560;
   const hCal = hArk * (cal.dollars / ark.dollars);
-  const pctAt    = (t: number) => tween(t, T.bars + 40, 22, slam);
+  const pctAt    = (t: number) => tween(t, T.pct, 22, slam);
   const pctScale = (t: number) => 1 + 1.0 * (1 - pctAt(t));
   const pctBlur  = Math.min(14, Math.abs(pctScale(f) - pctScale(f - 1)) * (18 / K));
-  const barsBack = ramp(f, T.bars + 40, T.bars + 58, glide);
+  const barsBack = ramp(f, T.pct, T.pct + 18, glide);
 
   const litAt = (t: number) => taxStates.reduce((a, _, idx) => a + tween(t, T.lights + idx * 4 + 10, 8, glide), 0);
 
@@ -283,7 +285,7 @@ export const Shot5: React.FC = () => {
               </svg>
               <Bracket x={724} y1={860 - hArk} y2={860 - hCal} start={T.bars + 30} duration={22} depth={16} color={C.text} />
             </div>
-            {f >= T.bars + 40 && (
+            {f >= T.pct && (
               <div
                 style={{
                   position: 'absolute',
@@ -297,7 +299,7 @@ export const Shot5: React.FC = () => {
                   opacity: Math.min(1, pctAt(f) * 3),
                 }}
               >
-                <Count to={Math.round(g.pct)} from={0} start={T.bars + 40} duration={34} size={130} color={C.amber} glow={22} prefix="+" suffix="%" />
+                <Count to={Math.round(g.pct)} from={0} start={T.pct} duration={34} size={130} color={C.amber} glow={22} prefix="+" suffix="%" />
               </div>
             )}
           </div>
@@ -327,30 +329,30 @@ export const Shot5: React.FC = () => {
 
           {/* 31-44s: info cards */}
           {/* Card 1: Washington split — most expensive + no wage tax */}
-          <InfoCard start={T.card1} end={T.card2 + sec(0.5)}>
+          <InfoCard start={T.card2} end={T.card3 + sec(0.5)}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.text}}>
-                <MaskLine start={T.card1 + 8} dur={20}>{ordinal(waRank)} most expensive</MaskLine>
+                <MaskLine start={T.card2 + 8} dur={20}>{ordinal(waRank)} most expensive</MaskLine>
               </div>
               <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.amber}}>
-                <MaskLine start={T.card1 + 14} dur={20}>No wage tax</MaskLine>
+                <MaskLine start={T.card2 + 14} dur={20}>No wage tax</MaskLine>
               </div>
             </div>
           </InfoCard>
 
           {/* Card 2: how many no-wage-tax states made the top 10. Not Texas: the "Not on this list" break already
               showed Texas and Florida, so repeating Texas here said the same thing twice. */}
-          <InfoCard start={T.card2} end={T.card3 + sec(0.5)}>
+          <InfoCard start={T.card1} end={T.card2 + sec(0.5)}>
             <div style={{textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.text, padding: '0 40px', ...tabular}}>
-              <MaskLine start={T.card2 + 8} dur={22}>
+              <MaskLine start={T.card1 + 8} dur={22}>
                 {topTax.length === 0
                   ? `None of the ${NO_WAGE_TAX.length} no-wage-tax states is in the top 10`
                   : `Only ${topTax.length} of ${NO_WAGE_TAX.length} no-wage-tax states ${topTax.length === 1 ? 'is' : 'are'} in the top 10`}
               </MaskLine>
               {topTax.length > 0 && (
                 <div style={{marginTop: 10, fontFamily: F.body, fontWeight: 500, fontSize: 36, color: C.amber}}>
-                  <MaskLine start={T.card2 + 22} dur={20}>{topTax.map((x) => `${x.name}, #${x.rank}`).join(' · ')}</MaskLine>
+                  <MaskLine start={T.card1 + 22} dur={20}>{topTax.map((x) => `${x.name}, #${x.rank}`).join(' · ')}</MaskLine>
                 </div>
               )}
             </div>
@@ -428,7 +430,7 @@ export const Shot5: React.FC = () => {
         </Background>
         <SourceTag />
       </div>
-      <Flash at={T.bars + 40} duration={8} peak={0.45} />
+      <Flash at={T.pct} duration={8} peak={0.45} />
       <Flash at={T.interrupt} duration={6} peak={0.9} />
     </AbsoluteFill>
   );

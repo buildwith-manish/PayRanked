@@ -1,34 +1,34 @@
 {
   "fps": 30,
-  "total": 498.5,
+  "total": 556,
   "shots": {
     "shot1": {
       "start": 0,
-      "dur": 15
+      "dur": 27
     },
     "shot2": {
-      "start": 15,
-      "dur": 4
+      "start": 27,
+      "dur": 3.5
     },
     "shot3": {
-      "start": 19,
-      "dur": 60
+      "start": 30.5,
+      "dur": 78.5
     },
     "countdown": {
-      "start": 79,
-      "dur": 197.5
+      "start": 109,
+      "dur": 235
     },
     "shot5": {
-      "start": 276.5,
-      "dur": 100
+      "start": 344,
+      "dur": 85
     },
     "shot55": {
-      "start": 376.5,
+      "start": 429,
       "dur": 110
     },
     "shot6": {
-      "start": 486.5,
-      "dur": 12
+      "start": 539,
+      "dur": 17
     }
   },
   "shot1": {
@@ -37,34 +37,35 @@
     "count": 1,
     "head": 2.2,
     "explain": 3.4,
-    "head2": 4.8,
-    "rest": 5.6,
-    "bracket": 6,
-    "slam": 6.8,
-    "chips": 10
+    "head2": 7.1,
+    "rest": 20.166666666666668,
+    "bracket": 20.566666666666666,
+    "slam": 21.366666666666667,
+    "chips": 24.566666666666666
   },
   "shot3": {
-    "avg": 2.5,
-    "toCal": 5,
-    "formula": 9.5,
-    "rail": 56.5,
-    "categories": 20,
-    "housing": 35,
-    "honesty": 50
+    "avg": 11.633333333333333,
+    "toCal": 13.733333333333333,
+    "formula": 28.833333333333332,
+    "categories": 48.1,
+    "housing": 55.766666666666666,
+    "honesty": 70.7,
+    "rail": 74.26666666666667
   },
   "shot5": {
-    "rows": 7,
-    "bars": 16,
-    "interrupt": 24,
-    "lights": 26,
-    "ring": 30,
-    "card1": 31.5,
-    "card2": 35.5,
-    "card3": 39,
-    "card4": 43,
-    "card5": 50,
-    "card6": 58,
-    "card7": 68
+    "rows": 4.5,
+    "bars": 14.166666666666666,
+    "pct": 23.8,
+    "interrupt": 27.833333333333332,
+    "lights": 30.166666666666668,
+    "ring": 41.36666666666667,
+    "card1": 37.96666666666667,
+    "card2": 43.46666666666667,
+    "card3": 54.56666666666667,
+    "card4": 57.166666666666664,
+    "card5": 66.6,
+    "card6": 76.06666666666666,
+    "card7": 79.86666666666666
   },
   "shot55": {
     "hook": 0,
@@ -77,7 +78,7 @@
   "shot6": {
     "cards": 0.5,
     "pct": 3,
-    "fade": 11
+    "fade": 16
   },
   "reveals": [
     {
@@ -86,28 +87,28 @@
         "Kansas",
         "Nebraska"
       ],
-      "fast": true,
+      "fast": false,
       "from": 0,
-      "dur": 15,
-      "name": 2.6,
-      "bea": 3.6,
-      "dollars": 5.2,
-      "lock": 13.4,
-      "mapOut": 14.4
+      "dur": 30,
+      "name": 3,
+      "bea": 6,
+      "dollars": 8,
+      "lock": 21,
+      "mapOut": 23.2
     },
     {
       "label": "#9",
       "names": [
         "West Virginia"
       ],
-      "fast": true,
-      "from": 15,
-      "dur": 15,
-      "name": 2.6,
-      "bea": 3.6,
-      "dollars": 5.2,
-      "lock": 13.4,
-      "mapOut": 14.4
+      "fast": false,
+      "from": 30,
+      "dur": 25,
+      "name": 3,
+      "bea": 6,
+      "dollars": 8,
+      "lock": 21,
+      "mapOut": 23.2
     },
     {
       "label": "#8",
@@ -115,7 +116,7 @@
         "North Dakota"
       ],
       "fast": true,
-      "from": 30,
+      "from": 55,
       "dur": 15,
       "name": 2.6,
       "bea": 3.6,
@@ -129,7 +130,7 @@
         "Alabama"
       ],
       "fast": true,
-      "from": 45,
+      "from": 70,
       "dur": 15,
       "name": 2.6,
       "bea": 3.6,
@@ -142,14 +143,14 @@
       "names": [
         "South Dakota"
       ],
-      "fast": true,
-      "from": 67.5,
-      "dur": 15,
-      "name": 2.6,
-      "bea": 3.6,
-      "dollars": 5.2,
-      "lock": 13.4,
-      "mapOut": 14.4
+      "fast": false,
+      "from": 95,
+      "dur": 25,
+      "name": 3,
+      "bea": 6,
+      "dollars": 8,
+      "lock": 21,
+      "mapOut": 23.2
     },
     {
       "label": "#5",
@@ -157,7 +158,7 @@
         "Louisiana"
       ],
       "fast": false,
-      "from": 82.5,
+      "from": 120,
       "dur": 25,
       "name": 3,
       "bea": 6,
@@ -172,7 +173,7 @@
         "Oklahoma"
       ],
       "fast": false,
-      "from": 107.5,
+      "from": 145,
       "dur": 30,
       "name": 3,
       "bea": 6,
@@ -186,7 +187,7 @@
         "Mississippi"
       ],
       "fast": false,
-      "from": 147.5,
+      "from": 185,
       "dur": 25,
       "name": 3,
       "bea": 6,
@@ -200,7 +201,7 @@
         "Arkansas"
       ],
       "fast": false,
-      "from": 172.5,
+      "from": 210,
       "dur": 25,
       "name": 3,
       "bea": 6,
@@ -212,12 +213,12 @@
   "breaks": [
     {
       "kind": "notHere",
-      "from": 60,
-      "dur": 7.5
+      "from": 85,
+      "dur": 10
     },
     {
       "kind": "prices",
-      "from": 137.5,
+      "from": 175,
       "dur": 10
     }
   ]

@@ -12,6 +12,7 @@ import {Odometer} from '../components/Odometer';
 import {MotionBlur} from '../components/MotionBlur';
 import {Flash, Letters, SourceTag} from '../components/common';
 import {MaskWords} from '../components/MaskText';
+import voLayout from '../audio/vo-layout.json';
 import {byName, fmtUSD, gap, SALARY} from '../data';
 import {SHOT_SECONDS} from '../timeline';
 import {glide, ramp, roll, slam, snap, tween} from '../motion';
@@ -28,12 +29,13 @@ export const COUNT_START = 30; // California's number rolls straight away
 export const COUNT_DUR = 60;
 export const HEAD_START = sec(2.2); // "$100,000 in California feels like $90,300"
 export const EXPLAIN_START = sec(3.4); // "Same $100,000 salary. Different prices."
-export const HEAD2_START = sec(4.8); // "One state does the opposite."
-export const BRACKET_START = sec(6); // the bracket draws, then the gap slams in
+export const HEAD2_START = sec(voLayout.shot1.head2); // "One state does the opposite." on "One lives in Arkansas" (src/audio/vo-layout.json)
+export const HEAD2_LEAVE = sec(voLayout.shot1.head2Leave);
+export const BRACKET_START = sec(voLayout.shot1.bracket); // the bracket draws, then the gap slams in
 export const SLAM = BRACKET_START + 24;
-export const REST_START = sec(5.6); // California and the "?" step back so the gap is the only bright thing
-export const REST2_START = sec(9.2); // everything but the chips steps back
-export const CHIPS_START = sec(10);
+export const REST_START = sec(voLayout.shot1.rest); // California and the "?" step back so the gap is the only bright thing
+export const REST2_START = sec(voLayout.shot1.rest2); // everything but the chips steps back
+export const CHIPS_START = sec(voLayout.shot1.chips);
 
 /** Value on a card: 0 to the result in one roll. A pure function of the frame so the odometer can also be given last frame's value, for the blur on its fast wheels. */
 export const valueAt = (f: number, target: number, startAt: number) => target * tween(f, startAt, COUNT_DUR, roll);
@@ -294,7 +296,7 @@ export const Shot1: React.FC = () => {
 
             {/* 4.8-9s: the turn. The question the whole video answers. */}
             <div style={{position: 'absolute', left: 0, right: 0, top: 44, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.text, whiteSpace: 'nowrap'}}>
-              <MaskWords text="One state does the opposite." start={HEAD2_START} step={4} leaveAt={sec(9)} wordStyle={(_, i) => (i >= 3 ? {color: C.mint} : undefined)} />
+              <MaskWords text="One state does the opposite." start={HEAD2_START} step={4} leaveAt={HEAD2_LEAVE} wordStyle={(_, i) => (i >= 3 ? {color: C.mint} : undefined)} />
             </div>
 
             {/* 3.4-5.6s: the one-line reason, quiet and neutral, then it drops behind its line before the gap */}

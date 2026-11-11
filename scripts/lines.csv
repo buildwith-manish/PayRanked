@@ -1,0 +1,34 @@
+id,type,text
+v01_cold_open,voice,Two people. Same job. Same salary: exactly one hundred thousand dollars a year.
+v02_cold_open,voice,One lives in Arkansas. The other lives in California.
+v03_cold_open,voice,"In Arkansas, that paycheck buys what about one hundred fifteen thousand dollars buys in the average state. In California? About ninety thousand."
+v04_cold_open,voice,Same salary. A gap of almost twenty-five thousand dollars. Every single year.
+v06_method,voice,"Welcome to PayRanked, where we rank places by what your money actually buys. Here's how this works."
+v07_method,voice,The U.S. Bureau of Economic Analysis publishes something called Regional Price Parities. A hundred is the national average. California scores one hundred ten point seven: about eleven percent pricier. Arkansas scores eighty-six point nine: about thirteen percent cheaper.
+v08_method,voice,"To see what a salary is worth, divide it by that score. One hundred thousand, divided by point eight six nine, is about one hundred fifteen thousand. In average-state dollars."
+v09_method,voice,"Three limits, up front. These are statewide averages, so New York City is not upstate New York. They're before tax. And they measure prices, not paychecks. Pay and jobs get their own video."
+v10_method,voice,"This index measures prices across five categories. Housing is forty-two percent of it. That's why cheap states feel cheap. The median U.S. home costs about three hundred sixty thousand. In Arkansas, it's two hundred fifteen thousand. In California, seven hundred eighty thousand. Same salary, but a California mortgage eats four times what an Arkansas one does. Prices, not paychecks. Pay gets its own video. Okay. Let's count down."
+v11_reveal_10,voice,"Number ten is a tie. Kansas and Nebraska. Both score ninety point one. A hundred thousand dollars in either state is worth about one hundred eleven thousand. Nebraska's unemployment rate is two point eight percent, fifth lowest in the country."
+v12_reveal_9,voice,"Number nine. West Virginia. It scores eighty-nine point five, about ten and a half percent below average. Your hundred thousand is worth about one hundred eleven thousand seven hundred. The state's population has been shrinking. It lost twenty-four thousand residents in five years."
+v13_break,voice,Not on this list. Texas. Florida. No wage tax doesn't fix the prices. Guess number one before we get there.
+v14_reveal_6,voice,"Number six. South Dakota. Eighty-eight point six, a little over eleven percent below average. Your hundred thousand is worth about one hundred twelve thousand nine hundred. And South Dakota has no state income tax on wages, which we'll come back to."
+v15_reveal_5,voice,"Number five. Louisiana. Eighty-eight point two, almost twelve percent below average. Your hundred thousand is worth about one hundred thirteen thousand four hundred. That's thirteen thousand four hundred dollars of extra buying power. Louisiana has the highest combined sales tax in the nation, nine point five six percent."
+v16_reveal_3,voice,"Third place is a tie: Iowa and Oklahoma. Both score eighty-seven point eight, so there is no number four. In either state, your hundred thousand is worth about one hundred thirteen thousand nine hundred. Iowa produces about eighteen percent of all U.S. corn. Oklahoma is a top-ten state for oil production."
+v17_break,voice,"Cheap doesn't mean you'd earn a hundred thousand there. This ranks prices, not paychecks."
+v18_reveal_2,voice,"Number two. Mississippi. Eighty-seven point zero, thirteen percent below average. Your hundred thousand is worth about one hundred fourteen thousand nine hundred. Mississippi has the lowest median household income in the country, about fifty-six thousand. But seventy percent of residents own their homes."
+v19_reveal_1,voice,"Number one. Arkansas. At eighty-six point nine, it's the cheapest state in the country by B-E-A's measure. A hundred thousand dollars here is worth about one hundred fifteen thousand one hundred. The median rent is nine hundred eighty-two dollars a month, fourth lowest in the nation."
+v20_reality,voice,"Now the other end. In California, a hundred thousand dollars is worth about ninety thousand three hundred. Hawaii is close behind, then New Jersey, New York, and Washington."
+v21_reality,voice,Put the best and worst side by side: about one hundred fifteen thousand in Arkansas against about ninety thousand in California. That's roughly twenty-seven percent more buying power for the same salary.
+v22_reality,voice,"Nine states don't tax wages: Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, and Wyoming. But only one of those, South Dakota, is in the top ten."
+v23_reality,voice,"Washington is on both lists: fifth most expensive, yet no wage tax. Texas scores ninety-seven point one, so your hundred thousand there is worth about one hundred three thousand, with no state wage tax on top."
+v24_reality,voice,But San Francisco median rent? Three thousand five hundred a month. Rural Arkansas? Eight hundred. State averages hide a four-times spread.
+v25_reality,voice,"Texas has no wage tax, but property tax is one point seven percent, sixth highest in the country. No income tax doesn't automatically mean cheaper."
+v26_reality,voice,And the cheapest states have about thirty percent fewer specialists per capita. Cheap doesn't mean better. It's just cheaper.
+v27_practical,voice,So who actually wins?
+v28_practical,voice,"If you work remote, Texas, Florida, Washington look tempting. But check total cost, not just the tax headline. Property tax and insurance can eat the savings."
+v29_practical,voice,"If you're a retiree, the cheapest states win. Arkansas, Mississippi, Oklahoma stretch a fixed income furthest. But healthcare access matters more than price."
+v30_practical,voice,"If you're early career, don't chase cheap. Expensive states often pay enough to offset the cost. Chase income growth first, cost of living second."
+v31_practical,voice,"Your turn. Take your salary, divide it by your state's price score divided by one hundred. That's your real buying power."
+v32_practical,voice,Cities next. Where does fifty thousand dollars actually go?
+v33_outro,voice,Same hundred thousand. Ninety thousand three hundred to one hundred fifteen thousand one hundred. No tax isn't always cheaper. Your city matters more than your state.
+v34_outro,voice,Which state surprised you most? I read every comment. Thanks for watching.

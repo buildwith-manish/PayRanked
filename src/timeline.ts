@@ -1,6 +1,7 @@
 import type {RailEntry} from './components/Leaderboard';
 import {byName, COUNTDOWN} from './data';
 import {sec} from './theme';
+import voLayout from './audio/vo-layout.json';
 
 /**
  * Frames the dollar count takes to roll inside each RankReveal.
@@ -16,9 +17,11 @@ export const COUNT_DUR = 54; // 54 design frames = 1.8 s (all timings are on the
 export const MIN_REVEAL_SECONDS = 25;
 
 /** Seconds per reveal: 15 for #10 to #6 (T_FAST in RankReveal), then 25 normally and 30 for ties. #1 is a normal 25 s reveal. */
-export const FAST_FROM_RANK = 6; // #10 .. #6 use the 15 s beats
+/** Which reveals use the 15 s beats. scripts/vo_layout.py decides: a reveal is fast only when it has no narration or its narration is
+ *  finished by about 13.6 s. Every other reveal uses the full 25 s beats so the voice never runs into the next one. */
+export const FAST_RANKS: number[] = voLayout.fastRanks;
 export const FAST_REVEAL_SECONDS = 15;
-export const isFast = (rank: number) => rank >= FAST_FROM_RANK;
+export const isFast = (rank: number) => FAST_RANKS.includes(rank);
 
 /**
  * The one fast reveal that breaks the "3D map left, text panel right" template: #8 swaps the coin stack and fact card for a
@@ -42,8 +45,8 @@ export const revealSeconds = (names: string[], rank: number) =>
  */
 export type BreakKind = 'notHere' | 'prices';
 export const BREAKS: {afterRank: number; kind: BreakKind; seconds: number}[] = [
-  {afterRank: 7, kind: 'notHere', seconds: 7.5}, // 3 bars of the 96 BPM bed
-  {afterRank: 3, kind: 'prices', seconds: 10}, // 4 bars
+  {afterRank: 7, kind: 'notHere', seconds: voLayout.breakSeconds.notHere}, // 4 bars of the 96 BPM bed (its voice-over is 8 s long)
+  {afterRank: 3, kind: 'prices', seconds: voLayout.breakSeconds.prices}, // 4 bars
 ];
 
 /** Every reveal in order, each carrying the rail entries locked in so far, and every break between them. */
@@ -80,12 +83,12 @@ for (const t of timeline) {
 
 /** Length of each shot in seconds. The shot files turn these into frames; the master schedule below is built from them. */
 export const SHOT_SECONDS = {
-  shot1: 15, // cold open: the question, without the answer (was 30)
-  shot2: 4.0, // the intro clip (extended from 3.0 s: +0.5 s hold + fade-in) (v9) is 3.0 s; was 2.6 s plus 0.4 s of air
-  shot3: 60, // method (EXTEND-1: restored from 20 s to 60 s; was 42 s originally)
-  shot5: 100, // EXTEND-3: restored from 44 s to 100 s; was 130 s originally
-  shot55: 110, // EXTEND-4: practical takeaways (was 80 s; extended to 110 s so the body text has 25 s per profile, hits the 8:30 target)
-  shot6: 12, // outro: the recap cards, then a 1 s fade to black. No next-video card, subscribe ask or end screen (there is no next video yet)
+  shot1: voLayout.shot1Seconds, // cold open: as long as its voice-over (scripts/vo_layout.py measures it); the intro must never start under a spoken word
+  shot2: voLayout.introSeconds, // the real length of public/intro.mp4 (3.5 s per ffprobe); a longer slot only adds dead air before Shot 3
+  shot3: voLayout.shot3Seconds, // method: as long as its narration (the beats inside it are cued to the words, see src/audio/vo-layout.json)
+  shot5: voLayout.shot5Seconds, // reality check: as long as its narration
+  shot55: voLayout.shot55Seconds, // practical takeaways: 25 s per profile card, the voice-over sits at the start of each
+  shot6: voLayout.shot6Seconds, // outro: the recap cards, the last two voice-over lines, then a 1 s fade to black
 };
 
 /** Start frames on the master timeline. Each shot starts where the one before it ends, so no gap can open up again. */

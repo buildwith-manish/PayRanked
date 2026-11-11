@@ -12,6 +12,7 @@ import {byName, fmtUSD, SALARY} from '../data';
 import {SHOT_SECONDS} from '../timeline';
 import {C, F, H, W, mix, sec, tabular} from '../theme';
 import {useDesignFrame} from '../clock';
+import voLayout from '../audio/vo-layout.json';
 
 // Method, restored to 60 s (EXTEND-1). The gauge + formula + footnote still run in the first 20 s; the extra 40 s
 // adds: what BEA measures (categories with weights), a concrete housing example (3 bars), and a final honesty
@@ -20,14 +21,13 @@ export const SHOT3_FRAMES = sec(SHOT_SECONDS.shot3);
 
 /** Shot-local times (0 = the start of the shot). */
 export const T = {
-  avg:       sec(2.5),  // needle springs to 100
-  toCal:     sec(5),    // and swings to California
-  formula:   sec(9.5),  // formula tokens fly in
-  rail:      sec(56.5), // leaderboard opens, "Let's count down" (was 16.5; the new beats fill 20-56 s)
-  // EXTEND-1: the three new beats after the formula
-  categories: sec(20),  // 5-category breakdown appears
-  housing:    sec(35),  // 3-bar housing comparison
-  honesty:    sec(50),  // "Prices, not paychecks" exit line
+  avg:        sec(voLayout.shot3.avg),        // needle springs to 100, on "A hundred is the national average"
+  toCal:      sec(voLayout.shot3.toCal),      // and swings to California
+  formula:    sec(voLayout.shot3.formula),    // formula tokens fly in
+  categories: sec(voLayout.shot3.categories), // 5-category breakdown appears
+  housing:    sec(voLayout.shot3.housing),    // 3-bar housing comparison, on "The median U.S. home costs..."
+  honesty:    sec(voLayout.shot3.honesty),    // "Prices, not paychecks" exit line
+  rail:       sec(voLayout.shot3.rail),       // leaderboard opens, "Let's count down"
 };
 
 /** Label under the gauge: rises from behind a line, holds, then drops back. */
