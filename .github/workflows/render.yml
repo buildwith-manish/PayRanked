@@ -18,9 +18,10 @@ on:
 
 jobs:
   render:
-    # Use the 4-core larger runner so Remotion's --concurrency=4 is accepted (it caps at os.cpus().length).
-    # Available for free on public repos; falls back to ubuntu-latest (2 cores) if unavailable.
-    runs-on: ubuntu-latest-4-cores
+    # GitHub Pro includes 2-core ubuntu-latest runners (same as free tier).
+    # 4-core+ larger runners require GitHub Team or Enterprise, not Pro.
+    # Remotion caps --concurrency at os.cpus().length, so 2 cores = max concurrency 2.
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -121,16 +122,16 @@ jobs:
             SCALE_FLAG="--scale=1"
           fi
 
-          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 4)..."
-          # --concurrency=4: the 4-core larger runner (ubuntu-latest-4-cores) reports 4 CPUs,
-          # so Remotion accepts concurrency=4. Four Chromium instances render frames in parallel.
+          echo "Rendering frames $START-$END at $QUALITY (preset medium, concurrency 2)..."
+          # --concurrency=2: GitHub Pro's ubuntu-latest runner has 2 cores; Remotion caps at os.cpus().length.
           # preset=medium is the right balance: 2x slower than ultrafast but visibly cleaner at 4K.
+          # 4K + 60fps + motion blur all stay ON (config-level, not flag-level).
           npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
             --frames=$START-$END \
             --codec=h264 --crf=16 \
             --x264-preset=medium \
             --audio-codec=aac --audio-bitrate=320k \
-            --concurrency=4 \
+            --concurrency=2 \
             --log=error \
             $SCALE_FLAG
 
