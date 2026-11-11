@@ -43,7 +43,7 @@ export const T = {
   card2:     sec(voLayout.shot5.card2),
   card3:     sec(voLayout.shot5.card3),
   card4:     sec(voLayout.shot5.card4),    // housing comparison: SF vs rural Arkansas
-  card5:     sec(voLayout.shot5.card5),    // property tax: Texas 1.7%, 6th highest
+  card5:     sec(voLayout.shot5.card5),    // property tax: Texas 1.4%, top ten
   card6:     sec(voLayout.shot5.card6),    // healthcare access: cheaper states, fewer specialists
   card7:     sec(voLayout.shot5.card7),    // the honest catch: "Cheap ≠ better. It's just cheaper."
 };
@@ -385,8 +385,8 @@ export const Shot5: React.FC = () => {
             </div>
           </InfoCard>
 
-          {/* EXTEND-3 card5 (50-58 s): property tax angle. Texas: no wage tax, but property tax 1.7% — 6th highest.
-              Source: Tax Foundation 2024 state and local property tax rankings. The point: no wage tax ≠ low total tax. */}
+          {/* EXTEND-3 card5 (50-58 s): property tax angle. Texas: no wage tax, but property tax 1.4% — top ten.
+              Source: Tax Foundation 2026 state and local property tax rankings. The point: no wage tax ≠ low total tax. */}
           <InfoCard start={T.card5} end={T.card6 + sec(0.5)}>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.amber}}>
@@ -395,8 +395,8 @@ export const Shot5: React.FC = () => {
               </div>
               <div style={{width: 4, height: 110, background: 'rgba(232,238,247,0.3)', borderRadius: 2}} />
               <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 50, color: C.red, ...tabular}}>
-                <Count to={1.7} start={T.card5 + 14} duration={30} size={50} color={C.red} prefix="" suffix="%" />
-                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Property tax — 6th highest</div>
+                <Count to={1.4} start={T.card5 + 14} duration={30} size={50} color={C.red} prefix="" suffix="%" />
+                <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 28, color: C.muted, marginTop: 8}}>Property tax — top ten</div>
               </div>
             </div>
           </InfoCard>
