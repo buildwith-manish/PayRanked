@@ -15,6 +15,10 @@ on:
         description: 'Run ID of the old Render & Upload run (the number in .../actions/runs/<ID>)'
         required: true
         default: '42971952524'
+      reuse_run_id:
+        description: 'OPTIONAL: ID of an earlier Render Resume run whose finished pieces should be reused (same pieces_per_group!)'
+        required: false
+        default: ''
       pieces_per_group:
         description: 'How many pieces to split each unfinished group into'
         required: false
@@ -51,6 +55,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SRC: ${{ inputs.source_run_id }}
+          REUSE: ${{ inputs.reuse_run_id }}
           PIECES: ${{ inputs.pieces_per_group }}
         run: |
           TOTAL=$(node -e "console.log(Math.round(require('./src/audio/vo-layout.json').totalSeconds * 60))")
@@ -60,6 +65,13 @@ jobs:
             --jq '.artifacts[] | select(.expired==false) | select(.size_in_bytes>100000) | .name' > have.txt
           echo "Artifacts found in run ${SRC}:"
           sort -V have.txt
+          # Pieces already finished in an earlier Render Resume run (optional) are not rendered again
+          : > have_pieces.txt
+          if [ -n "$REUSE" ]; then
+            gh api --paginate "repos/${{ github.repository }}/actions/runs/${REUSE}/artifacts?per_page=100" \
+              --jq '.artifacts[] | select(.expired==false) | select(.size_in_bytes>100000) | .name' > have_pieces.txt
+            echo "Reusable pieces from run ${REUSE}: $(wc -l < have_pieces.txt)"
+          fi
           TOTAL="$TOTAL" python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import os, json, math
           TOTAL = int(os.environ["TOTAL"])
@@ -67,6 +79,7 @@ jobs:
           NUM_GROUPS = 40
           PER_GROUP = (TOTAL + NUM_GROUPS - 1) // NUM_GROUPS
           have = set(open("have.txt").read().split())
+          have_pieces = set(open("have_pieces.txt").read().split())
           include, missing = [], []
           for g in range(1, NUM_GROUPS + 1):
               s = (g - 1) * PER_GROUP
@@ -79,8 +92,9 @@ jobs:
               p, ps = 1, s
               while ps <= e:
                   pe = min(ps + size - 1, e)
-                  include.append({"group": g, "piece": p, "start": ps, "end": pe,
-                                  "dur": round((pe - ps + 1) / 60.0, 3)})
+                  if f"resume-g{g}-p{p}" not in have_pieces:
+                      include.append({"group": g, "piece": p, "start": ps, "end": pe,
+                                      "dur": round((pe - ps + 1) / 60.0, 3)})
                   ps, p = pe + 1, p + 1
           import sys
           print(f"Unfinished groups: {missing}", file=sys.stderr)
@@ -140,15 +154,30 @@ jobs:
           fi
 
           echo "Rendering frames $START-$END at $QUALITY (same flags as render.yml)..."
-          npx remotion render src/index.ts Video1 "$OUT" \
-            --frames=$START-$END \
-            --codec=h264 --crf=14 \
-            --x264-preset=fast \
-            --color-space=bt709 \
-            --audio-codec=aac --audio-bitrate=320k \
-            --concurrency=4 \
-            --log=error \
-            $SCALE_FLAG
+          # --timeout=1200000: a piece starts mid-scene, so its first frames compile the heavy WebGL map geometry cold.
+          #   With 4 Chromium instances at once that exceeded the 300 s default and failed some pieces. 20 min is plenty.
+          # Up to 3 attempts per piece: a rare slow-frame timeout then costs one retry instead of the whole job.
+          for attempt in 1 2 3; do
+            if npx remotion render src/index.ts Video1 "$OUT" \
+              --frames=$START-$END \
+              --codec=h264 --crf=14 \
+              --x264-preset=fast \
+              --color-space=bt709 \
+              --audio-codec=aac --audio-bitrate=320k \
+              --concurrency=4 \
+              --timeout=1200000 \
+              --log=error \
+              $SCALE_FLAG; then
+              break
+            fi
+            if [ "$attempt" = "3" ]; then
+              echo "ERROR: render failed 3 times"
+              exit 1
+            fi
+            echo "Render attempt $attempt failed - retrying..."
+            rm -f "$OUT"
+            sleep 10
+          done
 
           ACTUAL=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT" 2>/dev/null || echo "0")
           SIZE=$(stat -c%s "$OUT" 2>/dev/null || echo 0)
@@ -211,6 +240,16 @@ jobs:
           run-id: ${{ inputs.source_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
+
+      - name: Download pieces reused from an earlier Render Resume run
+        if: ${{ inputs.reuse_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: new-clips
+          pattern: resume-g*
+          merge-multiple: true
+          run-id: ${{ inputs.reuse_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download newly rendered pieces
         if: ${{ needs.plan.outputs.has_work == 'true' }}
