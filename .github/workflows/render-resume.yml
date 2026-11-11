@@ -1,0 +1,306 @@
+name: Render Resume (unfinished groups only)
+
+# Resumes a "Render & Upload" run that has some groups unfinished (e.g. 30/40 done, 10 stuck at the 6-hour limit).
+# 1. plan:   lists the artifacts of the old run, finds which clips-group-N are missing, and splits each missing group
+#            into PIECES_PER_GROUP small pieces (10 missing groups x 4 pieces = 40 parallel jobs).
+# 2. render: renders every piece with exactly the same flags as render.yml.
+# 3. concat: takes the finished clips from the OLD run + the new pieces, joins them in order, optionally uploads to YouTube.
+#
+# Cancel the old run first. Artifacts of completed jobs survive cancelling (retention in render.yml is 7 days).
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Run ID of the old Render & Upload run (the number in .../actions/runs/<ID>)'
+        required: true
+        default: '42971952524'
+      pieces_per_group:
+        description: 'How many pieces to split each unfinished group into'
+        required: false
+        default: '4'
+      quality:
+        description: 'Quality (4K or 1080p) - MUST match the old run'
+        required: false
+        default: '4K'
+      upload_to_youtube:
+        description: 'Upload to YouTube after render (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Find unfinished groups and build the piece matrix
+        id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SRC: ${{ inputs.source_run_id }}
+          PIECES: ${{ inputs.pieces_per_group }}
+        run: |
+          TOTAL=$(node -e "console.log(Math.round(require('./src/audio/vo-layout.json').totalSeconds * 60))")
+          echo "Total frames: $TOTAL"
+          # Valid finished clips from the old run: not expired and non-trivial in size
+          gh api --paginate "repos/${{ github.repository }}/actions/runs/${SRC}/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.expired==false) | select(.size_in_bytes>100000) | .name' > have.txt
+          echo "Artifacts found in run ${SRC}:"
+          sort -V have.txt
+          TOTAL="$TOTAL" python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, json, math
+          TOTAL = int(os.environ["TOTAL"])
+          K = max(1, int(os.environ["PIECES"]))
+          NUM_GROUPS = 40
+          PER_GROUP = (TOTAL + NUM_GROUPS - 1) // NUM_GROUPS
+          have = set(open("have.txt").read().split())
+          include, missing = [], []
+          for g in range(1, NUM_GROUPS + 1):
+              s = (g - 1) * PER_GROUP
+              e = min(s + PER_GROUP - 1, TOTAL - 1)
+              if s >= TOTAL or f"clips-group-{g}" in have:
+                  continue
+              missing.append(g)
+              n = e - s + 1
+              size = math.ceil(n / K)
+              p, ps = 1, s
+              while ps <= e:
+                  pe = min(ps + size - 1, e)
+                  include.append({"group": g, "piece": p, "start": ps, "end": pe,
+                                  "dur": round((pe - ps + 1) / 60.0, 3)})
+                  ps, p = pe + 1, p + 1
+          import sys
+          print(f"Unfinished groups: {missing}", file=sys.stderr)
+          print(f"Pieces to render: {len(include)}", file=sys.stderr)
+          print("has_work=" + ("true" if include else "false"))
+          print("matrix=" + json.dumps({"include": include}))
+          PY
+
+  render:
+    needs: plan
+    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Render piece (group ${{ matrix.group }}, piece ${{ matrix.piece }})
+        run: |
+          START=${{ matrix.start }}
+          END=${{ matrix.end }}
+          QUALITY="${{ inputs.quality }}"
+          OUT="out/clips/resume-g${{ matrix.group }}-p${{ matrix.piece }}.mp4"
+          mkdir -p out/clips
+
+          SCALE_FLAG=""
+          if [ "$QUALITY" = "1080p" ]; then
+            SCALE_FLAG="--scale=1"
+          fi
+
+          echo "Rendering frames $START-$END at $QUALITY (same flags as render.yml)..."
+          npx remotion render src/index.ts Video1 "$OUT" \
+            --frames=$START-$END \
+            --codec=h264 --crf=14 \
+            --x264-preset=fast \
+            --color-space=bt709 \
+            --audio-codec=aac --audio-bitrate=320k \
+            --concurrency=4 \
+            --log=error \
+            $SCALE_FLAG
+
+          ACTUAL=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT" 2>/dev/null || echo "0")
+          SIZE=$(stat -c%s "$OUT" 2>/dev/null || echo 0)
+          echo "Rendered piece: ${ACTUAL}s (expected ${{ matrix.dur }}s), ${SIZE} bytes"
+          if [ "$SIZE" -lt 100000 ]; then
+            echo "ERROR: piece is too small - render likely failed"
+            exit 1
+          fi
+          python3 -c "import sys; sys.exit(0 if abs(float('$ACTUAL') - float('${{ matrix.dur }}')) < 0.3 else 1)" \
+            || { echo "ERROR: piece duration differs from expected by more than 0.3s"; exit 1; }
+
+      - name: Upload piece
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-g${{ matrix.group }}-p${{ matrix.piece }}
+          path: out/clips/*.mp4
+          retention-days: 7
+          overwrite: true
+
+  concat-and-upload:
+    needs: [plan, render]
+    if: ${{ always() && needs.plan.result == 'success' && (needs.render.result == 'success' || needs.render.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Download finished clips from the old run
+        uses: actions/download-artifact@v4
+        with:
+          path: old-clips
+          pattern: clips-group-*
+          merge-multiple: true
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Download newly rendered pieces
+        if: ${{ needs.plan.outputs.has_work == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: new-clips
+          pattern: resume-g*
+          merge-multiple: true
+
+      - name: Concatenate in order
+        run: |
+          mkdir -p old-clips new-clips
+          echo "old clips: $(ls old-clips | wc -l), new pieces: $(ls new-clips | wc -l)"
+          TOTAL=$(node -e "console.log(Math.round(require('./src/audio/vo-layout.json').totalSeconds * 60))")
+          TOTAL="$TOTAL" python3 - <<'PY'
+          import os, glob, re, subprocess, sys
+          TOTAL = int(os.environ["TOTAL"])
+          NUM_GROUPS = 40
+          PER_GROUP = (TOTAL + NUM_GROUPS - 1) // NUM_GROUPS
+
+          def dur(path):
+              r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                  "-of", "csv=p=0", path], capture_output=True, text=True)
+              try:
+                  return float(r.stdout.strip())
+              except ValueError:
+                  return 0.0
+
+          lines, problems = [], []
+          for g in range(1, NUM_GROUPS + 1):
+              s = (g - 1) * PER_GROUP
+              if s >= TOTAL:
+                  continue
+              e = min(s + PER_GROUP - 1, TOTAL - 1)
+              expected = (e - s + 1) / 60.0
+              old = f"old-clips/group-{g}.mp4"
+              pieces = sorted(glob.glob(f"new-clips/resume-g{g}-p*.mp4"),
+                              key=lambda p: int(re.search(r"-p(\d+)\.mp4$", p).group(1)))
+              if pieces:
+                  total = sum(dur(p) for p in pieces)
+                  print(f"group {g}: {len(pieces)} new pieces, {total:.3f}s (expected {expected:.3f}s)")
+                  if abs(total - expected) > 0.5:
+                      problems.append(f"group {g}: pieces total {total:.3f}s vs expected {expected:.3f}s")
+                  lines += [f"file '{p}'" for p in pieces]
+              elif os.path.isfile(old):
+                  d = dur(old)
+                  print(f"group {g}: old clip, {d:.3f}s (expected {expected:.3f}s)")
+                  if abs(d - expected) > 0.5:
+                      problems.append(f"group {g}: old clip {d:.3f}s vs expected {expected:.3f}s")
+                  lines.append(f"file '{old}'")
+              else:
+                  problems.append(f"group {g}: no old clip and no new pieces")
+          if problems:
+              print("ERROR:\n  " + "\n  ".join(problems))
+              sys.exit(1)
+          open("concat.txt", "w").write("\n".join(lines) + "\n")
+          print(f"{len(lines)} files in concat list")
+          PY
+
+          # Same as render.yml: clips share identical settings, so video is stream-copied and only audio is re-encoded.
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart final_video.mp4
+          ls -la final_video.mp4
+          FINAL_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 final_video.mp4)
+          echo "Final video duration: ${FINAL_DUR}s (expected $(python3 -c "print(round($TOTAL/60.0,1))")s)"
+
+      - name: Upload final video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-video
+          path: final_video.mp4
+          retention-days: 14
+          overwrite: true
+
+      - name: Upload to YouTube
+        if: ${{ inputs.upload_to_youtube == 'true' }}
+        env:
+          CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          TITLE: ${{ secrets.YOUTUBE_TITLE || 'What $100,000 Is Really Worth in Every State | PayRanked' }}
+          DESC: ${{ secrets.YOUTUBE_DESC }}
+          TAGS: ${{ secrets.YOUTUBE_TAGS || 'salary,states,ranking,cost of living,purchasing power,us states,finance,data visualization,payranked' }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, os
+          if not os.environ.get('CLIENT_SECRET') or not os.environ.get('REFRESH_TOKEN'):
+              print("YouTube secrets not set — skipping upload (artifact is still available)")
+              exit(0)
+          cs = json.loads(os.environ['CLIENT_SECRET'])
+          info = cs.get("installed", cs.get("web", {}))
+          cid = info.get("client_id", "")
+          csec = info.get("client_secret", "")
+          r = subprocess.run(["curl", "-s", "-X", "POST", "https://oauth2.googleapis.com/token",
+              "-d", f"client_id={cid}", "-d", f"client_secret={csec}",
+              "-d", f"refresh_token={os.environ['REFRESH_TOKEN']}",
+              "-d", "grant_type=refresh_token"], capture_output=True, text=True)
+          at = json.loads(r.stdout).get("access_token", "")
+          if not at:
+              print("No access token"); exit(1)
+          print("Got token")
+          desc = os.environ.get('DESC') or open('video-description.txt', encoding='utf-8').read().strip()
+          meta = {"snippet":{"title":os.environ['TITLE'],"description":desc,
+                            "tags":os.environ['TAGS'].split(","),"categoryId":"24"},
+                  "status":{"privacyStatus":"private","selfDeclaredMadeForKids":False}}
+          r1 = subprocess.run(["curl", "-s", "-i", "-X", "POST",
+              "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+              "-H", f"Authorization: Bearer {at}", "-H", "Content-Type: application/json",
+              "-d", json.dumps(meta)], capture_output=True, text=True)
+          uu = None
+          for line in r1.stdout.split("\n"):
+              if line.lower().startswith("location:"): uu = line.split(":",1)[1].strip(); break
+          if not uu:
+              print("No upload URL"); exit(1)
+          print(f"Uploading {os.path.getsize('final_video.mp4')/1e6:.1f}MB...")
+          r2 = subprocess.run(["curl", "-s", "-X", "PUT", "-H", "Content-Type: video/mp4",
+              "--data-binary", "@final_video.mp4", uu], capture_output=True, text=True, timeout=3600)
+          try:
+              vid = json.loads(r2.stdout).get("id", "")
+              if vid: print(f"UPLOADED: https://www.youtube.com/watch?v={vid}")
+              else: print(f"Response: {r2.stdout[:200]}")
+          except: print(f"Response: {r2.stdout[:200]}")
+          PY
