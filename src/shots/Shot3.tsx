@@ -60,6 +60,7 @@ const DIRS: [number, number][] = [[-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1
 export const Shot3: React.FC = () => {
   const f = useDesignFrame();
   const cal = byName('California');
+  const ark = byName('Arkansas'); // the formula is worked on Arkansas: that is the example the narration reads out (0.869 -> about $115,000)
 
   const needle = useNeedle([
     {at: T.avg,   value: 100},
@@ -70,7 +71,7 @@ export const Shot3: React.FC = () => {
   const gaugeOpacity = 1 - ramp(f, T.formula - 30, T.formula - 15, glide);
 
   // formula tokens, built from the data
-  const tokens     = ['$100,000', '÷', '(', cal.rpp.toFixed(1), '÷', '100', ')', '='];
+  const tokens     = ['$100,000', '÷', '(', ark.rpp.toFixed(1), '÷', '100', ')', '='];
   const resultDelay = T.formula + tokens.length * 5 + 6;
   const formulaOpacity = win(f, T.formula, T.categories, 10);  // Bug 9: fade out before CategoriesBreakdown appears at T.categories
 
@@ -103,10 +104,10 @@ export const Shot3: React.FC = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'baseline',
-            gap: 26,
+            gap: 22,
             fontFamily: F.display,
             fontWeight: 700,
-            fontSize: 104,
+            fontSize: 84, // was 104: the row was wider than the 1920 px frame and both ends were clipped
             color: C.text,
             opacity: formulaOpacity,
             ...tabular,
@@ -137,7 +138,7 @@ export const Shot3: React.FC = () => {
             );
           })}
           <span style={{opacity: ramp(f, resultDelay, resultDelay + 6)}}>
-            <Count to={cal.display} start={resultDelay} duration={54} size={104} color={C.red} glow={20} />
+            <Count to={ark.display} start={resultDelay} duration={54} size={84} color={C.mint} glow={20} prefix="≈ $" />
           </span>
         </div>
 
@@ -157,7 +158,7 @@ export const Shot3: React.FC = () => {
           }}
         >
           <MaskLine start={resultDelay + 44} dur={22}>
-            {fmtUSD(SALARY)} salary in {cal.name} buys what {fmtUSD(cal.display)} buys at the US average
+            {fmtUSD(SALARY)} salary in {ark.name} buys about what {fmtUSD(ark.display)} buys at the US average
           </MaskLine>
         </div>
 
