@@ -23,6 +23,7 @@ export const SHOT3_FRAMES = sec(SHOT_SECONDS.shot3);
 export const T = {
   avg:        sec(voLayout.shot3.avg),        // needle springs to 100, on "A hundred is the national average"
   toCal:      sec(voLayout.shot3.toCal),      // and swings to California
+  toArk:      sec(voLayout.shot3.toArk),      // swings back to Arkansas 86.9, on "Arkansas scores eighty-six point nine"
   formula:    sec(voLayout.shot3.formula),    // formula tokens fly in
   categories: sec(voLayout.shot3.categories), // 5-category breakdown appears
   housing:    sec(voLayout.shot3.housing),    // 3-bar housing comparison, on "The median U.S. home costs..."
@@ -65,8 +66,9 @@ export const Shot3: React.FC = () => {
   const needle = useNeedle([
     {at: T.avg,   value: 100},
     {at: T.toCal, value: cal.rpp},
+    {at: T.toArk, value: ark.rpp},
   ]);
-  const tint    = f < T.toCal ? C.text : C.red;
+  const tint    = f >= T.toArk ? C.mint : f >= T.toCal ? C.red : C.text;
   const pricier = Math.round(cal.rpp - 100);
   const gaugeOpacity = 1 - ramp(f, T.formula - 30, T.formula - 15, glide);
 
@@ -108,7 +110,8 @@ export const Shot3: React.FC = () => {
           <Gauge value={needle} size={900} tint={tint} drawFrames={60} jitter={f > T.toCal && f < T.formula} />
         </div>
         <PopLabel text="US average" start={T.avg + 14} end={T.toCal + 6} color={C.text} />
-        <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.formula - 2} color={C.red}     />
+        <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.toArk - 2} color={C.red} />
+        <PopLabel text={`Arkansas ${ark.rpp.toFixed(1)}: about ${Math.round(100 - ark.rpp)}% cheaper`} start={T.toArk + 28} end={T.formula - 2} color={C.mint} />
 
         {/* formula, token by token */}
         <div
