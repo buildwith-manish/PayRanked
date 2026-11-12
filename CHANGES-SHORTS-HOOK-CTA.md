@@ -25,5 +25,14 @@ Wording lives in `SHORT_HOOKS` (`src/shots/ShortOverlays.tsx`); edit one line to
   `Preview vertical Shorts (stills)` workflow and look at the 0.8 s / 1.5 s stills (hook clear of the map and the rank slam?) and the last still of each Short.
 - Short 3's hook (Texas) is paid off by the "Not on this list" break that follows #7 inside the Short. Confirm that break is inside the 40 s window.
 - Short 1 says California feels like $90,300; the data gives $90,318. Short 3's #8 bar was reported as $90,251, which does not match either: check it.
-- Shorts 6 and 7 held the same card for 20 s or more in the stills reviewed earlier: worth confirming the cards advance as intended.
 - Instagram / Facebook: the end line says "on my channel", so keep the matching pinned comment / link on each platform.
+
+## Shorts 6 and 7: dead air removed, cards keep moving
+In the long video each profile card is up for 25 s but the voice reads it for about 10 s (card 1: 5.3-16.6 s, card 3: 55.3-65.1 s of Shot 5.5),
+so the rest was a still card in silence: about 14 s in Short 6 and 15 s in Short 7. Fixed two ways:
+- **Cut the silence.** Short 6 is now 19 s (hook + the remote-worker card while it is read; was 30 s). Short 7 is 22 s (was 45 s): the
+  early-career card while it is read (12.5 s), then straight to the formula (9.5 s). `ShortSpec.parts` in `Root.tsx` plays source windows
+  back to back; voice-over and music follow each part, with a short fade at the join. Render `TOTAL`s are 1350 (Short 6) and 1530 (Short 7), end card included.
+- **Motion while a card is up (vertical only, the 16:9 video is unchanged):** the card drifts slowly toward the viewer, the headline glow
+  breathes, and the body text appears one sentence at a time (second sentence 5.5 s after the first).
+- Not verified: where exactly each cut lands against the voice (read the stills at 12.5 s and 14 s for Short 7, and listen to the join).

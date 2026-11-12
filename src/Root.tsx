@@ -98,17 +98,21 @@ export const Video1: React.FC<{withAudio?: boolean}> = ({withAudio = true}) => (
   </Grade>
 );
 
-type ShortSpec = {id: 2 | 3 | 4 | 5 | 6 | 7; sourceStart: number; seconds: number};
+/** `parts` (Shorts 6 and 7): source windows played back to back. In the long video each profile card is up for 25 s but the voice reads it
+ *  for about 10, so the rest is a still card in silence. The Shorts keep the spoken part of each card and skip the silence.
+ *  `start` is a second of the long video, so a part never needs retiming. */
+type ShortPart = {start: number; seconds: number};
+type ShortSpec = {id: 2 | 3 | 4 | 5 | 6 | 7; sourceStart: number; seconds: number; parts?: ShortPart[]};
 export const SHORTS_2_TO_7: ShortSpec[] = [
   {id: 2, sourceStart: 109, seconds: 55},
   {id: 3, sourceStart: 164, seconds: 40},
   {id: 4, sourceStart: 204, seconds: 50},
   {id: 5, sourceStart: 254, seconds: 40},
-  {id: 6, sourceStart: 429, seconds: 30},
-  {id: 7, sourceStart: 484, seconds: 45},
+  {id: 6, sourceStart: 429, seconds: 19, parts: [{start: 429, seconds: 19}]}, // hook + the remote-worker card while it is being read (voice ends at 16.6 s)
+  {id: 7, sourceStart: 484, seconds: 22, parts: [{start: 484, seconds: 12.5}, {start: 509, seconds: 9.5}]}, // early-career card while it is read (voice ends at 65.1 s), then straight to the formula (80-89.5 s, voice ends 88.3 s)
 ];
 
-const SegmentAudio: React.FC<{sourceStart: number; seconds: number}> = ({sourceStart, seconds}) => {
+const SegmentAudio: React.FC<{sourceStart: number; seconds: number; fadeIn?: boolean; joined?: boolean}> = ({sourceStart, seconds, fadeIn = false, joined = false}) => {
   const sourceEnd = sourceStart + seconds;
   return (
     <>
@@ -126,8 +130,19 @@ const SegmentAudio: React.FC<{sourceStart: number; seconds: number}> = ({sourceS
           </Sequence>
         );
       })}
-      {/* the music bed runs on under the end card and fades out over its first 1.5 s */}
-      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sec(sourceStart))} volume={(f) => musicGain(sec(sourceStart) + f / K) * Math.min(1, Math.max(0, 1 - (f / K - sec(seconds)) / sec(1.5)))} />}
+      {/* the music bed runs on under the end card and fades out over its first 1.5 s (parts that are followed by another part fade out over 8 frames instead) */}
+      {AUDIO.music && (
+        <Audio
+          src={staticFile('music.mp3')}
+          startFrom={toReal(sec(sourceStart))}
+          volume={(f) => {
+            const t = f / K; // design frames since the part began
+            const end = sec(seconds);
+            const out = joined ? Math.min(1, Math.max(0, (end - t) / 8)) : Math.min(1, Math.max(0, 1 - (t - end) / sec(1.5)));
+            return musicGain(sec(sourceStart) + t) * out * (fadeIn ? Math.min(1, t / 8) : 1);
+          }}
+        />
+      )}
     </>
   );
 };
@@ -161,33 +176,52 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
 
 export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
   const isCountdown = spec.id <= 5;
-  const localOffset = isCountdown ? sec(spec.sourceStart) - START.shot4 : sec(spec.sourceStart) - START.shot55;
   const hook = SHORT_HOOKS[spec.id];
+  const parts = spec.parts ?? [{start: spec.sourceStart, seconds: spec.seconds}];
+  let at = 0; // seconds into the Short at which each part begins
   return (
     // Native 1080x1920 composition: every scene below reads its size from the composition (useLayout) and lays itself out for 9:16.
     <AbsoluteFill style={{backgroundColor: C.navy3}}>
       <Grade>
         <AbsoluteFill>
-          {/* the Short itself; the same end card as Short 1 follows it (SHORT_END_SECONDS) */}
-          <Sequence from={0} durationInFrames={toReal(sec(spec.seconds))} name={`Short ${spec.id} content`}>
-            {isCountdown ? (
-              <CountdownSegment offset={localOffset} seconds={spec.seconds} />
-            ) : (
-              <FrameOffset offset={localOffset}>
-                <Shot55 />
-                <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
-              </FrameOffset>
-            )}
-            {hook && (
-              <Sequence from={0} durationInFrames={toReal(sec(3))} name={`Short ${spec.id} hook`}>
-                <ShortHook text={hook} />
+          {isCountdown ? (
+            <>
+              {/* the Short itself; the same end card as Short 1 follows it (SHORT_END_SECONDS) */}
+              <Sequence from={0} durationInFrames={toReal(sec(spec.seconds))} name={`Short ${spec.id} content`}>
+                <CountdownSegment offset={sec(spec.sourceStart) - START.shot4} seconds={spec.seconds} />
               </Sequence>
-            )}
-          </Sequence>
+              <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
+            </>
+          ) : (
+            parts.map((part, i) => {
+              const from = at;
+              at += part.seconds;
+              const localOffset = sec(part.start) - START.shot55;
+              const last = i === parts.length - 1;
+              return (
+                <React.Fragment key={part.start}>
+                  <Sequence from={toReal(sec(from))} durationInFrames={toReal(sec(part.seconds))} name={`Short ${spec.id} part ${i + 1}`}>
+                    <FrameOffset offset={localOffset}>
+                      <Shot55 />
+                      <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(part.seconds))} offset={START.shot55 + localOffset} />
+                    </FrameOffset>
+                  </Sequence>
+                  {/* voice-over and music of this part; the last part's music runs on under the end card */}
+                  <Sequence from={toReal(sec(from))} durationInFrames={toReal(sec(part.seconds + (last ? SHORT_END_SECONDS : 0)))} layout="none" name={`Short ${spec.id} part ${i + 1} audio`}>
+                    <SegmentAudio sourceStart={part.start} seconds={part.seconds} fadeIn={i > 0} joined={!last} />
+                  </Sequence>
+                </React.Fragment>
+              );
+            })
+          )}
+          {hook && (
+            <Sequence from={0} durationInFrames={toReal(sec(3))} name={`Short ${spec.id} hook`}>
+              <ShortHook text={hook} />
+            </Sequence>
+          )}
           <Sequence from={toReal(sec(spec.seconds))} durationInFrames={toReal(sec(SHORT_END_SECONDS))} name={`Short ${spec.id} end card`}>
             <ShortEndCard />
           </Sequence>
-          <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
           <Watermark />
         </AbsoluteFill>
       </Grade>

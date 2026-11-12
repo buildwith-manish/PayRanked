@@ -91,13 +91,18 @@ const ProfileCard: React.FC<{
   const out = ramp(f, end - 12, end, exitIn);
   // 3D rotateY: 80deg at start, 0deg when settled
   const rotateY = 80 * (1 - p);
+  // Vertical Shorts only (the 16:9 video is untouched): the card keeps moving while the voice reads it. It drifts slowly toward
+  // the viewer, the headline glow breathes, and the body appears one sentence at a time instead of all at once.
+  const drift = V ? 1 + 0.03 * ramp(f, start, end - 12) : 1;
+  const breathe = V ? 0.5 + 0.5 * Math.sin((f - start) / 12) : 0;
+  const sentences = V ? body.split(/(?<=\.)\s+/) : [body];
   return (
     <MotionBlur dx={-180 * (inAt(f) - inAt(f - 1))} shutter={0.6} cap={40} style={{position: 'absolute', left: V ? 48 : 240, right: V ? 48 : 240, top: V ? 400 : 200, height: V ? 900 : 620, perspective: 1400}}>
       <div
         style={{
           height: '100%',
           transformStyle: 'preserve-3d',
-          transform: `rotateY(${rotateY}deg) translateX(${(1 - p) * -120}px)`,
+          transform: `rotateY(${rotateY}deg) translateX(${(1 - p) * -120}px) scale(${drift})`,
           opacity: ramp(f, start, start + 8) * (1 - out),
         }}
       >
@@ -118,11 +123,16 @@ const ProfileCard: React.FC<{
           <div style={{fontFamily: F.body, fontWeight: 600, fontSize: V ? 46 : 36, color, letterSpacing: '0.18em', opacity: ramp(f, start + 6, start + 16)}}>
             {label}
           </div>
-          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 104 : 84, color: C.text, lineHeight: 1.05, opacity: ramp(f, start + 10, start + 22)}}>
+          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 104 : 84, color: C.text, lineHeight: 1.05, opacity: ramp(f, start + 10, start + 22), textShadow: V ? `0 0 ${18 + 22 * breathe}px ${color}66` : undefined}}>
             <MaskWords text={headline} start={start + 10} step={3} dur={20} />
           </div>
-          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 38, color: C.muted, lineHeight: V ? 1.3 : 1.4, maxWidth: 1100, opacity: ramp(f, start + 20, start + 32)}}>
-            {body}
+          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 38, color: C.muted, lineHeight: V ? 1.3 : 1.4, maxWidth: 1100, opacity: V ? 1 : ramp(f, start + 20, start + 32)}}>
+            {sentences.map((sentence, i) => (
+              <span key={i} style={{opacity: V ? ramp(f, start + 20 + i * sec(5.5), start + 32 + i * sec(5.5)) : 1}}>
+                {sentence}
+                {i < sentences.length - 1 ? ' ' : ''}
+              </span>
+            ))}
           </div>
         </Glass>
       </div>
