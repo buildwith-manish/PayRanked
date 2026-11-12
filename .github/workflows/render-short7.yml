@@ -6,8 +6,18 @@ on:
         description: Git ref to render
         required: true
         default: feat/short-1-vertical
+      variant:
+        description: 'End card: youtube = on my channel; social = Instagram and Facebook, link in comments'
+        required: true
+        default: youtube
+        type: choice
+        options: [youtube, social]
+
 jobs:
   render:
+    env:
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -30,13 +40,16 @@ jobs:
           echo "end=$END" >> "$GITHUB_OUTPUT"
       - run: |
           mkdir -p out
-          npx remotion render src/index.ts Short7-Vertical out/chunk-${{ matrix.chunk }}.mp4 \
+          npx remotion render src/index.ts "Short7-Vertical${COMP_SUFFIX}" out/chunk-${{ matrix.chunk }}.mp4 \
             --frames=${{ steps.range.outputs.start }}-${{ steps.range.outputs.end }} \
             --codec=h264 --crf=16 --x264-preset=slow --audio-codec=aac \
             --audio-bitrate=320k --scale=1 --concurrency=4 --color-space=bt709 --log=error
       - uses: actions/upload-artifact@v4
         with: {name: short7-chunk-${{ matrix.chunk }}, path: out/chunk-${{ matrix.chunk }}.mp4}
   concatenate:
+    env:
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
     needs: render
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +59,9 @@ jobs:
       - run: |
           : > concat.txt
           for i in 1 2 3 4; do echo "file 'out/chunks/chunk-$i.mp4'" >> concat.txt; done
-          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart out/short7-vertical.mp4
-          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=nw=1 out/short7-vertical.mp4
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart out/short7-vertical$FILE_SUFFIX.mp4
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=nw=1 out/short7-vertical$FILE_SUFFIX.mp4
       - uses: actions/upload-artifact@v4
-        with: {name: short7-vertical, path: out/short7-vertical.mp4}
+        with:
+          name: short7-vertical${{ env.FILE_SUFFIX }}
+          path: out/short7-vertical${{ env.FILE_SUFFIX }}.mp4

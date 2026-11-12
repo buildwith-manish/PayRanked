@@ -27,7 +27,12 @@ const CTA_CUES: Cue[] = [
   {sfx: 'ding_hi', at: CTA_T.sub + 8, gain: 0.3, hero: true},
 ];
 
-export const Short1EndCard: React.FC = () => {
+/** Which end line a render carries: 'youtube' = "on my channel" (the related-video button and pinned comment do the linking);
+ *  'social' = Instagram and Facebook, where there is no related-video button, so the card says "link in comments" and points down. */
+export type CtaVariant = 'youtube' | 'social';
+export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'on my channel', social: 'link in comments'};
+
+export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'youtube'}) => {
   const f = useDesignFrame();
   const fade = ramp(f, 0, 10);
   const rule = ramp(f, CTA_T.rule, CTA_T.rule + 16, glide);
@@ -43,8 +48,12 @@ export const Short1EndCard: React.FC = () => {
         </div>
         <div style={{marginTop: 30, height: 8, width: 520 * rule, borderRadius: 4, background: C.mint, boxShadow: `0 0 ${24 + 30 * pulse}px ${C.mint}${pulse > 0.2 ? 'aa' : '66'}`}} />
         <div style={{marginTop: 30, fontFamily: F.body, fontWeight: 600, fontSize: 46, color: C.mint, transform: `scale(${1 + 0.06 * pulse})`, opacity: pop > 0 ? 1 : 0}}>
-          <MaskLine start={CTA_T.sub} dur={16}>on my channel</MaskLine>
+          <MaskLine start={CTA_T.sub} dur={16}>{CTA_LINE[variant]}</MaskLine>
         </div>
+        {variant === 'social' && (
+          // a chevron that points down toward the comments and bobs, so the card keeps moving until the end
+          <div style={{marginTop: 46, width: 40, height: 40, borderRight: `10px solid ${C.mint}`, borderBottom: `10px solid ${C.mint}`, borderRadius: 3, opacity: ramp(f, CTA_T.sub + 14, CTA_T.sub + 26), transform: `translateY(${8 * Math.sin(f / 5)}px) rotate(45deg)`}} />
+        )}
       </div>
       <SfxTrack cues={CTA_CUES} offset={10_000_000} />
     </AbsoluteFill>

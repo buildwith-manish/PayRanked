@@ -21,7 +21,7 @@ import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
-import {Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {CtaVariant, Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
 import {HOOK_SECONDS, SHORT_HOOK_ANIMS} from './shots/HookKit';
 import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
@@ -175,7 +175,7 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
   </AbsoluteFill>
 );
 
-export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
+export const ShortSegment: React.FC<{spec: ShortSpec; cta?: CtaVariant}> = ({spec, cta = 'youtube'}) => {
   const isCountdown = spec.id <= 5;
   const hook = SHORT_HOOKS[spec.id];
   const HookAnim = SHORT_HOOK_ANIMS[spec.id]; // Shorts with a built hook animation (HookKit); the others use the plain text line
@@ -228,7 +228,7 @@ export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
             )
           )}
           <Sequence from={toReal(sec(spec.seconds))} durationInFrames={toReal(sec(SHORT_END_SECONDS))} name={`Short ${spec.id} end card`}>
-            <ShortEndCard />
+            <ShortEndCard variant={cta} />
           </Sequence>
           <Watermark />
         </AbsoluteFill>
@@ -291,7 +291,7 @@ const Short1Audio: React.FC = () => (
   </>
 );
 
-const Short1: React.FC = () => (
+const Short1: React.FC<{cta?: CtaVariant}> = ({cta = 'youtube'}) => (
   <AbsoluteFill style={{backgroundColor: C.navy3}}>
     <Grade>
       <AbsoluteFill>
@@ -304,7 +304,7 @@ const Short1: React.FC = () => (
           <SfxTrack cues={CUES.shot3} offset={START.shot3} />
         </Sequence>
         <Sequence from={toReal(sec(27 + SHORT1_METHOD_SECONDS))} durationInFrames={toReal(sec(3.5))} name="Short 1 end card">
-          <Short1EndCard />
+          <Short1EndCard variant={cta} />
         </Sequence>
         <Short1Audio />
         <Watermark />
@@ -318,19 +318,23 @@ const common = {width: W, height: H, fps: FPS};
 export const Root: React.FC = () => (
   <>
     <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
-    <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} />
-    {SHORTS_2_TO_7.map((spec) => (
-      <Composition
-        key={spec.id}
-        id={`Short${spec.id}-Vertical`}
-        component={ShortSegment}
-        durationInFrames={toReal(sec(spec.seconds + SHORT_END_SECONDS))}
-        width={VW}
-        height={VH}
-        fps={FPS}
-        defaultProps={{spec}}
-      />
-    ))}
+    {/* Two renders of every Short: YouTube ("on my channel") and -Social for Instagram and Facebook ("link in comments"). Only the end card differs. */}
+    <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'youtube' as CtaVariant}} />
+    <Composition id="Short1-Vertical-Social" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'social' as CtaVariant}} />
+    {SHORTS_2_TO_7.flatMap((spec) =>
+      (['youtube', 'social'] as CtaVariant[]).map((cta) => (
+        <Composition
+          key={`${spec.id}-${cta}`}
+          id={`Short${spec.id}-Vertical${cta === 'social' ? '-Social' : ''}`}
+          component={ShortSegment}
+          durationInFrames={toReal(sec(spec.seconds + SHORT_END_SECONDS))}
+          width={VW}
+          height={VH}
+          fps={FPS}
+          defaultProps={{spec, cta}}
+        />
+      )),
+    )}
     <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
     <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
     <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />

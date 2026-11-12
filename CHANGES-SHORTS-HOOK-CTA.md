@@ -57,3 +57,19 @@ words that land one by one with overshoot and blur, soft sound cues (pop, riser 
 - **Short 7 (own salary):** compact, because the profile card sits from y 400: "YOUR SALARY", a box types "$100,000" with a cursor and tick sounds,
   "÷ (RPP ÷ 100)" slams in below it, line: "Try this with your own salary." The card shows through while it plays, but its entrance
   (first second) is behind the hook: check the 1-3 s stills.
+
+## End card per platform
+Every Short now renders in two versions. Only the end line differs; the picture, voice and hook are identical.
+
+| Platform | Composition | End line | How the viewer gets there |
+|---|---|---|---|
+| YouTube | `ShortN-Vertical` | Full ranking + #1 / **on my channel** | related-video button + pinned comment with the long-video link |
+| Instagram, Facebook | `ShortN-Vertical-Social` | Full ranking + #1 / **link in comments** (chevron points down, bobs) | first comment with the long-video link |
+
+Render with the `Render Short N` workflow: new input `variant` (`youtube` default, or `social`). Social renders get `-social` in the
+composition id and file name (`short2-vertical-social.mp4`), so the two never overwrite each other.
+
+Posting copy (suggestion): YouTube pinned comment `Full ranking + #1: <link>`. Instagram and Facebook first comment `Full ranking + #1: <link>`,
+posted right after the Short goes live, because the card promises it. Check on your phone whether the link is tappable on each platform:
+on Instagram, links in comments are, as far as I know, not tappable, so viewers would have to copy it. If that proves true, change the
+social line (`CTA_LINE` in `src/shots/Short1.tsx`), for example to "search PayRanked on YouTube".

@@ -7,9 +7,18 @@ on:
         description: 'Git ref to render'
         required: true
         default: 'feat/short-1-vertical'
+      variant:
+        description: 'End card: youtube = on my channel; social = Instagram and Facebook, link in comments'
+        required: true
+        default: youtube
+        type: choice
+        options: [youtube, social]
 
 jobs:
   render-chunk:
+    env:
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -50,7 +59,7 @@ jobs:
       - name: Render Short 1 chunk
         run: |
           mkdir -p out
-          npx remotion render src/index.ts Short1-Vertical "out/chunk-${{ matrix.chunk }}.mp4" \
+          npx remotion render src/index.ts "Short1-Vertical${COMP_SUFFIX}" "out/chunk-${{ matrix.chunk }}.mp4" \
             --frames=${{ steps.range.outputs.start }}-${{ steps.range.outputs.end }} \
             --codec=h264 \
             --crf=16 \
@@ -70,6 +79,9 @@ jobs:
           retention-days: 7
 
   concatenate:
+    env:
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
     needs: render-chunk
     runs-on: ubuntu-latest
     steps:
@@ -97,7 +109,7 @@ jobs:
           mkdir -p out
           ffmpeg -y -v error -f concat -safe 0 -i concat.txt \
             -c:v copy -c:a aac -b:a 320k -movflags +faststart \
-            out/short-1-vertical.mp4
+            out/short-1-vertical$FILE_SUFFIX.mp4
 
       - name: Validate output
         run: |
@@ -105,11 +117,11 @@ jobs:
             -show_entries stream=width,height,r_frame_rate \
             -show_entries format=duration \
             -of default=nw=1 \
-            out/short-1-vertical.mp4
+            out/short-1-vertical$FILE_SUFFIX.mp4
 
       - name: Upload rendered Short 1
         uses: actions/upload-artifact@v4
         with:
-          name: short-1-vertical
-          path: out/short-1-vertical.mp4
+          name: short-1-vertical${{ env.FILE_SUFFIX }}
+          path: out/short-1-vertical${{ env.FILE_SUFFIX }}.mp4
           retention-days: 7
