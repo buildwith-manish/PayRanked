@@ -4,7 +4,7 @@
 - **Hook line (Shorts 2, 3, 4, 5, 7)**: one line in the headline area (y 180-400, below the Shorts shelf), in at 0.1 s and out at ~2.6 s,
   on a soft dark band so it reads over the 3D map. It names no state and gives no answer; the slam still pays it off.
   Short 6 gets none: it already opens on "So who actually wins?".
-- **End card (Shorts 2-7)**: the same card as Short 1 ("Full ranking + #1 / on my channel"), 3.5 s long, added after each Short.
+- **End card (Shorts 1-7)**: one shared, animated card (`Short1EndCard`): background fades in, "Full ranking + #1" rises word by word from behind a mask, a mint rule draws under it, "on my channel" rises and pulses once, slow scale drift; soft `pop` and `ding_hi` cues. 3.5 s long, added after each of Shorts 2-7 (Short 1 already had its slot, so it now animates too).
   Each Short is therefore 3.5 s longer. The music fades out over the first 1.5 s of the card.
 - Render workflows: `TOTAL` frame counts updated for the new lengths (Short 1's `TOTAL` was 2640, the composition is 2652 frames: fixed too).
 - Preview workflow: extra stills at 0.8 s / 1.5 s (hook) and at the end card.
