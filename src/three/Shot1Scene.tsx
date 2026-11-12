@@ -2,6 +2,7 @@ import React from 'react';
 import {anticipate, glide, tween} from '../motion';
 import * as THREE from 'three';
 import {H, W, C, clamp} from '../theme';
+import {VH, VW} from '../layout';
 import {CAM_D, lerp, toWorld} from './camera';
 import {CameraRig, MapLights, Sync} from './scene';
 import {FLOOR, rppColor, rppOf, stateGeo} from './geometry';
@@ -32,7 +33,16 @@ export const Shot1Scene: React.FC<{
   riseB: number;
   /** optional state for the left half; the cold open leaves it out so the winner stays hidden */
   leftName?: string;
-}> = ({frame, shapeStart, lxPx, rxPx, riseA = 0, riseB, leftName}) => {
+  /** vertical Shorts (1080x1920): the states are laid out in a column and `cyPx` is the screen y of California's centre */
+  vertical?: boolean;
+  cyPx?: number;
+}> = ({frame, shapeStart, lxPx, rxPx, riseA = 0, riseB, leftName, vertical = false, cyPx = 300}) => {
+  // the room each state has on screen (px): 400 x 380 in the landscape split, wider and taller in the vertical column
+  const SLOT_W = vertical ? 640 : 400;
+  const SLOT_H = vertical ? 400 : 380;
+  const FW = vertical ? VW : W;
+  const FH = vertical ? VH : H;
+  const toW = (x: number, y: number): [number, number] => [x - FW / 2, -(y - FH / 2)];
   const trace = tween(frame, shapeStart, 20, glide);
   // the states rise to the neutral plane with a long calm curve: nothing else is moving yet
   const grow = tween(frame, shapeStart + 14, 40, glide);
@@ -49,16 +59,16 @@ export const Shot1Scene: React.FC<{
     const maxW = Math.max(smCal.size[0], smLeft.size[0]);
     const maxH = Math.max(smCal.size[1], smLeft.size[1]);
     const pad = Math.max(maxW, maxH) * 0.06;
-    return FIT * Math.min(400 / (maxW + 2 * pad), 380 / (maxH + 2 * pad));
-  }, [leftName]);
+    return FIT * Math.min(SLOT_W / (maxW + 2 * pad), SLOT_H / (maxH + 2 * pad));
+  }, [leftName, SLOT_W, SLOT_H]);
 
   const one = (name: string, cxPx: number, rise: number, lineColor: string) => {
     const sm = stateGeo(name);
     if (!sm) return null;
     // Use the shared scale when two states are shown; fall back to per-state scale for the solo California reveal.
     const pad = Math.max(sm.size[0], sm.size[1]) * 0.06;
-    const s = sharedScale ?? FIT * Math.min(400 / (sm.size[0] + 2 * pad), 380 / (sm.size[1] + 2 * pad));
-    const [gx, gy] = toWorld(cxPx, 300);
+    const s = sharedScale ?? FIT * Math.min(SLOT_W / (sm.size[0] + 2 * pad), SLOT_H / (sm.size[1] + 2 * pad));
+    const [gx, gy] = toW(cxPx, vertical ? cyPx : 300);
     // the true height: a short wind-up (the state dips a touch), then it climbs or sinks, overshoots and settles
     const b = tween(frame, rise, 46, anticipate);
     // neutral height first (the plane), then the true height
@@ -79,7 +89,7 @@ export const Shot1Scene: React.FC<{
     );
   };
 
-  const mid = toWorld(W / 2, 300);
+  const mid = toW(FW / 2, vertical ? cyPx : 300);
   return (
     <>
       <MapLights floorZ={-2000} floorSize={1} />
@@ -88,7 +98,9 @@ export const Shot1Scene: React.FC<{
         dist={CAM_D * 1.0}
         pitch={lerp(36, 30, tween(frame, shapeStart, 60, glide))}
         yaw={Math.sin(frame / 70) * 3}
-        offsetY={H / 2 - 300}
+        offsetY={FH / 2 - (vertical ? cyPx : 300)}
+        viewW={FW}
+        viewH={FH}
       />
       {leftName && one(leftName, lxPx, riseA, C.mint)}
       {one('California', rxPx, riseB, C.red)}

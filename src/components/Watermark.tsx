@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig, interpolate, Easing} from 'remotion';
-import {W, H} from '../theme';
+import {useLayout} from '../layout';
 
 /**
  * PayRanked video watermark.
@@ -42,16 +42,19 @@ const DRIFT_PERIOD_FRAMES = 20 * 30;  // 20-second cycle
 export const Watermark: React.FC = () => {
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
+  const {vertical} = useLayout();
 
   // Fade in: 0 -> MAX_OPACITY over FADE_IN_DUR, starting at FADE_IN_START
-  const fadeIn = interpolate(frame, [FADE_IN_START, FADE_IN_START + FADE_IN_DUR], [0, MAX_OPACITY], {
+  const fadeInStart = vertical ? 20 : FADE_IN_START;
+  const fadeIn = interpolate(frame, [fadeInStart, fadeInStart + FADE_IN_DUR], [0, MAX_OPACITY], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
     easing: Easing.out(Easing.cubic),
   });
 
   // Fade out: MAX_OPACITY -> 0 over FADE_OUT_DUR, ending FADE_OUT_BEFORE_END before end
-  const fadeOutStart = durationInFrames - FADE_OUT_BEFORE_END;
+  // a Short is only 30-50 s long: it shows the logo for the whole clip, with a short fade at each end
+  const fadeOutStart = vertical ? durationInFrames - 30 : durationInFrames - FADE_OUT_BEFORE_END;
   const fadeOut = interpolate(frame, [fadeOutStart, fadeOutStart + FADE_OUT_DUR], [MAX_OPACITY, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -73,8 +76,8 @@ export const Watermark: React.FC = () => {
         src={staticFile('watermark/payranked-watermark.png')}
         style={{
           position: 'absolute',
-          bottom: MARGIN_PX,
-          right: MARGIN_PX,
+          // vertical Shorts: top-right, clear of the Shorts player controls (bottom and right edge)
+          ...(vertical ? {top: 132, right: 40} : {bottom: MARGIN_PX, right: MARGIN_PX}),
           width: SIZE_PX,
           height: SIZE_PX,
           opacity,

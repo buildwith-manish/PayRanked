@@ -1,0 +1,43 @@
+name: Preview vertical Shorts (stills)
+# Renders a handful of key frames of every vertical Short so the 9:16 layouts can be checked in a couple of minutes,
+# without rendering the full videos. Download the "vertical-stills-*" artifacts and look at the PNGs.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to render
+        required: true
+        default: feat/short-1-vertical
+jobs:
+  stills:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # composition : seconds into the Short (the Short runs at 60 fps, so frame = seconds * 60)
+          - {comp: Short1-Vertical, seconds: '1.5 4 8 12 16 21 24.5 26 30 35 38 42'}
+          - {comp: Short2-Vertical, seconds: '2 5 9 14 20 26 33 46 52'}
+          - {comp: Short3-Vertical, seconds: '2 5 9 14 20 26 34'}
+          - {comp: Short4-Vertical, seconds: '2 5 9 14 20 26 34 44'}
+          - {comp: Short5-Vertical, seconds: '2 5 9 14 20 26 34'}
+          - {comp: Short6-Vertical, seconds: '2 7 12 20 27'}
+          - {comp: Short7-Vertical, seconds: '2 8 14 24 30 38 43'}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.ref }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Render stills
+        run: |
+          mkdir -p out/stills
+          for s in ${{ matrix.seconds }}; do
+            frame=$(python3 -c "print(round($s * 60))")
+            npx remotion still src/index.ts "${{ matrix.comp }}" "out/stills/${{ matrix.comp }}-t${s}s.png" --frame="$frame" --scale=1 --log=error
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vertical-stills-${{ matrix.comp }}
+          path: out/stills/*.png

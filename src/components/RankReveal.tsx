@@ -5,7 +5,7 @@ import {geoOf} from './USMap';
 import {ThreeCanvas} from '@remotion/three';
 import {Aberration} from './Grade';
 import {Glass} from './Glass';
-import {CAM_D, FOV, lerp, toWorld} from '../three/camera';
+import {CAM_D, FOV, fovFor, lerp, toWorld} from '../three/camera';
 import {CameraRig, MapLights, Pin3D, Sync} from '../three/scene';
 import {Map3D, RISE_LAND} from '../three/Map3D';
 import {currentTop} from '../three/State3D';
@@ -24,6 +24,7 @@ import {C, F, H, MARGIN, W, clamp, sec, tabular} from '../theme';
 // count duration — changing one frame budget can't drift away from the other.
 import {COUNT_DUR} from '../timeline';
 import {K, useDesignFrame} from '../clock';
+import {useLayout} from '../layout';
 
 export type RankRevealProps = {
   rankLabel: string; // "#10"
@@ -47,15 +48,45 @@ export const NAME_STEP = 1.6;
 /** The tie stamp lands this many frames after the name starts (1 s in the full reveal). */
 export const TIE_STAMP_AFTER_NAME = 30;
 
-/** Zoom is fitted to the state(s) and then clamped to this range (1 = the whole country fills the frame). */
-const ZOOM_MIN = 1.7;
-const ZOOM_MAX = 3.0;
+/**
+ * Everything that depends on the shape of the frame, in one place. `land` is the original 1920x1080 layout (map left, text
+ * panel right, rail far left). `vert` is the 1080x1920 Shorts layout, a real redesign rather than a scaled-down copy:
+ * the 3D map takes the top of the frame, the text stacks underneath it (rank label, name, BEA chip, dollars and coins, fact
+ * card), the rail is a slim strip on the left edge, and every line of text stays inside the Shorts safe area
+ * (below ~150 px, above ~1540 px, clear of the right-hand button column). The beats and timings are the same in both.
+ */
+const GEOM = {
+  land: {
+    w: W, h: H,
+    ovFocusY: H / 2, // where the overview map sits before the fly (the middle of the frame)
+    focusX: W * 0.4, focusY: H / 2, // where the zoomed state sits on screen: left of centre, so the right-hand info panel stays clear
+    panelX: W - MARGIN - 760, panelW: 760, // left edge and width of the info panel
+    zoomMin: 1.7, zoomMax: 3.0, fitW: W * 0.4, fitH: H * 0.55, // zoom is fitted to the state(s), then clamped (1 = the whole country fills the frame)
+    ovK: 1.3, settleK: 1.08, // camera distance (in CAM_D) of the overview pose and of the opening push-in
+    rankFont: 520, labelY: 118, // the slammed rank number, and where it settles as a small label
+    nameTop: 172, nameSize: 92, nameSizeTie: 68,
+    beaTop: 410, dollarTop: 410, countSize: 128, countSizeTie: 110, gainSize: 46, coinScale: 0.85,
+    versusTop: 640, nearTop: 752, factTop: 560, factFont: 40, factPad: '28px 34px', factSource: 24,
+    barW: 600, versusLabel: 32, versusValue: 44, barH: 26, versusGap: 26,
+  },
+  vert: {
+    w: 1080, h: 1920,
+    ovFocusY: 1920 * 0.36, // the overview map sits in the upper part of the frame, above the text stack
+    focusX: 1080 * 0.56, focusY: 1920 * 0.255,
+    panelX: 64, panelW: 952,
+    zoomMin: 1.25, zoomMax: 2.6, fitW: 1080 * 0.74, fitH: 1920 * 0.3,
+    ovK: 1.75, settleK: 1.5,
+    rankFont: 340, labelY: 858, // 340 so the slammed "#10" (1.55x at its biggest) still fits inside 1080 px
+    nameTop: 896, nameSize: 96, nameSizeTie: 58,
+    beaTop: 1086, dollarTop: 1086, countSize: 132, countSizeTie: 112, gainSize: 50, coinScale: 0.8,
+    versusTop: 1300, nearTop: 1330, factTop: 1236, factFont: 40, factPad: '26px 34px', factSource: 26,
+    barW: 700, versusLabel: 34, versusValue: 46, barH: 24, versusGap: 18,
+  },
+};
+export type Geom = typeof GEOM.land;
+export const geomOf = (vertical?: boolean): Geom => (vertical ? GEOM.vert : GEOM.land);
 /** States whose longest side (in map pixels) is below this get a bigger pin. */
 const SMALL_STATE = 130;
-/** Where the zoomed state sits on screen: left of centre, so the right-hand info panel stays clear. */
-const FOCUS_X = W * 0.4;
-/** Left edge of the info panel. */
-const PANEL_X = W - MARGIN - 760;
 
 /** Frame numbers of every beat, in one place. They are the brief's timings, so the voice-over still lands on them.
  *
@@ -116,7 +147,12 @@ const DRIFT_DEG = 9;
 /** Frames before T.end in which the camera eases back to the overview pose the next reveal starts from (1.2 s). */
 export const PULLBACK = sec(1.2);
 /** The overview pose: frame 0 of every reveal and, after the pull-back, its last frame. Identical, so the cut has no jump. */
-export const OVERVIEW = {target: [0, 20, 0] as [number, number, number], dist: 1.3 * CAM_D, pitch: 60, yaw: -5, offsetX: 0};
+export const OVERVIEW = {target: [0, 20, 0] as [number, number, number], dist: 1.3 * CAM_D, pitch: 60, yaw: -5, offsetX: 0, offsetY: 0};
+/** The overview pose for either shape of frame (the vertical frame is narrow, so the camera starts further back to take in the whole country). */
+export const overviewOf = (vertical?: boolean) => {
+  const G = geomOf(vertical);
+  return {...OVERVIEW, dist: G.ovK * CAM_D, offsetY: G.h / 2 - G.ovFocusY};
+};
 
 /** The state starts to rise when the camera is this far (0-1) through its fly. */
 const RISE_FLY_P = 0.7;
@@ -133,7 +169,7 @@ export const riseAtOf = (fast: boolean) => {
   return timing(fast).fly + hi * flyDurOf(fast);
 };
 
-export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; targetZoom: number};
+export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; targetZoom: number; vertical?: boolean};
 
 /**
  * The camera pose as a pure function of the (design) frame, so its speed can be measured for motion blur and checked by
@@ -141,6 +177,7 @@ export type CameraInput = {fast: boolean; wx: number; wy: number; topZ: number; 
  */
 export const cameraPose = (f: number, c: CameraInput) => {
   const t = timing(c.fast);
+  const G = geomOf(c.vertical);
   const dur = flyDurOf(c.fast);
   const ease = flyEaseOf(c.fast);
   // the opening push-in starts from rest too, so the cut from the previous reveal's pull-back has no speed jump
@@ -154,20 +191,23 @@ export const cameraPose = (f: number, c: CameraInput) => {
   const drift = ramp(f, t.name, t.end, cubicInOut) * DRIFT_DEG;
   const base = {
     target: [lerp(0, c.wx, flyP), lerp(20, c.wy, flyP), lerp(0, c.topZ * 0.5, flyP)] as [number, number, number],
-    dist: lerp(lerp(1.3, 1.08, settle) * CAM_D, CAM_D / c.targetZoom, flyP),
+    dist: lerp(lerp(G.ovK, G.settleK, settle) * CAM_D, CAM_D / c.targetZoom, flyP),
     pitch: lerp(lerp(60, 42, settle), 51, turnP),
     yaw: lerp(-5, -18, turnP) + drift,
-    offsetX: (W / 2 - FOCUS_X) * slideP,
+    offsetX: (G.w / 2 - G.focusX) * slideP,
+    // the vertical frame parks the state in the upper part of the picture, above the text stack
+    offsetY: lerp(G.h / 2 - G.ovFocusY, G.h / 2 - G.focusY, slideP),
   };
   // pull-back: in the last 1.2 s everything, the yaw drift included, eases to the overview pose
   const back = ramp(f, t.end - PULLBACK, t.end, glide);
-  const O = OVERVIEW;
+  const O = overviewOf(c.vertical);
   return {
     target: [lerp(base.target[0], O.target[0], back), lerp(base.target[1], O.target[1], back), lerp(base.target[2], O.target[2], back)] as [number, number, number],
     dist: lerp(base.dist, O.dist, back),
     pitch: lerp(base.pitch, O.pitch, back),
     yaw: lerp(base.yaw, O.yaw, back),
     offsetX: lerp(base.offsetX, O.offsetX, back),
+    offsetY: lerp(base.offsetY, O.offsetY, back),
     flyP,
   };
 };
@@ -199,6 +239,9 @@ for (const [label, t] of [['full', T], ['fast', T_FAST]] as const) {
  */
 export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBefore = [], fast = false, versus = false}) => {
   const frame = useDesignFrame();
+  const lay = useLayout();
+  const V = lay.vertical;
+  const G = geomOf(V);
   const T = timing(fast);
   const states = names.map(byName);
   const tie = states.length > 1;
@@ -220,14 +263,14 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const by1 = Math.max(...geos.map((g) => g.bounds[1][1]));
   const bw = bx1 - bx0;
   const bh = by1 - by0;
-  const targetZoom = clamp(Math.min((W * 0.4) / bw, (H * 0.55) / bh), ZOOM_MIN, ZOOM_MAX);
+  const targetZoom = clamp(Math.min(G.fitW / bw, G.fitH / bh), G.zoomMin, G.zoomMax);
   const small = Math.max(...geos.map((g) => Math.max(g.bounds[1][0] - g.bounds[0][0], g.bounds[1][1] - g.bounds[0][1]))) < SMALL_STATE;
 
   const [wx, wy] = toWorld(cx, cy);
   const topZ = Math.max(...names.map((n) => stateGeo(n)?.top ?? 0));
 
   // ---- camera: a pure function of the frame, so its speed can be measured for motion blur ----
-  const camIn: CameraInput = {fast, wx, wy, topZ, targetZoom};
+  const camIn: CameraInput = {fast, wx, wy, topZ, targetZoom, vertical: V};
   const camAt = (f: number) => cameraPose(f, camIn);
   const cam = camAt(frame);
   const camPrev = camAt(frame - 1);
@@ -235,7 +278,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   // screen-space speed of the picture this frame: the pan, the pan of the view offset, and the zoom
   const zoomPx = (Math.abs(cam.dist - camPrev.dist) / cam.dist) * 520;
   const camBlurX = Math.abs(cam.target[0] - camPrev.target[0]) / camScale + Math.abs(cam.offsetX - camPrev.offsetX) + zoomPx * 0.6;
-  const camBlurY = (Math.abs(cam.target[1] - camPrev.target[1]) / camScale) * 0.8 + zoomPx * 0.6;
+  const camBlurY = (Math.abs(cam.target[1] - camPrev.target[1]) / camScale) * 0.8 + Math.abs(cam.offsetY - camPrev.offsetY) + zoomPx * 0.6;
 
   // ---- 0-1s rank slam; 1-3s the number shrinks into a label above the name ----
   // lands on a long expo-out with no overshoot: a clean, heavy settle instead of a bouncing neon slab
@@ -243,9 +286,9 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const travel = (f: number) => tween(f, T.fly, 46, glide);
   const rankScale = (f: number) => slamScale(f) * lerp(1, 0.2, travel(f));
   const rankBlur = Math.min(16, Math.abs(rankScale(frame) - rankScale(frame - 1)) * (16 / K));
-  const est = 0.65 * 520 * rankLabel.length; // rough width of the big label, to land its left edge on the panel edge
-  const rankX = lerp(W / 2, PANEL_X + est * 0.1, travel(frame));
-  const rankY = lerp(H / 2, 118, travel(frame));
+  const est = 0.65 * G.rankFont * rankLabel.length; // rough width of the big label, to land its left edge on the panel edge
+  const rankX = lerp(G.w / 2, G.panelX + est * 0.1, travel(frame));
+  const rankY = lerp(G.h / 2, G.labelY, travel(frame));
   // was lerp(80, 26) at full emerald: with the grade's bloom on top the slam blew out to a flat neon slab
   const rankGlow = lerp(14, 5, travel(frame));
 
@@ -267,7 +310,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
   // ---- 3-6s name: rises from behind a line, letter by letter; the rule draws under it, a beat later ----
   const nameText = names.join('  ·  ').toUpperCase();
-  const nameSize = tie ? 68 : 92;
+  const nameSize = tie ? G.nameSizeTie : G.nameSize;
   const nameStep = NAME_STEP;
   const ruleAt = T.name + Math.round(nameText.length * nameStep) + 4;
   // when the BEA score arrives the name steps back to a label
@@ -296,7 +339,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
   const vAt = versusAt(T);
   // bars share one scale, from $0, so their lengths are honest; the ring marks $100,000
   const BAR_MAX = 120000;
-  const BAR_W = 600;
+  const BAR_W = G.barW;
 
   // ---- 15-21s fact card ----
   // snap entrance (about 10 frames, was a 26-frame glide): the blur is taken from this curve's own derivative, so a fast
@@ -315,7 +358,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
   return (
     <Aberration at={[0, T.dollars + COUNT_DUR]} peak={4}>
-      <Background glowX={W * 0.62} glowY={H * 0.5} tint={0.2 * (1 - clamp(tween(frame, 0, 26, slam)))} parallax={[cam.target[0], cam.target[1]]}>
+      <Background glowX={V ? G.w * 0.5 : W * 0.62} glowY={V ? G.h * 0.3 : H * 0.5} tint={0.2 * (1 - clamp(tween(frame, 0, 26, slam)))} parallax={[cam.target[0], cam.target[1]]}>
         {/* 3D map: extruded states, height = buying power */}
         <AbsoluteFill
           style={{
@@ -325,15 +368,15 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
         >
           <MotionBlur dx={camBlurX} dy={camBlurY} shutter={0.38} cap={22} style={{position: 'absolute', inset: 0}}>
             <ThreeCanvas
-              width={W}
-              height={H}
+              width={G.w}
+              height={G.h}
               shadows
-              camera={{fov: FOV, near: 60, far: 9000, position: [0, 0, CAM_D]}}
+              camera={{fov: fovFor(G.h), near: 60, far: 9000, position: [0, 0, CAM_D]}}
               gl={{antialias: true, alpha: true, preserveDrawingBuffer: true}}
               style={{position: 'absolute', inset: 0}}
             >
               <MapLights glow={{x: wx, y: wy, z: topZ + 150, color: C.mint, amount: dimOthers * 0.55}} />
-              <CameraRig target={cam.target} dist={cam.dist} pitch={cam.pitch} yaw={cam.yaw} offsetX={cam.offsetX} />
+              <CameraRig target={cam.target} dist={cam.dist} pitch={cam.pitch} yaw={cam.yaw} offsetX={cam.offsetX} offsetY={cam.offsetY} viewW={G.w} viewH={G.h} />
               <Map3D frame={frame} highlight={names} revealed={revealed} dim={dimOthers} pop={pop} riseAt={riseAt} trace={trace} pulse={pulse} />
               {frame >= pinAt &&
                 geos.map((g, i) => {
@@ -363,7 +406,9 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             position: 'absolute',
             inset: 0,
             pointerEvents: 'none',
-            background: `linear-gradient(90deg, rgba(5,14,29,0) 30%, rgba(5,14,29,0.5) 62%, rgba(5,14,29,0.72) 100%)`,
+            background: V
+              ? `linear-gradient(180deg, rgba(5,14,29,0) 36%, rgba(5,14,29,0.62) 50%, rgba(5,14,29,0.82) 100%)`
+              : `linear-gradient(90deg, rgba(5,14,29,0) 30%, rgba(5,14,29,0.5) 62%, rgba(5,14,29,0.72) 100%)`,
             opacity: ramp(frame, T.name - 24, T.name + 6, glide) * (1 - panelOut(frame)),
           }}
         />
@@ -379,7 +424,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
             opacity: 1 - panelOut(frame),
             fontFamily: F.display,
             fontWeight: 700,
-            fontSize: 520,
+            fontSize: G.rankFont,
             color: C.mint,
             lineHeight: 1,
             textShadow: `0 ${lerp(26, 8, travel(frame))}px ${lerp(60, 18, travel(frame))}px rgba(2,8,18,0.55), 0 0 ${rankGlow}px ${C.emerald}44`,
@@ -393,14 +438,14 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
         {/* info panel: one beat at a time */}
         {showPanel && (
           <MotionBlur dx={60 * (panelOut(frame) - panelOut(frame - 1))} style={{position: 'absolute', inset: 0, pointerEvents: 'none'}}>
-            <div style={{position: 'absolute', left: PANEL_X, top: 0, width: 760, opacity: 1 - panelOut(frame), transform: `translateX(${panelOut(frame) * 60}px)`}}>
+            <div style={{position: 'absolute', left: G.panelX, top: 0, width: G.panelW, opacity: 1 - panelOut(frame), transform: `translateX(${panelOut(frame) * 60}px)`}}>
               {/* name (3-6s), then it steps back */}
               <div
                 style={{
                   position: 'absolute',
                   left: 0,
-                  top: 172,
-                  width: 760,
+                  top: G.nameTop,
+                  width: G.panelW,
                   transformOrigin: '0% 0%',
                   transform: `scale(${1 - 0.22 * nameBack})`,
                   opacity: 1 - 0.58 * nameBack,
@@ -433,7 +478,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   at its natural size (MiniGauge renders Gauge at size*2 = 300px svg, viewBox-fit to 150px
                   display) with no clip, so the full semicircle and needle read clearly. */}
               {frame >= T.bea && frame < T.dollars && (
-                <MotionBlur dy={-40 * (beaOut - tween(frame - 1, beaOutAt, BEA_EXIT, exitIn))} style={{position: 'absolute', left: 0, top: 410, width: 760, opacity: 1 - beaOut, transform: `translateY(${-40 * beaOut}px)`}}>
+                <MotionBlur dy={-40 * (beaOut - tween(frame - 1, beaOutAt, BEA_EXIT, exitIn))} style={{position: 'absolute', left: 0, top: G.beaTop, width: G.panelW, opacity: 1 - beaOut, transform: `translateY(${-40 * beaOut}px)`}}>
                   <div style={{display: 'flex', alignItems: 'center', gap: 48}}>
                     <MotionBlur dx={90 * (chipP(frame) - chipP(frame - 1)) * -1}>
                       <Glass
@@ -470,7 +515,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   style={{
                     position: 'absolute',
                     left: 0,
-                    top: 410,
+                    top: G.dollarTop,
                     transformOrigin: '0% 0%',
                     transform: `scale(${1 - 0.42 * compact})`,
                     opacity: 1 - 0.25 * compact,
@@ -478,17 +523,17 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 >
                   <div style={{display: 'flex', alignItems: 'flex-end', gap: 18}}>
                     <div>
-                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? 110 : 128} color={C.mint} glow={7} />
+                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? G.countSizeTie : G.countSize} color={C.mint} glow={7} />
                       {/* follow-through: the gain rises into view once the wheels have settled */}
                       {/* fades out before the fact card arrives so it never peeks out behind the card */}
-                      <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: 46, color: C.mint, opacity: 0.9 * gainFade, ...tabular}}>
+                      <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: G.gainSize, color: C.mint, opacity: 0.9 * gainFade, ...tabular}}>
                         <MaskLine start={T.dollars + COUNT_DUR - 4} dur={22}>
                           +{fmtUSD(Math.round(lead.extra / 100) * 100)}
                         </MaskLine>
                       </div>
                     </div>
                     {!isVersus && (
-                      <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: 'scale(0.85)', transformOrigin: 'bottom left', opacity: coinFade}}>
+                      <div style={{height: 300, display: 'flex', alignItems: 'flex-end', transform: `scale(${G.coinScale})`, transformOrigin: 'bottom left', opacity: coinFade}}>
                         <CoinStack count={coinCount} appearAt={T.dollars} refLineAt={10} refLabel="$100K" refSub="US average" width={130} />
                       </div>
                     )}
@@ -498,8 +543,8 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
               {/* versus (one reveal only): the same $100,000 in this state and in California, on one scale */}
               {isVersus && frame >= vAt && (
-                <div style={{position: 'absolute', left: 0, top: 640, width: 760}}>
-                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 34, color: C.muted, marginBottom: 22}}>
+                <div style={{position: 'absolute', left: 0, top: G.versusTop, width: G.panelW}}>
+                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 34, color: C.muted, marginBottom: V ? 14 : 22}}>
                     <MaskLine start={vAt} dur={20}>
                       The same $100,000 buys
                     </MaskLine>
@@ -510,14 +555,14 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   ].map((row) => {
                     const p = tween(frame, vAt + 8 + row.delay, 34, glide);
                     return (
-                      <div key={row.label} style={{marginBottom: 26, opacity: ramp(frame, vAt + 4 + row.delay, vAt + 14 + row.delay, glide)}}>
+                      <div key={row.label} style={{marginBottom: G.versusGap, opacity: ramp(frame, vAt + 4 + row.delay, vAt + 14 + row.delay, glide)}}>
                         <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: BAR_W + 150}}>
-                          <span style={{fontFamily: F.body, fontWeight: 500, fontSize: 32, color: row.color === C.mint ? C.text : C.muted}}>{row.label}</span>
-                          <span style={{fontFamily: F.display, fontWeight: 700, fontSize: 44, color: row.color, ...tabular}}>{fmtUSD(Math.round(row.dollars * p))}</span>
+                          <span style={{fontFamily: F.body, fontWeight: 500, fontSize: G.versusLabel, color: row.color === C.mint ? C.text : C.muted}}>{row.label}</span>
+                          <span style={{fontFamily: F.display, fontWeight: 700, fontSize: G.versusValue, color: row.color, ...tabular}}>{fmtUSD(Math.round(row.dollars * p))}</span>
                         </div>
-                        <div style={{position: 'relative', marginTop: 8, height: 26, width: BAR_W + 150}}>
-                          <div style={{position: 'absolute', left: 0, top: 0, height: 26, width: (row.dollars / BAR_MAX) * BAR_W * p, borderRadius: 13, background: row.color, opacity: row.color === C.mint ? 1 : 0.55}} />
-                          <div style={{position: 'absolute', left: (SALARY / BAR_MAX) * BAR_W - 1.5, top: -6, width: 3, height: 38, background: C.text, opacity: 0.7}} />
+                        <div style={{position: 'relative', marginTop: 8, height: G.barH, width: BAR_W + 150}}>
+                          <div style={{position: 'absolute', left: 0, top: 0, height: G.barH, width: (row.dollars / BAR_MAX) * BAR_W * p, borderRadius: G.barH / 2, background: row.color, opacity: row.color === C.mint ? 1 : 0.55}} />
+                          <div style={{position: 'absolute', left: (SALARY / BAR_MAX) * BAR_W - 1.5, top: -6, width: 3, height: G.barH + 12, background: C.text, opacity: 0.7}} />
                         </div>
                       </div>
                     );
@@ -532,7 +577,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
               {/* #1 only: the honest margin over #2, once the dollars have landed */}
               {nearTie && frame >= T.dollars + COUNT_DUR && (
-                <div style={{position: 'absolute', left: 0, top: 752, width: 760, opacity: 1 - 0.25 * compact}}>
+                <div style={{position: 'absolute', left: 0, top: G.nearTop, width: G.panelW, opacity: 1 - 0.25 * compact}}>
                   <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, color: C.text, lineHeight: 1.2, ...tabular}}>
                     <MaskLine start={T.dollars + COUNT_DUR + 14} dur={22}>
                       Just ~{fmtUSD(Math.round(nearTie.dollarGap / 10) * 10)} ahead of #2 {nearTie.name}
@@ -548,22 +593,22 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
               {/* fact card (15-21s): arrives alone once the dollars have stepped back */}
               {hasFact && frame >= T.fact && (
-                <MotionBlur dx={-FACT_SLIDE * (factIn(frame) - factIn(frame - 1))} shutter={0.6} cap={50} style={{position: 'absolute', left: 0, top: 560, width: 760}}>
+                <MotionBlur dx={-FACT_SLIDE * (factIn(frame) - factIn(frame - 1))} shutter={0.6} cap={50} style={{position: 'absolute', left: 0, top: G.factTop, width: G.panelW}}>
                   <Glass
                     radius={22}
                     tint={C.text}
                     style={{
-                      width: 760,
-                      padding: '28px 34px',
+                      width: G.panelW,
+                      padding: G.factPad,
                       transform: `translateX(${(1 - factIn(frame)) * FACT_SLIDE}px)`,
                       opacity: ramp(frame, T.fact + 6, T.fact + 11, glide),
                     }}
                   >
-                    <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, lineHeight: 1.25, color: C.text}}>
+                    <div style={{fontFamily: F.body, fontWeight: 500, fontSize: G.factFont, lineHeight: 1.25, color: C.text}}>
                       <MaskWords text={lead.fact ?? ''} start={T.fact + 12} step={2} dur={18} />
                     </div>
                     {showSource && (
-                      <div style={{marginTop: 12, fontFamily: F.body, fontWeight: 500, fontSize: 24, color: C.muted}}>
+                      <div style={{marginTop: 12, fontFamily: F.body, fontWeight: 500, fontSize: G.factSource, color: C.muted}}>
                         <MaskLine start={T.fact + 12 + Math.min(30, (lead.fact ?? '').split(' ').length * 2) + 6}>Source: {lead.factSource}</MaskLine>
                       </div>
                     )}

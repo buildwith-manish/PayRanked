@@ -21,7 +21,8 @@ import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
-import {Short1EndCard, Short1Landscape, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {VH, VW} from './layout';
 import voManifest from './audio/voiceover-manifest.json';
 import {AUDIO} from './audio/config';
 import {musicGain} from './audio/duck';
@@ -160,23 +161,22 @@ export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
   const isCountdown = spec.id <= 5;
   const localOffset = isCountdown ? sec(spec.sourceStart) - START.shot4 : sec(spec.sourceStart) - START.shot55;
   return (
+    // Native 1080x1920 composition: every scene below reads its size from the composition (useLayout) and lays itself out for 9:16.
     <AbsoluteFill style={{backgroundColor: C.navy3}}>
-      <Short1Landscape>
-        <Grade>
-          <AbsoluteFill>
-            {isCountdown ? (
-              <CountdownSegment offset={localOffset} seconds={spec.seconds} />
-            ) : (
-              <FrameOffset offset={localOffset}>
-                <Shot55 />
-                <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
-              </FrameOffset>
-            )}
-            <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
-            <Watermark />
-          </AbsoluteFill>
-        </Grade>
-      </Short1Landscape>
+      <Grade>
+        <AbsoluteFill>
+          {isCountdown ? (
+            <CountdownSegment offset={localOffset} seconds={spec.seconds} />
+          ) : (
+            <FrameOffset offset={localOffset}>
+              <Shot55 />
+              <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
+            </FrameOffset>
+          )}
+          <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
+          <Watermark />
+        </AbsoluteFill>
+      </Grade>
     </AbsoluteFill>
   );
 };
@@ -237,25 +237,23 @@ const Short1Audio: React.FC = () => (
 
 const Short1: React.FC = () => (
   <AbsoluteFill style={{backgroundColor: C.navy3}}>
-    <Short1Landscape>
-      <Grade>
-        <AbsoluteFill>
-          <Sequence from={0} durationInFrames={toReal(27)} name="Short 1 cold open">
-            <Shot1 />
-            <SfxTrack cues={CUES.shot1} offset={START.shot1} />
-          </Sequence>
-          <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} name="Short 1 method opener">
-            <Shot3 />
-            <SfxTrack cues={CUES.shot3} offset={START.shot3} />
-          </Sequence>
-          <Sequence from={toReal(27 + SHORT1_METHOD_SECONDS)} durationInFrames={toReal(3.5)} name="Short 1 end card">
-            <Short1EndCard />
-          </Sequence>
-          <Short1Audio />
-          <Watermark />
-        </AbsoluteFill>
-      </Grade>
-    </Short1Landscape>
+    <Grade>
+      <AbsoluteFill>
+        <Sequence from={0} durationInFrames={toReal(27)} name="Short 1 cold open">
+          <Shot1 />
+          <SfxTrack cues={CUES.shot1} offset={START.shot1} />
+        </Sequence>
+        <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} name="Short 1 method opener">
+          <Shot3 />
+          <SfxTrack cues={CUES.shot3} offset={START.shot3} />
+        </Sequence>
+        <Sequence from={toReal(27 + SHORT1_METHOD_SECONDS)} durationInFrames={toReal(3.5)} name="Short 1 end card">
+          <Short1EndCard />
+        </Sequence>
+        <Short1Audio />
+        <Watermark />
+      </AbsoluteFill>
+    </Grade>
   </AbsoluteFill>
 );
 
@@ -264,15 +262,15 @@ const common = {width: W, height: H, fps: FPS};
 export const Root: React.FC = () => (
   <>
     <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
-    <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={1080} height={1920} fps={FPS} />
+    <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} />
     {SHORTS_2_TO_7.map((spec) => (
       <Composition
         key={spec.id}
         id={`Short${spec.id}-Vertical`}
         component={ShortSegment}
         durationInFrames={toReal(sec(spec.seconds))}
-        width={1080}
-        height={1920}
+        width={VW}
+        height={VH}
         fps={FPS}
         defaultProps={{spec}}
       />

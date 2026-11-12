@@ -5,6 +5,7 @@ import {glide, ramp, slam, stagger, trail, tween} from '../motion';
 import {Glass} from './Glass';
 import {useDesignFrame} from '../clock';
 import {COUNTDOWN} from '../data';
+import {useLayout} from '../layout';
 
 export type RailEntry = {label: string; names: string[]; lockAt: number};
 
@@ -28,17 +29,23 @@ const lerpN = (a: number, b: number, t: number) => a + (b - a) * t;
 export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; width?: number; open?: number}> = ({
   entries,
   revealAt = 0,
-  width = 370,
+  width,
   open = 1,
 }) => {
   const frame = useDesignFrame();
-  const rowH = 72;
-  const w = lerpN(SLIM, width, open);
+  const {vertical} = useLayout();
+  // vertical Shorts: a tighter rail hugging the left edge, under the Shorts header and clear of the map in the middle
+  const rowH = vertical ? 62 : 72;
+  const left = vertical ? 36 : MARGIN;
+  const top = vertical ? 168 : 130;
+  const slim = vertical ? 92 : SLIM;
+  width = width ?? (vertical ? 340 : 370);
+  const w = lerpN(slim, width, open);
   const byRank = new Map<number, RailEntry>();
   entries.forEach((e) => byRank.set(parseInt(e.label.replace('#', ''), 10), e));
 
   return (
-    <div style={{position: 'absolute', left: MARGIN, top: 130, width: w}}>
+    <div style={{position: 'absolute', left, top, width: w}}>
       {RAIL_ROWS.map((n, idx) => {
         const e = byRank.get(n);
         // entrance: each row glides in from the left, trailing the one above it
@@ -69,7 +76,7 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
               padding: '0 16px',
               overflow: 'hidden',
               opacity: Math.min(1, inP * 2) * (filled ? Math.max(quiet, 0.8) : quiet),
-              transform: `translateX(${(1 - inP) * (-w - MARGIN)}px) scale(${filled ? 1 + 0.05 * (lockP - 1 > 0 ? lockP - 1 : 0) + 0.07 * flash : 1})`,
+              transform: `translateX(${(1 - inP) * (-w - left)}px) scale(${filled ? 1 + 0.05 * (lockP - 1 > 0 ? lockP - 1 : 0) + 0.07 * flash : 1})`,
               transformOrigin: '0% 50%',
             }}
           >

@@ -10,7 +10,8 @@ import {MotionBlur} from '../components/MotionBlur';
 import {glide, ramp, snap, tween} from '../motion';
 import {byName, fmtUSD, SALARY} from '../data';
 import {SHOT_SECONDS} from '../timeline';
-import {C, F, H, W, mix, sec, tabular} from '../theme';
+import {C, F, mix, sec, tabular} from '../theme';
+import {useLayout} from '../layout';
 import {useDesignFrame} from '../clock';
 import voLayout from '../audio/vo-layout.json';
 
@@ -35,18 +36,20 @@ export const T = {
 /** Label under the gauge: rises from behind a line, holds, then drops back. */
 const PopLabel: React.FC<{text: string; start: number; end: number; color: string}> = ({text, start, end, color}) => {
   const f = useDesignFrame();
+  const {vertical: V} = useLayout();
   if (f < start || f > end + 20) return null;
   return (
     <div
       style={{
         position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 790,
+        // vertical Shorts: the label sits under the gauge, inside the Shorts safe area, and may wrap to two lines
+        left: V ? 56 : 0,
+        right: V ? 56 : 0,
+        top: V ? 1250 : 790,
         textAlign: 'center',
         fontFamily: F.display,
         fontWeight: 700,
-        fontSize: 58,
+        fontSize: V ? 70 : 58,
         color,
         ...tabular,
       }}
@@ -61,6 +64,9 @@ const DIRS: [number, number][] = [[-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1
 
 export const Shot3: React.FC = () => {
   const f = useDesignFrame();
+  // Vertical Shorts only play the opening of the method (welcome, gauge, US average, California), so only those beats have a
+  // vertical layout; the formula, categories, housing and rail beats further down are laid out for the 16:9 video.
+  const {w: W, h: H, vertical: V} = useLayout();
   const cal = byName('California');
   const ark = byName('Arkansas'); // the formula is worked on Arkansas: that is the example the narration reads out (0.869 -> about $115,000)
 
@@ -89,25 +95,25 @@ export const Shot3: React.FC = () => {
 
   return (
     <AbsoluteFill>
-      <Background glowX={W / 2} glowY={H * 0.45}>
+      <Background glowX={W / 2} glowY={V ? H * 0.42 : H * 0.45}>
         {/* v06 welcome overlay — "Welcome to PayRanked..." plays during Shot3 frames 0-4s.
             The welcome text owns the screen until T.gaugeIn (6.3 s); only then does the gauge draw in. */}
         <div style={{
-          position: 'absolute', left: 0, right: 0, top: 160,
+          position: 'absolute', left: V ? 56 : 0, right: V ? 56 : 0, top: V ? 400 : 160,
           textAlign: 'center',
           opacity: win(f, 0, T.gaugeIn, 10),
         }}>
-          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 72, color: C.text}}>
+          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 118 : 72, lineHeight: V ? 1.05 : undefined, color: C.text}}>
             <MaskWords text="Welcome to PayRanked" start={2} step={3} dur={22} />
           </div>
-          <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted}}>
+          <div style={{marginTop: V ? 40 : 24, fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 42, lineHeight: V ? 1.25 : undefined, color: C.muted}}>
             <MaskWords text="where we rank places by what your money actually buys" start={16} step={2} dur={20} />
           </div>
         </div>
 
         {/* gauge */}
-        <div style={{position: 'absolute', left: W / 2 - 450, top: 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
-          <Gauge value={needle} size={900} tint={tint} drawFrames={60} drawDelay={T.gaugeIn} jitter={f > T.toCal && f < T.formula} />
+        <div style={{position: 'absolute', left: W / 2 - (V ? 490 : 450), top: V ? 640 : 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
+          <Gauge value={needle} size={V ? 980 : 900} tint={tint} drawFrames={60} drawDelay={T.gaugeIn} jitter={f > T.toCal && f < T.formula} />
         </div>
         <PopLabel text="US average" start={T.avg + 14} end={T.toCal + 6} color={C.text} />
         <PopLabel text={`California ${cal.rpp.toFixed(1)}: about ${pricier}% pricier`} start={T.toCal + 28} end={T.toArk - 2} color={C.red} />

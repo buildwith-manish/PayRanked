@@ -14,3 +14,10 @@ export const CAM_D = H / 2 / Math.tan((FOV * Math.PI) / 360);
 export const toWorld = (x: number, y: number): [number, number] => [x - W / 2, -(y - H / 2)];
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/**
+ * Vertical field of view that keeps "one world unit = one screen pixel at distance CAM_D" on a canvas that is `h` px tall.
+ * The 1920x1080 canvas gets exactly FOV; a 1080x1920 canvas needs a wider vertical FOV, with the same camera distance, so
+ * fog, shadows and every distance-based tuning stay the same as in the landscape video.
+ */
+export const fovFor = (h: number) => (h === H ? FOV : (2 * Math.atan(h / 2 / CAM_D) * 180) / Math.PI);

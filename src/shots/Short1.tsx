@@ -2,29 +2,12 @@ import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Shot1} from './Shot1';
 import {Shot3} from './Shot3';
-import {C, F, H, W, sec} from '../theme';
+import {C, F, sec} from '../theme';
 import {useDesignFrame} from '../clock';
 
 export const SHORT1_METHOD_SECONDS = 13.5;
 export const SHORT1_CTA_SECONDS = 3.5;
 export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS);
-
-/** Keep the existing 16:9 art uncropped inside the Shorts-safe 9:16 canvas. */
-export const Short1Landscape: React.FC<{children: React.ReactNode}> = ({children}) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: 0,
-      top: '50%',
-      width: W,
-      height: H,
-      transform: `translateY(-50%) scale(${1080 / W})`,
-      transformOrigin: 'top left',
-    }}
-  >
-    {children}
-  </div>
-);
 
 export const Short1EndCard: React.FC = () => {
   const f = useDesignFrame();

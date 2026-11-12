@@ -1,6 +1,6 @@
 import React, {useId, useMemo, useRef} from 'react';
 import {AbsoluteFill, random} from 'remotion';
-import {H, W} from '../theme';
+import {useLayout} from '../layout';
 import {useDesignFrame} from '../clock';
 
 /** Turn the soft bloom off if renders are too slow; it is the most expensive part of the grade. */
@@ -61,6 +61,7 @@ export const Grade: React.FC<{children: React.ReactNode; dust?: boolean}> = ({ch
 /** Faint out-of-focus dust and two aperture ghosts drifting at different speeds, plus a slow warm light leak. */
 export const LensDust: React.FC = () => {
   const f = useDesignFrame();
+  const {w: W, h: H} = useLayout();
   const specks = useMemo(
     () =>
       Array.from({length: 24}, (_, i) => ({
@@ -73,7 +74,7 @@ export const LensDust: React.FC = () => {
         hex: i % 5 === 0,
         warm: random(`dw${i}`) > 0.55,
       })),
-    []
+    [W, H]
   );
   return (
     <AbsoluteFill style={{mixBlendMode: 'screen', pointerEvents: 'none'}}>

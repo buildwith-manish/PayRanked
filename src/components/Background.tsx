@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, random, useVideoConfig} from 'remotion';
-import {C, W, H} from '../theme';
+import {C} from '../theme';
+import {useLayout} from '../layout';
 import {K, useDesignFrame} from '../clock';
 
 /** Navy gradient, drifting grid, pulsing emerald glow, vignette and film grain. Layers move at different speeds. */
@@ -13,8 +14,11 @@ export const Background: React.FC<{
   drift?: boolean;
   /** Camera position in px (world units). Layers behind the action slide the opposite way at different rates, for parallax. */
   parallax?: [number, number];
-}> = ({glowX = W / 2, glowY = H / 2, glowColor = C.emerald, tint = 0, children, drift = true, parallax = [0, 0]}) => {
+}> = ({glowX, glowY, glowColor = C.emerald, tint = 0, children, drift = true, parallax = [0, 0]}) => {
   const frame = useDesignFrame();
+  const {w: W, h: H} = useLayout();
+  glowX = glowX ?? W / 2;
+  glowY = glowY ?? H / 2;
   const {durationInFrames} = useVideoConfig();
   const camera = drift ? interpolate(frame, [0, durationInFrames / K], [1, 1.04], {extrapolateRight: 'clamp'}) : 1;
   const gridShift = (frame * 0.25) % 80;
@@ -39,7 +43,7 @@ export const Background: React.FC<{
           opacity: pulse + tint,
         }}
       />
-      <Bokeh frame={frame} parallax={parallax} />
+      <Bokeh frame={frame} parallax={parallax} w={W} h={H} />
       <AbsoluteFill style={{transform: `scale(${camera})`, transformOrigin: '50% 50%'}}>{children}</AbsoluteFill>
       <AbsoluteFill
         style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)', pointerEvents: 'none'}}
@@ -54,7 +58,7 @@ export const Background: React.FC<{
   );
 };
 
-const BOKEH = Array.from({length: 18}, (_, i) => ({
+const bokehFor = (W: number, H: number) => Array.from({length: 18}, (_, i) => ({
   x: random(`bx${i}`) * W,
   y: random(`by${i}`) * H,
   r: 40 + random(`br${i}`) * 120,
@@ -62,11 +66,13 @@ const BOKEH = Array.from({length: 18}, (_, i) => ({
   o: 0.05 + random(`bo${i}`) * 0.09,
   warm: random(`bw${i}`) > 0.8,
 }));
+const BOKEH_LAND = bokehFor(1920, 1080);
+const BOKEH_VERT = bokehFor(1080, 1920);
 
 /** Soft out-of-focus lights far behind the map. They slide against the camera at different rates. */
-const Bokeh: React.FC<{frame: number; parallax: [number, number]}> = ({frame, parallax}) => (
+const Bokeh: React.FC<{frame: number; parallax: [number, number]; w: number; h: number}> = ({frame, parallax, w, h}) => (
   <AbsoluteFill style={{mixBlendMode: 'screen', pointerEvents: 'none'}}>
-    {BOKEH.map((b, i) => (
+    {(h > w ? BOKEH_VERT : BOKEH_LAND).map((b, i) => (
       <div
         key={i}
         style={{

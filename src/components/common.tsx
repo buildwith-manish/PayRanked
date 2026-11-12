@@ -4,6 +4,7 @@ import {C, F, MARGIN, springIn} from '../theme';
 import {presence} from '../motion';
 import {MaskChars} from './MaskText';
 import {DESIGN_FPS, useDesignFrame} from '../clock';
+import {useLayout} from '../layout';
 
 /** 0 -> 1 -> 0 visibility window in frames (fade in at start, fade out at end). */
 export const win = (f: number, start: number, end: number, fade = 10) => presence(f, start, end, fade, fade);
@@ -26,19 +27,21 @@ export const Flash: React.FC<{at: number; duration?: number; color?: string; pea
   return <AbsoluteFill style={{background: color, opacity: o, pointerEvents: 'none'}} />;
 };
 
-export const SourceTag: React.FC<{opacity?: number}> = ({opacity = 1}) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: MARGIN,
-      bottom: 48,
-      fontFamily: F.body,
-      fontWeight: 500,
-      fontSize: 24,
-      color: C.muted,
-      opacity: 0.7 * opacity,
-    }}
-  >
-    Source: BEA, 2024 prices
-  </div>
-);
+export const SourceTag: React.FC<{opacity?: number}> = ({opacity = 1}) => {
+  const {vertical} = useLayout();
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        // vertical: top-left under the Shorts header; the bottom 380 px belong to the Shorts player UI
+        ...(vertical ? {left: 44, top: 116, fontSize: 24} : {left: MARGIN, bottom: 48, fontSize: 24}),
+        fontFamily: F.body,
+        fontWeight: 500,
+        color: C.muted,
+        opacity: 0.7 * opacity,
+      }}
+    >
+      Source: BEA, 2024 prices
+    </div>
+  );
+};

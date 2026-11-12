@@ -40,7 +40,7 @@ const stubFonts = {
   },
 };
 
-const POSE_KEYS = ['dist', 'pitch', 'yaw', 'offsetX'];
+const POSE_KEYS = ['dist', 'pitch', 'yaw', 'offsetX', 'offsetY'];
 const VEC_KEYS = ['target'];
 const WINDOW = 3; // frames either side of a beat to scan for the worst jerk
 
@@ -99,14 +99,16 @@ try {
 
   const fullPoses = checkVariant('Full', data.full);
   const fastPoses = checkVariant('Fast', data.fast);
+  const fullVPoses = checkVariant('Full (vertical 9:16)', data.fullV);
+  const fastVPoses = checkVariant('Fast (vertical 9:16)', data.fastV);
 
   console.log('\nReveal-to-reveal handover (next reveal\'s frame 0 vs. this one\'s last frame, both should be OVERVIEW):');
   let failed = false;
-  for (const [label, poses] of [['full', fullPoses], ['fast', fastPoses]]) {
+  for (const [label, poses, overview] of [['full', fullPoses, data.overview], ['fast', fastPoses, data.overview], ['full vertical', fullVPoses, data.overviewV], ['fast vertical', fastVPoses, data.overviewV]]) {
     const first = poses[0];
     const last = poses[poses.length - 1];
-    const firstOk = posesEqual(first, data.overview);
-    const lastOk = posesEqual(last, data.overview);
+    const firstOk = posesEqual(first, overview);
+    const lastOk = posesEqual(last, overview);
     const handoverOk = posesEqual(first, last);
     console.log(`  ${label}: frame 0 == OVERVIEW: ${firstOk ? 'ok' : 'FAIL'}, last frame == OVERVIEW: ${lastOk ? 'ok' : 'FAIL'}, frame 0 == last frame: ${handoverOk ? 'ok' : 'FAIL'}`);
     if (!firstOk || !lastOk || !handoverOk) failed = true;
@@ -116,7 +118,7 @@ try {
     console.error('\ncamera-check: FAILED — a pose value jumps at the reveal-to-reveal handover.');
     process.exitCode = 1;
   } else {
-    console.log('\ncamera-check: ok — no handover jump in either variant.');
+    console.log('\ncamera-check: ok — no handover jump in any variant (landscape and vertical).');
   }
 } finally {
   rmSync(tmp, {recursive: true, force: true});

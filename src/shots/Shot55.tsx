@@ -9,7 +9,8 @@ import {Count} from '../components/Count';
 import {Flash, SourceTag, win} from '../components/common';
 import {exitIn, glide, ramp, snap, tween} from '../motion';
 import {SALARY} from '../data';
-import {C, F, H, W, sec, tabular} from '../theme';
+import {C, F, sec, tabular} from '../theme';
+import {useLayout} from '../layout';
 import {useDesignFrame} from '../clock';
 import {SHOT_SECONDS} from '../timeline';
 
@@ -83,6 +84,7 @@ const ProfileCard: React.FC<{
   color: string;
 }> = ({start, end, label, headline, body, color}) => {
   const f = useDesignFrame();
+  const {vertical: V} = useLayout();
   if (f < start - 6 || f > end + 12) return null;
   const inAt = (t: number) => tween(t, start, 28, snap);
   const p = inAt(f);
@@ -90,7 +92,7 @@ const ProfileCard: React.FC<{
   // 3D rotateY: 80deg at start, 0deg when settled
   const rotateY = 80 * (1 - p);
   return (
-    <MotionBlur dx={-180 * (inAt(f) - inAt(f - 1))} shutter={0.6} cap={40} style={{position: 'absolute', left: 240, right: 240, top: 200, height: 620, perspective: 1400}}>
+    <MotionBlur dx={-180 * (inAt(f) - inAt(f - 1))} shutter={0.6} cap={40} style={{position: 'absolute', left: V ? 48 : 240, right: V ? 48 : 240, top: V ? 400 : 200, height: V ? 900 : 620, perspective: 1400}}>
       <div
         style={{
           height: '100%',
@@ -109,17 +111,17 @@ const ProfileCard: React.FC<{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            padding: '0 80px',
-            gap: 28,
+            padding: V ? '0 56px' : '0 80px',
+            gap: V ? 34 : 28,
           }}
         >
-          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 36, color, letterSpacing: '0.18em', opacity: ramp(f, start + 6, start + 16)}}>
+          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: V ? 42 : 36, color, letterSpacing: '0.18em', opacity: ramp(f, start + 6, start + 16)}}>
             {label}
           </div>
-          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 84, color: C.text, lineHeight: 1.05, opacity: ramp(f, start + 10, start + 22)}}>
+          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 104 : 84, color: C.text, lineHeight: 1.05, opacity: ramp(f, start + 10, start + 22)}}>
             <MaskWords text={headline} start={start + 10} step={3} dur={20} />
           </div>
-          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 38, color: C.muted, lineHeight: 1.4, maxWidth: 1100, opacity: ramp(f, start + 20, start + 32)}}>
+          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 46 : 38, color: C.muted, lineHeight: V ? 1.35 : 1.4, maxWidth: 1100, opacity: ramp(f, start + 20, start + 32)}}>
             {body}
           </div>
         </Glass>
@@ -130,6 +132,9 @@ const ProfileCard: React.FC<{
 
 export const Shot55: React.FC = () => {
   const f = useDesignFrame();
+  // Vertical Shorts (6 and 7) play the hook, the profile cards and the formula. The tease of the next video is not part of
+  // either Short, so it keeps its 16:9 layout.
+  const {w: W, h: H, vertical: V} = useLayout();
   return (
     <AbsoluteFill>
       <Background glowX={W * 0.5} glowY={H * 0.45} glowColor={f < T.formula ? C.emerald : C.amber}>
@@ -138,13 +143,14 @@ export const Shot55: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 380,
+              left: V ? 56 : 0,
+              right: V ? 56 : 0,
+              top: V ? 640 : 380,
               textAlign: 'center',
               fontFamily: F.display,
               fontWeight: 700,
-              fontSize: 110,
+              fontSize: V ? 170 : 110,
+              lineHeight: V ? 1.05 : undefined,
               color: C.text,
               letterSpacing: '-0.02em',
               opacity: win(f, T.hook, T.profile1, 12),
@@ -171,7 +177,40 @@ export const Shot55: React.FC = () => {
         })}
 
         {/* 65-75s: the formula reveal — "YOUR TURN: $salary ÷ (RPP ÷ 100) = your real buying power" */}
-        {f >= T.formula - 6 && f < T.tease + sec(0.5) && (
+        {f >= T.formula - 6 && f < T.tease + sec(0.5) && V && (
+          // vertical: one term per line, big and centred, so no line is wider than the 1080 px frame
+          <div
+            style={{
+              position: 'absolute',
+              left: 56,
+              right: 56,
+              top: 400,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 22,
+              opacity: win(f, T.formula, T.tease, 12),
+            }}
+          >
+            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, color: C.amber, letterSpacing: '0.18em'}}>
+              <MaskLine start={T.formula} dur={18}>YOUR TURN</MaskLine>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, fontFamily: F.display, fontWeight: 700, color: C.text, whiteSpace: 'nowrap', ...tabular}}>
+              <span style={{color: C.mint, opacity: ramp(f, T.formula + 6, T.formula + 14)}}>
+                <Count to={SALARY} start={T.formula + 6} duration={40} size={148} color={C.mint} prefix="$" />
+              </span>
+              <span style={{fontSize: 104, color: C.muted, opacity: ramp(f, T.formula + 12, T.formula + 18)}}>÷</span>
+              <span style={{fontSize: 112, opacity: ramp(f, T.formula + 16, T.formula + 22)}}>(RPP ÷ 100)</span>
+              <span style={{fontSize: 104, color: C.muted, opacity: ramp(f, T.formula + 22, T.formula + 28)}}>=</span>
+              <span style={{fontSize: 84, color: C.amber, opacity: ramp(f, T.formula + 28, T.formula + 36)}}>your real buying power</span>
+            </div>
+            <div style={{marginTop: 26, fontFamily: F.body, fontWeight: 500, fontSize: 46, lineHeight: 1.3, color: C.muted, textAlign: 'center', opacity: ramp(f, T.formula + 36, T.formula + 48)}}>
+              Plug in your salary and your state's BEA score. That's what your money actually buys.
+            </div>
+          </div>
+        )}
+
+        {f >= T.formula - 6 && f < T.tease + sec(0.5) && !V && (
           <div
             style={{
               position: 'absolute',

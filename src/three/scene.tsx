@@ -84,7 +84,10 @@ export const CameraRig: React.FC<{
   yaw: number;
   offsetX?: number;
   offsetY?: number;
-}> = ({target, dist, pitch, yaw, offsetX = 0, offsetY = 0}) => {
+  /** size of the canvas in px (default 1920x1080); the view offset is expressed in these units */
+  viewW?: number;
+  viewH?: number;
+}> = ({target, dist, pitch, yaw, offsetX = 0, offsetY = 0, viewW = W, viewH = H}) => {
   const {camera} = useThree();
   useLayoutEffect(() => {
     const c = camera as THREE.PerspectiveCamera;
@@ -94,7 +97,7 @@ export const CameraRig: React.FC<{
     c.up.set(-Math.sin(y), Math.cos(y), 0);
     c.position.set(tx + dist * Math.sin(p) * Math.sin(y), ty - dist * Math.sin(p) * Math.cos(y), tz + dist * Math.cos(p));
     c.lookAt(tx, ty, tz);
-    if (offsetX || offsetY) c.setViewOffset(W, H, offsetX, offsetY, W, H);
+    if (offsetX || offsetY) c.setViewOffset(viewW, viewH, offsetX, offsetY, viewW, viewH);
     else c.clearViewOffset();
     c.updateProjectionMatrix();
     c.updateMatrixWorld();
