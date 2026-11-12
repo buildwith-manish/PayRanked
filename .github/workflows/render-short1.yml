@@ -36,7 +36,7 @@ jobs:
       - name: Calculate frame range
         id: range
         run: |
-          TOTAL=2640
+          TOTAL=2652
           CHUNKS=4
           CHUNK=${{ matrix.chunk }}
           PER_CHUNK=$(( (TOTAL + CHUNKS - 1) / CHUNKS ))

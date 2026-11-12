@@ -17,12 +17,12 @@ jobs:
         include:
           # composition : seconds into the Short (the Short runs at 60 fps, so frame = seconds * 60)
           - {comp: Short1-Vertical, seconds: '1.5 4 8 12 16 21 24.5 26 30 35 38 42'}
-          - {comp: Short2-Vertical, seconds: '2 5 9 14 20 26 33 46 52'}
-          - {comp: Short3-Vertical, seconds: '2 5 9 14 20 26 34'}
-          - {comp: Short4-Vertical, seconds: '2 5 9 14 20 26 34 44'}
-          - {comp: Short5-Vertical, seconds: '2 5 9 14 20 26 34'}
-          - {comp: Short6-Vertical, seconds: '2 7 12 20 27'}
-          - {comp: Short7-Vertical, seconds: '2 8 14 24 30 38 43'}
+          - {comp: Short2-Vertical, seconds: '0.8 1.5 2 5 9 14 20 26 33 46 52 56'}
+          - {comp: Short3-Vertical, seconds: '0.8 1.5 2 5 9 14 20 26 34 41'}
+          - {comp: Short4-Vertical, seconds: '0.8 1.5 2 5 9 14 20 26 34 44 51'}
+          - {comp: Short5-Vertical, seconds: '0.8 1.5 2 5 9 14 20 26 34 41'}
+          - {comp: Short6-Vertical, seconds: '2 7 12 20 27 31'}
+          - {comp: Short7-Vertical, seconds: '0.8 1.5 2 8 14 24 30 38 43 46'}
     steps:
       - uses: actions/checkout@v4
         with: {ref: '${{ inputs.ref }}'}

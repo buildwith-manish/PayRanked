@@ -21,7 +21,7 @@ jobs:
       - run: npm ci
       - id: range
         run: |
-          TOTAL=2400
+          TOTAL=2610
           PER_CHUNK=$(( (TOTAL + 3) / 4 ))
           START=$(( (${{ matrix.chunk }} - 1) * PER_CHUNK ))
           END=$(( START + PER_CHUNK - 1 ))

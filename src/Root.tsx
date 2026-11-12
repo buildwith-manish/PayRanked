@@ -22,6 +22,7 @@ import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
 import {Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
 import voManifest from './audio/voiceover-manifest.json';
 import {AUDIO} from './audio/config';
@@ -125,7 +126,8 @@ const SegmentAudio: React.FC<{sourceStart: number; seconds: number}> = ({sourceS
           </Sequence>
         );
       })}
-      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sec(sourceStart))} volume={(f) => musicGain(sec(sourceStart) + f / K)} />}
+      {/* the music bed runs on under the end card and fades out over its first 1.5 s */}
+      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sec(sourceStart))} volume={(f) => musicGain(sec(sourceStart) + f / K) * Math.min(1, Math.max(0, 1 - (f / K - sec(seconds)) / sec(1.5)))} />}
     </>
   );
 };
@@ -160,19 +162,31 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
 export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
   const isCountdown = spec.id <= 5;
   const localOffset = isCountdown ? sec(spec.sourceStart) - START.shot4 : sec(spec.sourceStart) - START.shot55;
+  const hook = SHORT_HOOKS[spec.id];
   return (
     // Native 1080x1920 composition: every scene below reads its size from the composition (useLayout) and lays itself out for 9:16.
     <AbsoluteFill style={{backgroundColor: C.navy3}}>
       <Grade>
         <AbsoluteFill>
-          {isCountdown ? (
-            <CountdownSegment offset={localOffset} seconds={spec.seconds} />
-          ) : (
-            <FrameOffset offset={localOffset}>
-              <Shot55 />
-              <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
-            </FrameOffset>
-          )}
+          {/* the Short itself; the same end card as Short 1 follows it (SHORT_END_SECONDS) */}
+          <Sequence from={0} durationInFrames={toReal(sec(spec.seconds))} name={`Short ${spec.id} content`}>
+            {isCountdown ? (
+              <CountdownSegment offset={localOffset} seconds={spec.seconds} />
+            ) : (
+              <FrameOffset offset={localOffset}>
+                <Shot55 />
+                <SfxTrack cues={CUES.shot55.map((c) => ({...c, at: c.at - localOffset})).filter((c) => c.at >= 0 && c.at < sec(spec.seconds))} offset={START.shot55 + localOffset} />
+              </FrameOffset>
+            )}
+            {hook && (
+              <Sequence from={0} durationInFrames={toReal(sec(3))} name={`Short ${spec.id} hook`}>
+                <ShortHook text={hook} />
+              </Sequence>
+            )}
+          </Sequence>
+          <Sequence from={toReal(sec(spec.seconds))} durationInFrames={toReal(sec(SHORT_END_SECONDS))} name={`Short ${spec.id} end card`}>
+            <ShortEndCard />
+          </Sequence>
           <SegmentAudio sourceStart={spec.sourceStart} seconds={spec.seconds} />
           <Watermark />
         </AbsoluteFill>
@@ -268,7 +282,7 @@ export const Root: React.FC = () => (
         key={spec.id}
         id={`Short${spec.id}-Vertical`}
         component={ShortSegment}
-        durationInFrames={toReal(sec(spec.seconds))}
+        durationInFrames={toReal(sec(spec.seconds + SHORT_END_SECONDS))}
         width={VW}
         height={VH}
         fps={FPS}
