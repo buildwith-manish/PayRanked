@@ -61,16 +61,16 @@ const PLACE = {
     cardW: 780, cardH: 200, odo: 132,
     cardYA: 690, cardYB: 1290,
     qTop: 292, qFont: 330, labelTopA: 585, labelTopB: 1215, labelFont: 76,
-    headTop: 158, headFont: 64, headNoWrap: false,
-    explainTop: 1000, explainFont: 54,
-    gapTop: 720, gapW: 900, gapSize: 170, bracket: 'M 340 944 v 44 M 340 966 H 740 M 740 944 v 44',
-    moreTop: 1010, moreFont: 58, tagTop: 1176, tagFont: 46, chipsTop: 1270, chipSize: 50,
+    headTop: 172, headFont: 58, headNoWrap: false, // 58 px keeps both headlines left of the watermark at x~985
+    explainTop: 906, explainFont: 42, // one line in the 66 px strip between the mystery card and the top of California
+    gapTop: 720, gapW: 900, gapSize: 170, bracket: 'M 300 916 v 44 M 300 938 H 780 M 780 916 v 44',
+    moreTop: 1010, moreFont: 50, tagTop: 1116, tagFont: 44, chipsTop: 1270, chipSize: 50,
     coin: {left: 980 - 310, top: 1205 - 404},
     splitY: 890,
   },
 };
 const CARD_X = {land: {a: LX, b: RX}, vert: {a: 540, b: 540}};
-const SHAPE_CY_V = 1050; // screen y of California's centre in the vertical column
+const SHAPE_CY_V = 1068; // screen y of California's centre in the vertical column
 
 /** Value on a card: 0 to the result in one roll. A pure function of the frame so the odometer can also be given last frame's value, for the blur on its fast wheels. */
 export const valueAt = (f: number, target: number, startAt: number) => target * tween(f, startAt, COUNT_DUR, roll);
@@ -335,7 +335,7 @@ export const Shot1: React.FC = () => {
             </div>
 
             {/* 2-4.6s: the claim, written across the top. Only California's number is shown. */}
-            <div style={{position: 'absolute', left: V ? 56 : 0, right: V ? 56 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
+            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
               <MaskWords
                 text={`${fmtUSD(SALARY)} in California feels like ${fmtUSD(cal.display)}`}
                 start={HEAD_START}
@@ -346,7 +346,7 @@ export const Shot1: React.FC = () => {
             </div>
 
             {/* 4.8-9s: the turn. The question the whole video answers. */}
-            <div style={{position: 'absolute', left: V ? 56 : 0, right: V ? 56 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
+            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
               <MaskWords text="One state does the opposite." start={HEAD2_START} step={4} leaveAt={HEAD2_LEAVE} wordStyle={(_, i) => (i >= 3 ? {color: C.mint} : undefined)} />
             </div>
 
