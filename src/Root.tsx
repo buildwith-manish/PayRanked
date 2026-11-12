@@ -120,12 +120,12 @@ const SegmentAudio: React.FC<{sourceStart: number; seconds: number}> = ({sourceS
         const localStart = Math.max(0, clipStart - sourceStart);
         const duration = Math.min(clipEnd, sourceEnd) - Math.max(clipStart, sourceStart);
         return (
-          <Sequence key={clip.id} from={toReal(localStart)} durationInFrames={toReal(duration) + 10} layout="none" name={`short vo ${clip.id}`}>
-            <Audio src={staticFile(clip.file)} startFrom={toReal(trim)} volume={AUDIO.voLevel} />
+          <Sequence key={clip.id} from={toReal(sec(localStart))} durationInFrames={toReal(sec(duration)) + 10} layout="none" name={`short vo ${clip.id}`}>
+            <Audio src={staticFile(clip.file)} startFrom={toReal(sec(trim))} volume={AUDIO.voLevel} />
           </Sequence>
         );
       })}
-      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sourceStart)} volume={(f) => musicGain(sourceStart + f / K)} />}
+      {AUDIO.music && <Audio src={staticFile('music.mp3')} startFrom={toReal(sec(sourceStart))} volume={(f) => musicGain(sec(sourceStart) + f / K)} />}
     </>
   );
 };
@@ -211,7 +211,7 @@ const Short1Audio: React.FC = () => (
       const mute = MUTED_WORDS[clip.id];
       const maxDuration = isMethod ? SHORT1_METHOD_SECONDS - clip.at + clip.lead : clip.duration;
       return (
-        <Sequence key={clip.id} from={toReal(localStart)} durationInFrames={toReal(Math.min(clip.duration, maxDuration)) + 10} layout="none" name={`short vo ${clip.id}`}>
+        <Sequence key={clip.id} from={toReal(sec(localStart))} durationInFrames={toReal(sec(Math.min(clip.duration, maxDuration))) + 10} layout="none" name={`short vo ${clip.id}`}>
           <Audio
             src={staticFile(clip.file)}
             volume={(f) => {
@@ -224,10 +224,10 @@ const Short1Audio: React.FC = () => (
     })}
     {AUDIO.music && (
       <>
-        <Sequence from={0} durationInFrames={toReal(27)} layout="none">
+        <Sequence from={0} durationInFrames={toReal(sec(27))} layout="none">
           <Audio src={staticFile('music.mp3')} startFrom={0} volume={(f) => musicGain(f / K)} />
         </Sequence>
-        <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} layout="none">
+        <Sequence from={toReal(sec(SHORT1_METHOD_OFFSET))} durationInFrames={toReal(sec(SHORT1_METHOD_SECONDS))} layout="none">
           <Audio src={staticFile('music.mp3')} startFrom={toReal(SHORT1_SOURCE_METHOD_START)} volume={(f) => musicGain(SHORT1_SOURCE_METHOD_START + f / K)} />
         </Sequence>
       </>
