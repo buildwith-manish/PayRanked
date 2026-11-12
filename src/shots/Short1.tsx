@@ -4,10 +4,10 @@ import {Shot1} from './Shot1';
 import {Shot3} from './Shot3';
 import {C, F, sec, tabular} from '../theme';
 import {useDesignFrame} from '../clock';
-import {MaskLine, MaskWords} from '../components/MaskText';
 import {SfxTrack} from '../audio/Sfx';
 import {Cue} from '../audio/cues';
-import {glide, ramp, snap, tween} from '../motion';
+import {glide, ramp, slam, snap, tween} from '../motion';
+import {Flash} from '../components/common';
 import {byName, COUNTDOWN, fmtUSD} from '../data';
 import {VIDEO_FRAMES} from '../timeline';
 import {Glass} from '../components/Glass';
@@ -18,10 +18,10 @@ export const SHORT1_METHOD_SECONDS = 13.7;
 export const SHORT1_CTA_SECONDS = 3.5;
 export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS);
 
-/** Which end line a render carries: 'youtube' = "on my channel" (the related-video button and pinned comment do the linking);
- *  'social' = Instagram and Facebook, where there is no related-video button, so the card says "link in comments" and points down. */
+/** Which end line a render carries: 'youtube' = a button that looks like YouTube's "Related video" button, with a tap animation (the real
+ *  button, set in Studio, does the linking); 'social' = Instagram and Facebook, which have no such button, so the card says "link in comments". */
 export type CtaVariant = 'youtube' | 'social';
-export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'on my channel', social: 'link in comments'};
+export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'Related video', social: 'link in comments'};
 
 /**
  * The end card, shared by every Short (1-7), so each one ends the same way. Design frames (30 fps) local to the card
@@ -29,10 +29,11 @@ export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'on my channel', s
  *   0-10   background fades in
  *   6-30   a video-style card slides up: header, then the countdown rows #10-#6 fill one after another (numbers from src/data)
  *   34-52  the #1 row lights up as a locked "???" (the Shorts never give away the winner) and a progress line sweeps the card
- *   40-60  "Full ranking + #1" rises word by word
- *   58-74  a mint rule draws, the platform line rises ("on my channel" or "link in comments"), then a pulse
+ *   44-72  headline: "Full", "ranking", "+" land with an overshoot, "#1" slams in larger (flash, hit), a light sweeps across once
+ *   64-90  the button: YouTube = a "Related video" button that rises, a touch point glides in and taps it at 86 (rings, click);
+ *          social = a "link in comments" bubble. An arrow bobs toward where the real button / the comments are.
  */
-const CTA_T = {card: 6, rows: 14, rowStep: 5, mystery: 40, title: 44, rule: 62, sub: 68, pulse: 84};
+const CTA_T = {card: 6, rows: 12, rowStep: 5, mystery: 38, title: 44, hero: 56, pill: 64, tap: 86, pulse: 90};
 // Sound cues are local to the card. The offset is far past the voice-over envelope, so the voice ducking never touches them.
 const CTA_CUES: Cue[] = [
   {sfx: 'whoosh_s', at: CTA_T.card + 2, gain: 0.25, hero: true},
@@ -41,8 +42,10 @@ const CTA_CUES: Cue[] = [
   {sfx: 'tick_2', at: CTA_T.rows + 14, gain: 0.2, hero: true},
   {sfx: 'tick_0', at: CTA_T.rows + 19, gain: 0.2, hero: true},
   {sfx: 'tick_1', at: CTA_T.rows + 24, gain: 0.2, hero: true},
-  {sfx: 'pop', at: CTA_T.title + 6, gain: 0.35, hero: true},
-  {sfx: 'ding_hi', at: CTA_T.sub + 8, gain: 0.3, hero: true},
+  {sfx: 'hit_med', at: CTA_T.hero, gain: 0.4, hero: true},
+  {sfx: 'pop', at: CTA_T.pill + 6, gain: 0.35, hero: true},
+  {sfx: 'click', at: CTA_T.tap, gain: 0.4, hero: true},
+  {sfx: 'ding_hi', at: CTA_T.tap + 3, gain: 0.25, hero: true},
 ];
 
 const mmss = (frames: number) => {
@@ -61,8 +64,12 @@ export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'yout
   const mystery = tween(f, CTA_T.mystery, 12, snap);
   const lit = 0.5 + 0.5 * Math.sin(f / 5);
   const sweep = ramp(f, CTA_T.rows, CTA_T.title + 20); // the progress line of the card
-  const rule = ramp(f, CTA_T.rule, CTA_T.rule + 16, glide);
-  const pulse = Math.sin(Math.PI * ramp(f, CTA_T.pulse, CTA_T.pulse + 20));
+  const pulse = Math.sin(Math.PI * ramp(f, CTA_T.pulse, CTA_T.pulse + 14));
+  const pillIn = tween(f, CTA_T.pill, 18, slam);
+  const tapP = ramp(f, CTA_T.tap, CTA_T.tap + 10);
+  const press = 1 - 0.07 * Math.sin(Math.PI * tapP);
+  const shine = ramp(f, CTA_T.hero + 8, CTA_T.hero + 30);
+  const CW = [{t: 'Full'}, {t: 'ranking'}, {t: '+'}, {t: '#1', hero: true}];
   const rows = PREVIEW_ROWS;
   const maxExtra = 16000;
   return (
@@ -109,17 +116,52 @@ export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'yout
       </div>
 
       {/* the call to action, under the card */}
-      <div style={{position: 'absolute', left: 56, right: 56, top: 1000, textAlign: 'center'}}>
-        <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 108, lineHeight: 1.1, color: C.text}}>
-          <MaskWords text="Full ranking + #1" start={CTA_T.title} step={5} dur={18} />
+      <Flash at={CTA_T.hero} duration={8} peak={0.22} />
+      <div style={{position: 'absolute', left: 40, right: 40, top: 950, textAlign: 'center'}}>
+        {/* headline: the words land one by one with an overshoot, "#1" slams in larger, then a light sweeps across it once */}
+        <div style={{position: 'relative', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: 26, fontFamily: F.display, fontWeight: 700, fontSize: 104, lineHeight: 1.12, color: C.text, padding: '10px 0'}}>
+          {CW.map((w, i) => {
+            const at = CTA_T.title + i * 4 + (w.hero ? 4 : 0);
+            const p = tween(f, at, w.hero ? 16 : 14, slam);
+            return (
+              <span key={i} style={{display: 'inline-block', opacity: ramp(f, at, at + 4), color: w.hero ? C.mint : C.text, fontSize: w.hero ? 150 : 104, transform: `translateY(${(1 - p) * 40}px) scale(${1 + (1 - p) * (w.hero ? 1.1 : 0.4)})`, filter: p < 0.9 ? `blur(${(1 - p) * 7}px)` : undefined, textShadow: w.hero ? `0 0 ${24 + 30 * pulse}px ${C.mint}88` : undefined}}>
+                {w.t}
+              </span>
+            );
+          })}
+          <div style={{position: 'absolute', top: 0, bottom: 0, left: `${-20 + 140 * shine}%`, width: 90, transform: 'skewX(-20deg)', background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.28), rgba(255,255,255,0))', opacity: shine > 0 && shine < 1 ? 1 : 0, pointerEvents: 'none'}} />
         </div>
-        <div style={{margin: '28px auto 0', height: 8, width: 520 * rule, borderRadius: 4, background: C.mint, boxShadow: `0 0 ${24 + 30 * pulse}px ${C.mint}${pulse > 0.2 ? 'aa' : '66'}`}} />
-        <div style={{marginTop: 28, fontFamily: F.body, fontWeight: 600, fontSize: 54, color: C.mint, transform: `scale(${1 + 0.05 * pulse})`}}>
-          <MaskLine start={CTA_T.sub} dur={16}>{CTA_LINE[variant]}</MaskLine>
-        </div>
-        {variant === 'social' && (
-          // a chevron that points down toward the comments and bobs, so the card keeps moving until the end
-          <div style={{margin: '44px auto 0', width: 40, height: 40, borderRight: `10px solid ${C.mint}`, borderBottom: `10px solid ${C.mint}`, borderRadius: 3, opacity: ramp(f, CTA_T.sub + 14, CTA_T.sub + 26), transform: `translateY(${8 * Math.sin(f / 5)}px) rotate(45deg)`}} />
+
+        {variant === 'youtube' ? (
+          <>
+            {/* a button that looks like YouTube's "Related video" button; a touch point glides in, taps it and rings spread out */}
+            <div style={{position: 'relative', margin: '34px auto 0', width: 560, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * press})`}}>
+              {[0, 5].map((d) => {
+                const r = ramp(f, CTA_T.tap + d, CTA_T.tap + d + 18);
+                return <div key={d} style={{position: 'absolute', left: -r * 40, right: -r * 40, top: -r * 40, bottom: -r * 40, borderRadius: 999, border: `5px solid ${C.mint}`, opacity: r > 0 && r < 1 ? 0.7 * (1 - r) : 0}} />;
+              })}
+              <div style={{position: 'absolute', inset: 0, borderRadius: 999, background: `linear-gradient(90deg, ${C.emerald}, ${C.mint})`, boxShadow: `0 0 ${22 + 34 * pulse}px ${C.mint}${pulse > 0.2 ? 'bb' : '77'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22}}>
+                <div style={{width: 0, height: 0, borderTop: '20px solid transparent', borderBottom: '20px solid transparent', borderLeft: `34px solid ${C.navy3}`}} />
+                <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.navy3}}>{CTA_LINE.youtube}</div>
+              </div>
+              {/* the touch point */}
+              <div style={{position: 'absolute', left: 330 + (1 - ramp(f, CTA_T.pill + 6, CTA_T.tap, glide)) * 150, top: 56 + (1 - ramp(f, CTA_T.pill + 6, CTA_T.tap, glide)) * 130, width: 64, height: 64, marginLeft: -32, marginTop: -32, borderRadius: 32, background: 'rgba(255,255,255,0.55)', border: '4px solid rgba(255,255,255,0.9)', opacity: ramp(f, CTA_T.pill + 6, CTA_T.pill + 14) * (1 - ramp(f, CTA_T.tap + 12, CTA_T.tap + 20)), transform: `scale(${1 - 0.25 * Math.sin(Math.PI * tapP)})`}} />
+            </div>
+            <div style={{marginTop: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22, fontFamily: F.body, fontWeight: 600, fontSize: 46, color: C.text, opacity: ramp(f, CTA_T.pill + 12, CTA_T.pill + 24)}}>
+              {/* the real button sits in the Shorts player, bottom left: the arrow bobs toward it */}
+              <div style={{width: 30, height: 30, borderLeft: `9px solid ${C.mint}`, borderBottom: `9px solid ${C.mint}`, borderRadius: 3, transform: `translate(${-6 * Math.sin(f / 5)}px, ${6 * Math.sin(f / 5)}px) rotate(0deg)`}} />
+              <span>tap the button below</span>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Instagram / Facebook: a comment bubble that says where the link is, with a chevron pointing down at the comments */}
+            <div style={{position: 'relative', margin: '34px auto 0', width: 700, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * (1 + 0.04 * pulse)})`}}>
+              <div style={{position: 'absolute', inset: 0, borderRadius: 40, border: `5px solid ${C.mint}`, background: `${C.mint}1F`, boxShadow: `0 0 ${22 + 30 * pulse}px ${C.mint}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.mint}}>{CTA_LINE.social}</div>
+              <div style={{position: 'absolute', left: 64, bottom: -20, width: 36, height: 36, borderRight: `5px solid ${C.mint}`, borderBottom: `5px solid ${C.mint}`, background: C.navy2, transform: 'rotate(45deg) skew(8deg, 8deg)'}} />
+            </div>
+            <div style={{margin: '56px auto 0', width: 40, height: 40, borderRight: `10px solid ${C.mint}`, borderBottom: `10px solid ${C.mint}`, borderRadius: 3, opacity: ramp(f, CTA_T.pill + 14, CTA_T.pill + 26), transform: `translateY(${8 * Math.sin(f / 5)}px) rotate(45deg)`}} />
+          </>
         )}
       </div>
       <SfxTrack cues={CTA_CUES} offset={10_000_000} />

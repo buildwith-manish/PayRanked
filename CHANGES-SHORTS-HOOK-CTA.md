@@ -86,3 +86,14 @@ social line (`CTA_LINE` in `src/shots/Short1.tsx`), for example to "search PayRa
   `Video1` and dropped into `public/`; say so and I will wire it in.
 - Not rendered. Check the Short 1 stills at 27.5-33 s and 41.2-44 s: "PayRanked" must fit inside the frame on one line, and the card must
   clear the Shorts UI (the card ends at about y 880, the line at about y 1300).
+
+## End card v3: kinetic headline and a "Related video" button (YouTube)
+- **Headline (both versions):** "Full ranking + #1" now lands word by word with an overshoot; "#1" slams in larger in mint with a flash,
+  a hit sound and a glow, then a light sweeps across the line once.
+- **YouTube version:** the plain line "on my channel" is replaced by a button that looks like YouTube's "Related video" button (mint pill with a play
+  triangle). It rises, a touch point glides in and taps it (press, two expanding rings, click sound), then "tap the button below" with an arrow
+  that bobs toward the bottom-left, where I believe the real button sits in the Shorts player. **Check on your phone where the real button
+  appears and whether the label says "Related video"**; move the arrow or change `CTA_LINE.youtube` in `src/shots/Short1.tsx` if not.
+- **Instagram / Facebook version:** a "link in comments" bubble with a pointer and a bobbing chevron.
+- Timing: the tap lands at 2.9 s of the 3.5 s card, so it holds about 0.6 s after. If that is too short, `SHORT1_CTA_SECONDS` can grow
+  (the render `TOTAL`s would need the same change).
