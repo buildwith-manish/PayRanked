@@ -16,14 +16,14 @@ jobs:
       matrix:
         include:
           # composition : seconds into the Short (the Short runs at 60 fps, so frame = seconds * 60)
-          - {comp: Short1-Vertical, seconds: '1.5 4 8 12 16 21 24.5 26 30 35 38 42'}
+          - {comp: Short1-Vertical, seconds: '1.5 4 8 12 16 21 24.5 26 27.5 28.5 29.5 31 33 36 40 41.2 42 43 44'}
           - {comp: Short2-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 5 9 14 20 26 33 46 52 56'}
           - {comp: Short3-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 5 9 14 20 26 34 41'}
           - {comp: Short4-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 5 9 14 20 26 34 44 51'}
           - {comp: Short5-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 5 9 14 20 26 34 41'}
           - {comp: Short6-Vertical, seconds: '1 3 7 11 15 18 21'}
           - {comp: Short7-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 8 11 12.5 14 18 21 24'}
-          - {comp: Short1-Vertical-Social, seconds: '42 43.5'}
+          - {comp: Short1-Vertical-Social, seconds: '41.2 43 44'}
           - {comp: Short3-Vertical-Social, seconds: '41 42.5'}
     steps:
       - uses: actions/checkout@v4

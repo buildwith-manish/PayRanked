@@ -5,7 +5,7 @@ import {Gauge, useNeedle} from '../components/Gauge';
 import {Count} from '../components/Count';
 import {Leaderboard} from '../components/Leaderboard';
 import {SourceTag, win} from '../components/common';
-import {MaskLine, MaskWords} from '../components/MaskText';
+import {MaskChars, MaskLine, MaskWords} from '../components/MaskText';
 import {MotionBlur} from '../components/MotionBlur';
 import {glide, ramp, snap, tween} from '../motion';
 import {byName, fmtUSD, SALARY} from '../data';
@@ -96,20 +96,47 @@ export const Shot3: React.FC = () => {
   return (
     <AbsoluteFill>
       <Background glowX={W / 2} glowY={V ? H * 0.42 : H * 0.45}>
-        {/* v06 welcome overlay — "Welcome to PayRanked..." plays during Shot3 frames 0-4s.
+        {/* v06 welcome overlay: "Welcome to PayRanked..." plays during Shot3 frames 0-6.3 s.
             The welcome text owns the screen until T.gaugeIn (6.3 s); only then does the gauge draw in. */}
-        <div style={{
-          position: 'absolute', left: V ? 56 : 0, right: V ? 56 : 0, top: V ? 400 : 160,
-          textAlign: 'center',
-          opacity: win(f, 0, T.gaugeIn, 10),
-        }}>
-          <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 118 : 72, lineHeight: V ? 1.05 : undefined, color: C.text}}>
-            <MaskWords text="Welcome to PayRanked" start={2} step={3} dur={22} />
+        {!V && (
+          <div style={{
+            position: 'absolute', left: 0, right: 0, top: 160,
+            textAlign: 'center',
+            opacity: win(f, 0, T.gaugeIn, 10),
+          }}>
+            <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 72, color: C.text}}>
+              <MaskWords text="Welcome to PayRanked" start={2} step={3} dur={22} />
+            </div>
+            <div style={{marginTop: 24, fontFamily: F.body, fontWeight: 500, fontSize: 42, color: C.muted}}>
+              <MaskWords text="where we rank places by what your money actually buys" start={16} step={2} dur={20} />
+            </div>
           </div>
-          <div style={{marginTop: V ? 40 : 24, fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 42, lineHeight: V ? 1.25 : undefined, color: C.muted}}>
-            <MaskWords text="where we rank places by what your money actually buys" start={16} step={2} dur={20} />
+        )}
+        {/* Vertical Shorts: the welcome is a centred title card, not a caption in the top third. A small "WELCOME TO" label, the
+            brand name letter by letter (Pay in white, Ranked in mint), a rule that draws under it, then the promise in two lines with
+            the money words in mint. It drifts slowly while it is up and lifts away as the gauge arrives. */}
+        {V && (
+          <div style={{
+            position: 'absolute', left: 56, right: 56, top: 560,
+            textAlign: 'center',
+            opacity: win(f, 0, T.gaugeIn, 8),
+            transform: `translateY(${-24 * ramp(f, 0, T.gaugeIn) - 50 * ramp(f, T.gaugeIn - 14, T.gaugeIn, glide)}px) scale(${1 + 0.04 * ramp(f, 0, T.gaugeIn)})`,
+          }}>
+            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, letterSpacing: '0.34em', color: C.muted}}>
+              <MaskLine start={2} dur={18}>WELCOME TO</MaskLine>
+            </div>
+            <div style={{marginTop: 26, fontFamily: F.display, fontWeight: 700, fontSize: 176, lineHeight: 1.05, letterSpacing: '-0.02em', whiteSpace: 'nowrap'}}>
+              <MaskChars text="Pay" start={8} step={3} dur={20} style={{color: C.text}} />
+              <MaskChars text="Ranked" start={17} step={3} dur={20} style={{color: C.mint, textShadow: `0 0 ${30 + 14 * Math.sin(f / 9)}px ${C.mint}55`}} />
+            </div>
+            <div style={{margin: '34px auto 0', height: 8, width: 380 * ramp(f, 30, 50, glide), borderRadius: 4, background: C.mint, boxShadow: `0 0 26px ${C.mint}88`}} />
+            <div style={{marginTop: 44, fontFamily: F.body, fontWeight: 500, fontSize: 58, lineHeight: 1.28, color: C.muted}}>
+              <MaskWords text="where we rank places by" start={44} step={3} dur={20} />
+              <br />
+              <MaskWords text="what your money actually buys" start={56} step={3} dur={20} wordStyle={(w) => (['money', 'actually', 'buys'].includes(w) ? {color: C.mint} : undefined)} />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* gauge */}
         <div style={{position: 'absolute', left: W / 2 - (V ? 490 : 450), top: V ? 640 : 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>

@@ -73,3 +73,16 @@ Posting copy (suggestion): YouTube pinned comment `Full ranking + #1: <link>`. I
 posted right after the Short goes live, because the card promises it. Check on your phone whether the link is tappable on each platform:
 on Instagram, links in comments are, as far as I know, not tappable, so viewers would have to copy it. If that proves true, change the
 social line (`CTA_LINE` in `src/shots/Short1.tsx`), for example to "search PayRanked on YouTube".
+
+## Short 1 welcome card and a better end card
+- **"Welcome to PayRanked" (Short 1, 27-33.3 s, vertical only; the 16:9 video is unchanged):** it was a caption in the top third of an
+  empty frame. It is now a centred title card: "WELCOME TO" label, "Pay" (white) + "Ranked" (mint) letter by letter at 176 px, a mint rule
+  that draws under it, then the promise in two lines with "money actually buys" in mint. It drifts slowly and lifts away as the gauge arrives.
+- **End card (all Shorts, both variants):** now shows a small preview of the long video: a video-style card with the title
+  "Where does $100,000 go the furthest?", the countdown rows #10 to #6 filling one after another (names and dollars from `src/data`), a
+  locked amber "#1 ? ? ?" row (the Shorts never give the winner away) and a progress line with a timecode (length from the timeline).
+  Under it: "Full ranking + #1", a rule, and the platform line ("on my channel" / "link in comments" with the bobbing chevron).
+  It is built from the video's own data and style, not footage. To use real footage, a short clip would have to be rendered from
+  `Video1` and dropped into `public/`; say so and I will wire it in.
+- Not rendered. Check the Short 1 stills at 27.5-33 s and 41.2-44 s: "PayRanked" must fit inside the frame on one line, and the card must
+  clear the Shorts UI (the card ends at about y 880, the line at about y 1300).
