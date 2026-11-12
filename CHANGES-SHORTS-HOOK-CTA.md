@@ -36,3 +36,14 @@ so the rest was a still card in silence: about 14 s in Short 6 and 15 s in Short
 - **Motion while a card is up (vertical only, the 16:9 video is unchanged):** the card drifts slowly toward the viewer, the headline glow
   breathes, and the body text appears one sentence at a time (second sentence 5.5 s after the first).
 - Not verified: where exactly each cut lands against the voice (read the stills at 12.5 s and 14 s for Short 7, and listen to the join).
+
+## Animated hooks (Shorts 3 and 4 first): `src/shots/HookKit.tsx`
+The hook now shows the claim instead of captioning it. Shared kit: dark scrim, 2-3 frame flash and a short damped shake on impact,
+words that land one by one with overshoot and blur, soft sound cues (pop, riser into hit). About 3.4 s. Numbers come from `src/data`.
+- **Short 3 (Texas):** a "TEXAS" label, the rank runs #1 -> #26 on the odometer curve (mint to red) while a marker runs a 50-place track
+  and stops one place outside the mint "TOP 25" zone. Impact at 1.5 s (flash, shake, hit), then "Texas isn't even top 25."
+- **Short 4 (Louisiana):** "LOUISIANA SALES TAX", the tax runs 0 -> 10.11% (parsed from the fact line) up a red meter, a "#5" stamp hits
+  at 1.5 s, then the line lands. "HIGHEST IN THE US" tags the meter's end.
+- Shorts 2, 5 and 7 still use the plain text hook until these two are approved; Short 6 keeps its own.
+- Not rendered. Check the stills at 0.4-3.2 s: the text must clear the 3D map, and the rank slam of the reveal underneath (its top reaches
+  about y 600 for the first second) must not fight the hook.

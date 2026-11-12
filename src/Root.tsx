@@ -22,6 +22,7 @@ import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
 import {Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {HOOK_SECONDS, SHORT_HOOK_ANIMS} from './shots/HookKit';
 import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
 import voManifest from './audio/voiceover-manifest.json';
@@ -177,6 +178,7 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
 export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
   const isCountdown = spec.id <= 5;
   const hook = SHORT_HOOKS[spec.id];
+  const HookAnim = SHORT_HOOK_ANIMS[spec.id]; // Shorts with a built hook animation (HookKit); the others use the plain text line
   const parts = spec.parts ?? [{start: spec.sourceStart, seconds: spec.seconds}];
   let at = 0; // seconds into the Short at which each part begins
   return (
@@ -214,10 +216,16 @@ export const ShortSegment: React.FC<{spec: ShortSpec}> = ({spec}) => {
               );
             })
           )}
-          {hook && (
-            <Sequence from={0} durationInFrames={toReal(sec(3))} name={`Short ${spec.id} hook`}>
-              <ShortHook text={hook} />
+          {HookAnim ? (
+            <Sequence from={0} durationInFrames={toReal(sec(HOOK_SECONDS))} name={`Short ${spec.id} hook animation`}>
+              <HookAnim />
             </Sequence>
+          ) : (
+            hook && (
+              <Sequence from={0} durationInFrames={toReal(sec(3))} name={`Short ${spec.id} hook`}>
+                <ShortHook text={hook} />
+              </Sequence>
+            )
           )}
           <Sequence from={toReal(sec(spec.seconds))} durationInFrames={toReal(sec(SHORT_END_SECONDS))} name={`Short ${spec.id} end card`}>
             <ShortEndCard />
