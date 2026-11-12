@@ -80,9 +80,9 @@ const GEOM = {
     rankFont: 340, labelY: 858, // 340 so the slammed "#10" (1.55x at its biggest) still fits inside 1080 px
     nameTop: 896, nameSize: 96, nameSizeTie: 58,
     // type is as large as the 1080 px width allows: the count and chip are ~1.2-1.4x their landscape size, the fact card 1.4x
-    beaTop: 1086, dollarTop: 1086, countSize: 156, countSizeTie: 130, gainSize: 60, coinScale: 0.8,
+    beaTop: 1086, dollarTop: 1086, countSize: 132, countSizeTie: 130, gainSize: 60, coinScale: 0.8,
     dollarTopVs: 1005, countSizeVs: 112, chipFont: 104, gaugeSize: 190, nearMain: 50, nearSub: 36,
-    versusTop: 1210, nearTop: 1305, factTop: 1250, factFont: 56, factPad: '28px 36px', factSource: 32,
+    versusTop: 1210, nearTop: 1415, factTop: 1250, factFont: 56, factPad: '28px 36px', factSource: 32,
     barW: 700, versusLabel: 36, versusValue: 46, barH: 24, versusGap: 12,
   },
 };
