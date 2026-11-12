@@ -137,7 +137,7 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
       const end = from + t.dur;
       if (end <= 0 || from >= sec(seconds)) return null;
       return (
-        <Sequence key={t.label} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(t.dur, seconds - Math.max(0, from)))} name={`${t.label} ${t.names.join(' + ')}`}>
+        <Sequence key={t.label} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(t.dur, sec(seconds) - Math.max(0, from)))} name={`${t.label} ${t.names.join(' + ')}`}>
           <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} versus={t.versus} />
           <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
         </Sequence>
@@ -148,7 +148,7 @@ const CountdownSegment: React.FC<{offset: number; seconds: number}> = ({offset, 
       const end = from + b.dur;
       if (end <= 0 || from >= sec(seconds)) return null;
       return (
-        <Sequence key={b.kind} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(b.dur, seconds - Math.max(0, from)))} name={`Break ${b.kind}`}>
+        <Sequence key={b.kind} from={toReal(Math.max(0, from))} durationInFrames={toReal(Math.min(b.dur, sec(seconds) - Math.max(0, from)))} name={`Break ${b.kind}`}>
           <Break kind={b.kind} rail={b.rail} durationInFrames={b.dur} />
           <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />
         </Sequence>
@@ -239,15 +239,15 @@ const Short1: React.FC = () => (
   <AbsoluteFill style={{backgroundColor: C.navy3}}>
     <Grade>
       <AbsoluteFill>
-        <Sequence from={0} durationInFrames={toReal(27)} name="Short 1 cold open">
+        <Sequence from={0} durationInFrames={toReal(sec(27))} name="Short 1 cold open">
           <Shot1 />
           <SfxTrack cues={CUES.shot1} offset={START.shot1} />
         </Sequence>
-        <Sequence from={toReal(SHORT1_METHOD_OFFSET)} durationInFrames={toReal(SHORT1_METHOD_SECONDS)} name="Short 1 method opener">
+        <Sequence from={toReal(sec(SHORT1_METHOD_OFFSET))} durationInFrames={toReal(sec(SHORT1_METHOD_SECONDS))} name="Short 1 method opener">
           <Shot3 />
           <SfxTrack cues={CUES.shot3} offset={START.shot3} />
         </Sequence>
-        <Sequence from={toReal(27 + SHORT1_METHOD_SECONDS)} durationInFrames={toReal(3.5)} name="Short 1 end card">
+        <Sequence from={toReal(sec(27 + SHORT1_METHOD_SECONDS))} durationInFrames={toReal(sec(3.5))} name="Short 1 end card">
           <Short1EndCard />
         </Sequence>
         <Short1Audio />
