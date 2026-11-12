@@ -61,7 +61,7 @@ const PLACE = {
     cardW: 780, cardH: 200, odo: 132,
     cardYA: 690, cardYB: 1290,
     qTop: 292, qFont: 330, labelTopA: 585, labelTopB: 1215, labelFont: 76,
-    headTop: 172, headFont: 58, headNoWrap: false, // 58 px keeps both headlines left of the watermark at x~985
+    headTop: 160, headFont: 58, headNoWrap: false, // 58 px keeps both headlines left of the watermark at x~985; lineHeight 1.25 (was 1.08) so the hidden mask words do not leave slivers at the top
     explainTop: 906, explainFont: 42, // one line in the 66 px strip between the mystery card and the top of California
     gapTop: 720, gapW: 900, gapSize: 170, bracket: 'M 300 916 v 44 M 300 938 H 780 M 780 916 v 44',
     moreTop: 1010, moreFont: 50, tagTop: 1116, tagFont: 44, chipsTop: 1270, chipSize: 50,
@@ -294,7 +294,7 @@ export const Shot1: React.FC = () => {
             )}
 
             {/* the states and everything that belongs to them: one group, so it can step back as a whole */}
-            <div style={{position: 'absolute', inset: 0, opacity: 1 - 0.72 * rest - 0.2 * rest2, filter: rest > 0 ? `grayscale(${0.6 * rest})` : undefined}}>
+            <div style={{position: 'absolute', inset: 0, opacity: V ? 1 - 0.9 * rest - 0.1 * rest2 : 1 - 0.72 * rest - 0.2 * rest2, filter: rest > 0 ? `grayscale(${0.6 * rest})` : undefined}}>
               {f >= SHAPE_START && (
                 <ThreeCanvas
                   width={W}
@@ -335,7 +335,7 @@ export const Shot1: React.FC = () => {
             </div>
 
             {/* 2-4.6s: the claim, written across the top. Only California's number is shown. */}
-            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
+            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.25 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
               <MaskWords
                 text={`${fmtUSD(SALARY)} in California feels like ${fmtUSD(cal.display)}`}
                 start={HEAD_START}
@@ -346,7 +346,7 @@ export const Shot1: React.FC = () => {
             </div>
 
             {/* 4.8-9s: the turn. The question the whole video answers. */}
-            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.08 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
+            <div style={{position: 'absolute', left: V ? 100 : 0, right: V ? 100 : 0, top: P.headTop, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: P.headFont, lineHeight: V ? 1.25 : undefined, color: C.text, whiteSpace: P.headNoWrap ? 'nowrap' : 'normal'}}>
               <MaskWords text="One state does the opposite." start={HEAD2_START} step={4} leaveAt={HEAD2_LEAVE} wordStyle={(_, i) => (i >= 3 ? {color: C.mint} : undefined)} />
             </div>
 
