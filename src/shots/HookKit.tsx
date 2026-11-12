@@ -7,7 +7,9 @@ import {Flash} from '../components/common';
 import {SfxTrack} from '../audio/Sfx';
 import {Cue} from '../audio/cues';
 import {SHORTS_SAFE} from '../layout';
-import {byName} from '../data';
+import {byName, SALARY} from '../data';
+
+const money = (n: number) => '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 /**
  * Hook kit for the Shorts: the first ~3 s of a Short is one small piece of motion that SHOWS the claim, then the line lands.
@@ -27,12 +29,12 @@ const shake = (f: number, at: number, amp: number) => {
 
 /** Frame, dark scrim, shake and flash shared by every hook. The sound cues are local to the hook; the offset is far past the
  *  voice-over envelope, so the voice ducking never touches them. */
-const Stage: React.FC<{cues: Cue[]; children: React.ReactNode}> = ({cues, children}) => {
+const Stage: React.FC<{cues: Cue[]; children: React.ReactNode; height?: number; alpha?: number}> = ({cues, children, height = 760, alpha = 0.9}) => {
   const f = useDesignFrame();
   const vis = presence(f, 0, END, 5, 12);
   return (
     <AbsoluteFill style={{pointerEvents: 'none'}}>
-      <div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 760, opacity: vis, background: 'linear-gradient(180deg, rgba(5,14,29,0.9) 0%, rgba(5,14,29,0.82) 62%, rgba(5,14,29,0) 100%)'}} />
+      <div style={{position: 'absolute', left: 0, right: 0, top: 0, height, opacity: vis, background: `linear-gradient(180deg, rgba(5,14,29,${alpha}) 0%, rgba(5,14,29,${alpha * 0.9}) 62%, rgba(5,14,29,0) 100%)`}} />
       <div style={{position: 'absolute', inset: 0, opacity: vis, transform: `translate(${shake(f, IMPACT, 9)}px, ${shake(f, IMPACT + 2, 6)}px)`}}>{children}</div>
       <Flash at={IMPACT} duration={9} peak={0.3} />
       <SfxTrack cues={cues} offset={10_000_000} />
@@ -143,4 +145,104 @@ export const Short4Hook: React.FC = () => {
   );
 };
 
-export const SHORT_HOOK_ANIMS: Partial<Record<number, React.FC>> = {3: Short3Hook, 4: Short4Hook};
+// ---------------------------------------------------------------------------------------------------------------------
+// Short 2: the #10 tie. Kansas and Nebraska slide in from opposite sides, the same dollar figure runs up, "=" slams between them.
+// ---------------------------------------------------------------------------------------------------------------------
+export const Short2Hook: React.FC = () => {
+  const f = useDesignFrame();
+  const ks = byName('Kansas');
+  const ne = byName('Nebraska');
+  const ca = byName('California');
+  const buys = Math.min(ks.display, ne.display); // both round to $111,000
+  const aheadK = Math.floor((Math.min(ks.dollars, ne.dollars) - ca.dollars) / 1000); // 20: both beat California by more than $20K
+  const run = roll(ramp(f, 4, 44));
+  const slide = tween(f, 3, 26, glide);
+  const eq = tween(f, IMPACT, 14, slam);
+  const landed = ramp(f, IMPACT, IMPACT + 10);
+  const name = (t: string, side: 1 | -1) => (
+    <div style={{flex: 1, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 62, color: C.text, transform: `translateX(${side * (1 - slide) * 520}px)`, opacity: ramp(f, 3, 9)}}>{t}</div>
+  );
+  const cues: Cue[] = [
+    {sfx: 'whoosh_s', at: 14, gain: 0.3, hero: true},
+    {sfx: 'riser_short', at: IMPACT, gain: 0.45, hero: true},
+    {sfx: 'hit_med', at: IMPACT, gain: 0.65, hero: true},
+    {sfx: 'stamp', at: IMPACT + 4, gain: 0.45, hero: true},
+  ];
+  return (
+    <Stage cues={cues}>
+      <Pill text={`TIED FOR #${ks.rank}`} color={C.amber} />
+      <div style={{position: 'absolute', left: 40, right: 40, top: AREA_TOP + 70, display: 'flex', alignItems: 'center'}}>
+        {name(ks.name.toUpperCase(), -1)}
+        <div style={{width: 90, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 90, color: C.amber, opacity: f >= IMPACT ? 1 : 0, transform: `scale(${3 - 2 * eq})`, textShadow: `0 0 ${20 + 20 * landed}px ${C.amber}99`}}>=</div>
+        {name(ne.name.toUpperCase(), 1)}
+      </div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: AREA_TOP + 175, textAlign: 'center', fontFamily: F.body, fontWeight: 700, fontSize: 34, letterSpacing: '0.16em', color: C.muted, opacity: ramp(f, 6, 14)}}>{money(SALARY)} BUYS</div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: AREA_TOP + 215, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 190, lineHeight: 1, color: C.mint, textShadow: `0 0 ${24 + 36 * landed}px ${C.mint}88`, opacity: ramp(f, 4, 10), ...tabular}}>
+        {money(SALARY + (buys - SALARY) * run)}
+      </div>
+      <Words start={IMPACT + 6} top={AREA_TOP + 440} size={56} accent={C.mint} words={[{t: 'Two'}, {t: 'states'}, {t: 'tie.'}, {t: 'Both'}, {t: 'beat'}, {t: 'California'}, {t: 'by'}, {t: `$${aheadK}K.`, accent: true}]} />
+    </Stage>
+  );
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Short 5: cheap is not a $100K job. The salary runs up, then a red slash strikes it out and a "?" lands.
+// ---------------------------------------------------------------------------------------------------------------------
+export const Short5Hook: React.FC = () => {
+  const f = useDesignFrame();
+  const run = roll(ramp(f, 4, 44));
+  const slash = tween(f, IMPACT, 10, glide);
+  const q = tween(f, IMPACT + 6, 14, slam);
+  const landed = ramp(f, IMPACT, IMPACT + 10);
+  const col = mix(C.mint, C.muted, landed);
+  const cues: Cue[] = [
+    {sfx: 'pop', at: 2, gain: 0.3, hero: true},
+    {sfx: 'riser_short', at: IMPACT, gain: 0.45, hero: true},
+    {sfx: 'hit_med', at: IMPACT, gain: 0.6, hero: true},
+    {sfx: 'glitch', at: IMPACT + 2, gain: 0.35, hero: true},
+  ];
+  return (
+    <Stage cues={cues}>
+      <Pill text="CHEAP STATE" color={C.mint} />
+      <div style={{position: 'absolute', left: 0, right: 0, top: AREA_TOP + 90, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 190, lineHeight: 1, color: col, opacity: ramp(f, 2, 8) * (1 - 0.35 * landed), ...tabular}}>
+        {money(SALARY * run)}
+      </div>
+      {/* the strike: a red bar that draws left to right across the figure */}
+      <div style={{position: 'absolute', left: 90, top: AREA_TOP + 90 + 100, width: 900 * slash, height: 14, borderRadius: 7, background: C.red, transform: 'rotate(-5deg)', transformOrigin: '0% 50%', boxShadow: `0 0 26px ${C.red}`}} />
+      <div style={{position: 'absolute', right: 80, top: AREA_TOP + 260, fontFamily: F.display, fontWeight: 700, fontSize: 130, lineHeight: 1, color: C.red, opacity: f >= IMPACT + 6 ? 1 : 0, transform: `scale(${2.4 - 1.4 * q}) rotate(${10 * (1 - q)}deg)`}}>?</div>
+      <Words start={IMPACT + 6} top={AREA_TOP + 440} size={56} accent={C.red} words={[{t: 'Cheap'}, {t: "doesn't"}, {t: 'mean'}, {t: "you'd"}, {t: 'earn', accent: true}, {t: '$100K', accent: true}, {t: 'there.', accent: true}]} />
+    </Stage>
+  );
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Short 7: "Try this with your own salary." A salary box types itself, then the formula part lands under it. Compact on purpose:
+// the profile card of the Short sits from y 400, so the hook stays above it and the card shows through the glass frame.
+// ---------------------------------------------------------------------------------------------------------------------
+export const Short7Hook: React.FC = () => {
+  const f = useDesignFrame();
+  const text = money(SALARY);
+  const typed = Math.min(text.length, Math.floor(ramp(f, 6, 40) * (text.length + 0.99)));
+  const cursor = Math.floor(f / 8) % 2 === 0 || typed < text.length;
+  const part = tween(f, IMPACT, 14, slam);
+  const cues: Cue[] = [
+    ...Array.from({length: text.length}, (_, i): Cue => ({sfx: (`tick_${i % 3}`) as Cue['sfx'], at: 6 + Math.round((i / text.length) * 34), gain: 0.22, hero: true})),
+    {sfx: 'riser_short', at: IMPACT, gain: 0.4, hero: true},
+    {sfx: 'hit_med', at: IMPACT, gain: 0.55, hero: true},
+  ];
+  return (
+    <Stage cues={cues} height={560} alpha={0.82}>
+      <Pill text="YOUR SALARY" color={C.amber} />
+      <div style={{position: 'absolute', left: 150, right: 150, top: AREA_TOP + 66, height: 110, borderRadius: 24, border: `3px solid ${C.amber}`, background: 'rgba(5,14,29,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 84, color: C.text, opacity: ramp(f, 2, 8), ...tabular}}>
+        {text.slice(0, typed)}
+        <span style={{display: 'inline-block', width: 6, height: 76, marginLeft: 6, background: C.amber, opacity: cursor ? 1 : 0}} />
+      </div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: AREA_TOP + 196, textAlign: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 64, color: C.amber, opacity: f >= IMPACT ? 1 : 0, transform: `scale(${2 - part}) translateY(${(1 - part) * -20}px)`, textShadow: `0 0 28px ${C.amber}88`, whiteSpace: 'nowrap'}}>
+        ÷ (RPP ÷ 100)
+      </div>
+      <Words start={IMPACT + 6} top={AREA_TOP + 286} size={54} accent={C.amber} words={[{t: 'Try'}, {t: 'this'}, {t: 'with'}, {t: 'your'}, {t: 'own', accent: true}, {t: 'salary.', accent: true}]} />
+    </Stage>
+  );
+};
+
+export const SHORT_HOOK_ANIMS: Partial<Record<number, React.FC>> = {2: Short2Hook, 3: Short3Hook, 4: Short4Hook, 5: Short5Hook, 7: Short7Hook};

@@ -44,6 +44,16 @@ words that land one by one with overshoot and blur, soft sound cues (pop, riser 
   and stops one place outside the mint "TOP 25" zone. Impact at 1.5 s (flash, shake, hit), then "Texas isn't even top 25."
 - **Short 4 (Louisiana):** "LOUISIANA SALES TAX", the tax runs 0 -> 10.11% (parsed from the fact line) up a red meter, a "#5" stamp hits
   at 1.5 s, then the line lands. "HIGHEST IN THE US" tags the meter's end.
-- Shorts 2, 5 and 7 still use the plain text hook until these two are approved; Short 6 keeps its own.
+- Short 6 keeps its own opening ("So who actually wins?"). Shorts 2, 5 and 7 are below.
 - Not rendered. Check the stills at 0.4-3.2 s: the text must clear the 3D map, and the rank slam of the reveal underneath (its top reaches
   about y 600 for the first second) must not fight the hook.
+
+### Shorts 2, 5 and 7 (same kit)
+- **Short 2 (tie):** "TIED FOR #10"; KANSAS and NEBRASKA slide in from opposite sides; "$100,000 BUYS" runs up to $111,000 (from the data, both
+  states round to the same figure); an amber "=" slams between the names at the impact; line: "Two states tie. Both beat California by $20K."
+  (the $20K is the data's gap rounded down to $1K: Nebraska $110,984 vs California $90,318 = $20,666).
+- **Short 5 (cheap is not a $100K job):** "CHEAP STATE"; $100,000 runs up in mint; at the impact a red bar strikes it out, the figure greys,
+  a red "?" lands; line: "Cheap doesn't mean you'd earn $100K there."
+- **Short 7 (own salary):** compact, because the profile card sits from y 400: "YOUR SALARY", a box types "$100,000" with a cursor and tick sounds,
+  "÷ (RPP ÷ 100)" slams in below it, line: "Try this with your own salary." The card shows through while it plays, but its entrance
+  (first second) is behind the hook: check the 1-3 s stills.
