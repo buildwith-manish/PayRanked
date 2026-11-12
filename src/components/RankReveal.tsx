@@ -72,11 +72,11 @@ const GEOM = {
   },
   vert: {
     w: 1080, h: 1920,
-    ovFocusY: 1920 * 0.36, // the overview map sits in the upper part of the frame, above the text stack
-    focusX: 1080 * 0.56, focusY: 1920 * 0.255,
+    ovFocusY: 1920 * 0.28, // the overview map sits in the upper part of the frame, above the slammed rank number (y 770+)
+    focusX: 1080 * 0.56, focusY: 1920 * 0.235,
     panelX: 64, panelW: 952,
-    zoomMin: 1.25, zoomMax: 2.6, fitW: 1080 * 0.74, fitH: 1920 * 0.3,
-    ovK: 1.75, settleK: 1.5,
+    zoomMin: 1.25, zoomMax: 2.6, fitW: 1080 * 0.66, fitH: 1920 * 0.27, // fitted so the extruded state ends above the rank label (y 858)
+    ovK: 1.55, settleK: 1.35,
     rankFont: 340, labelY: 858, // 340 so the slammed "#10" (1.55x at its biggest) still fits inside 1080 px
     nameTop: 896, nameSize: 96, nameSizeTie: 58,
     // type is as large as the 1080 px width allows: the count and chip are ~1.2-1.4x their landscape size, the fact card 1.4x
