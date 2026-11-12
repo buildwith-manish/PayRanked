@@ -211,7 +211,7 @@ const Short1Audio: React.FC = () => (
       const mute = MUTED_WORDS[clip.id];
       const maxDuration = isMethod ? SHORT1_METHOD_SECONDS - clip.at + clip.lead : clip.duration;
       return (
-        <Sequence key={clip.id} from={toReal(sec(localStart))} durationInFrames={toReal(sec(Math.min(clip.duration, maxDuration))) + 10} layout="none" name={`short vo ${clip.id}`}>
+        <Sequence key={clip.id} from={toReal(sec(localStart))} durationInFrames={toReal(sec(Math.min(clip.duration, maxDuration))) + (maxDuration < clip.duration ? 0 : 10)} layout="none" name={`short vo ${clip.id}`}>
           <Audio
             src={staticFile(clip.file)}
             volume={(f) => {

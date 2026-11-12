@@ -5,7 +5,9 @@ import {Shot3} from './Shot3';
 import {C, F, sec} from '../theme';
 import {useDesignFrame} from '../clock';
 
-export const SHORT1_METHOD_SECONDS = 13.5;
+// 13.7 s (was 13.5): clip 006 "...A hundred is the national average." is silent from 7.80 s to 8.12 s (measured on the WAV), and 13.7 s lands the cut
+// at 7.82 s into the clip. 13.5 s cut inside "average"; the next beat (needle to California) starts at 13.72 s, so the picture stays clean.
+export const SHORT1_METHOD_SECONDS = 13.7;
 export const SHORT1_CTA_SECONDS = 3.5;
 export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS);
 
