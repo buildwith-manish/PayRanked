@@ -66,6 +66,7 @@ const GEOM = {
     rankFont: 520, labelY: 118, // the slammed rank number, and where it settles as a small label
     nameTop: 172, nameSize: 92, nameSizeTie: 68,
     beaTop: 410, dollarTop: 410, countSize: 128, countSizeTie: 110, gainSize: 46, coinScale: 0.85,
+    dollarTopVs: 410, countSizeVs: 128, chipFont: 80, gaugeSize: 150, nearMain: 40, nearSub: 30,
     versusTop: 640, nearTop: 752, factTop: 560, factFont: 40, factPad: '28px 34px', factSource: 24,
     barW: 600, versusLabel: 32, versusValue: 44, barH: 26, versusGap: 26,
   },
@@ -78,9 +79,11 @@ const GEOM = {
     ovK: 1.75, settleK: 1.5,
     rankFont: 340, labelY: 858, // 340 so the slammed "#10" (1.55x at its biggest) still fits inside 1080 px
     nameTop: 896, nameSize: 96, nameSizeTie: 58,
-    beaTop: 1086, dollarTop: 1086, countSize: 132, countSizeTie: 112, gainSize: 50, coinScale: 0.8,
-    versusTop: 1300, nearTop: 1330, factTop: 1236, factFont: 40, factPad: '26px 34px', factSource: 26,
-    barW: 700, versusLabel: 34, versusValue: 46, barH: 24, versusGap: 18,
+    // type is as large as the 1080 px width allows: the count and chip are ~1.2-1.4x their landscape size, the fact card 1.4x
+    beaTop: 1086, dollarTop: 1086, countSize: 156, countSizeTie: 130, gainSize: 60, coinScale: 0.8,
+    dollarTopVs: 1050, countSizeVs: 112, chipFont: 104, gaugeSize: 190, nearMain: 50, nearSub: 36,
+    versusTop: 1255, nearTop: 1350, factTop: 1250, factFont: 56, factPad: '28px 36px', factSource: 32,
+    barW: 700, versusLabel: 36, versusValue: 46, barH: 24, versusGap: 12,
   },
 };
 export type Geom = typeof GEOM.land;
@@ -490,7 +493,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                           padding: '16px 40px',
                           fontFamily: F.display,
                           fontWeight: 700,
-                          fontSize: 80,
+                          fontSize: G.chipFont,
                           color: C.mint,
                           textShadow: `0 0 12px ${C.emerald}44`,
                           opacity: ramp(frame, T.bea + 4, T.bea + 12, glide),
@@ -503,7 +506,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                     </MotionBlur>
                     {/* gauge trails the chip by 6 frames; rendered unclipped so the full semicircle is visible */}
                     <div style={{opacity: ramp(frame, T.bea + 10, T.bea + 20, glide)}}>
-                      <MiniGauge value={lead.rpp} size={150} delay={T.bea + 10} />
+                      <MiniGauge value={lead.rpp} size={G.gaugeSize} delay={T.bea + 10} />
                     </div>
                   </div>
                 </MotionBlur>
@@ -515,7 +518,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                   style={{
                     position: 'absolute',
                     left: 0,
-                    top: G.dollarTop,
+                    top: isVersus ? G.dollarTopVs : G.dollarTop,
                     transformOrigin: '0% 0%',
                     transform: `scale(${1 - 0.42 * compact})`,
                     opacity: 1 - 0.25 * compact,
@@ -523,7 +526,7 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
                 >
                   <div style={{display: 'flex', alignItems: 'flex-end', gap: 18}}>
                     <div>
-                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? G.countSizeTie : G.countSize} color={C.mint} glow={7} />
+                      <Count to={lead.display} start={T.dollars} duration={COUNT_DUR} size={tie ? G.countSizeTie : isVersus ? G.countSizeVs : G.countSize} color={C.mint} glow={7} />
                       {/* follow-through: the gain rises into view once the wheels have settled */}
                       {/* fades out before the fact card arrives so it never peeks out behind the card */}
                       <div style={{marginTop: 8, fontFamily: F.display, fontWeight: 700, fontSize: G.gainSize, color: C.mint, opacity: 0.9 * gainFade, ...tabular}}>
@@ -577,13 +580,14 @@ export const RankReveal: React.FC<RankRevealProps> = ({rankLabel, names, railBef
 
               {/* #1 only: the honest margin over #2, once the dollars have landed */}
               {nearTie && frame >= T.dollars + COUNT_DUR && (
-                <div style={{position: 'absolute', left: 0, top: G.nearTop, width: G.panelW, opacity: 1 - 0.25 * compact}}>
-                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 40, color: C.text, lineHeight: 1.2, ...tabular}}>
+                <div style={{position: 'absolute', left: 0, top: G.nearTop, width: G.panelW, opacity: V ? gainFade : 1 - 0.25 * compact}}>
+                  {/* vertical: the fact card takes this space, so the margin note leaves just before it (the TOP TIER stamp stays) */}
+                  <div style={{fontFamily: F.body, fontWeight: 500, fontSize: G.nearMain, color: C.text, lineHeight: 1.2, ...tabular}}>
                     <MaskLine start={T.dollars + COUNT_DUR + 14} dur={22}>
                       Just ~{fmtUSD(Math.round(nearTie.dollarGap / 10) * 10)} ahead of #2 {nearTie.name}
                     </MaskLine>
                   </div>
-                  <div style={{marginTop: 10, fontFamily: F.body, fontWeight: 500, fontSize: 30, color: C.muted, lineHeight: 1.25}}>
+                  <div style={{marginTop: 10, fontFamily: F.body, fontWeight: 500, fontSize: G.nearSub, color: C.muted, lineHeight: 1.25}}>
                     <MaskLine start={T.dollars + COUNT_DUR + 26} dur={22}>
                       Ranked by index. A gap this small is within the data’s margin.
                     </MaskLine>

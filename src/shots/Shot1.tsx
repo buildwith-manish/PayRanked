@@ -64,7 +64,7 @@ const PLACE = {
     headTop: 158, headFont: 64, headNoWrap: false,
     explainTop: 1000, explainFont: 54,
     gapTop: 720, gapW: 900, gapSize: 170, bracket: 'M 340 944 v 44 M 340 966 H 740 M 740 944 v 44',
-    moreTop: 1010, moreFont: 56, tagTop: 1170, tagFont: 40, chipsTop: 1262, chipSize: 48,
+    moreTop: 1010, moreFont: 58, tagTop: 1176, tagFont: 46, chipsTop: 1270, chipSize: 50,
     coin: {left: 980 - 310, top: 1205 - 404},
     splitY: 890,
   },

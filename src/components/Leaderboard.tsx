@@ -35,11 +35,11 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
   const frame = useDesignFrame();
   const {vertical} = useLayout();
   // vertical Shorts: a tighter rail hugging the left edge, under the Shorts header and clear of the map in the middle
-  const rowH = vertical ? 62 : 72;
+  const rowH = vertical ? 74 : 72;
   const left = vertical ? 36 : MARGIN;
   const top = vertical ? 168 : 130;
-  const slim = vertical ? 92 : SLIM;
-  width = width ?? (vertical ? 340 : 370);
+  const slim = vertical ? 108 : SLIM;
+  width = width ?? (vertical ? 410 : 370);
   const w = lerpN(slim, width, open);
   const byRank = new Map<number, RailEntry>();
   entries.forEach((e) => byRank.set(parseInt(e.label.replace('#', ''), 10), e));
@@ -80,13 +80,13 @@ export const Leaderboard: React.FC<{entries: RailEntry[]; revealAt?: number; wid
               transformOrigin: '0% 50%',
             }}
           >
-            <span style={{fontFamily: F.display, fontWeight: 700, fontSize: spans ? 26 : 30, width: spans ? 62 : 50, flexShrink: 0, whiteSpace: 'nowrap', color: filled ? C.mint : C.muted, fontVariantNumeric: 'tabular-nums'}}>{spans ? `${n}\u2013${n + 1}` : n}</span>
+            <span style={{fontFamily: F.display, fontWeight: 700, fontSize: vertical ? (spans ? 32 : 38) : spans ? 26 : 30, width: vertical ? (spans ? 76 : 60) : spans ? 62 : 50, flexShrink: 0, whiteSpace: 'nowrap', color: filled ? C.mint : C.muted, fontVariantNumeric: 'tabular-nums'}}>{spans ? `${n}\u2013${n + 1}` : n}</span>
             {e && (
               <span
                 style={{
                   fontFamily: F.display,
                   fontWeight: 700,
-                  fontSize: tie ? 22 : 26,
+                  fontSize: vertical ? (tie ? 27 : 32) : tie ? 22 : 26,
                   color: C.text,
                   // Bug fix: threshold was 0.35 — names started appearing when the rail was only 35%
                   // open, overlapping the rank number in the narrow collapsed strip. Raised to 0.65

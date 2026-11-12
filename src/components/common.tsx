@@ -34,7 +34,7 @@ export const SourceTag: React.FC<{opacity?: number}> = ({opacity = 1}) => {
       style={{
         position: 'absolute',
         // vertical: top-left under the Shorts header; the bottom 380 px belong to the Shorts player UI
-        ...(vertical ? {left: 44, top: 116, fontSize: 24} : {left: MARGIN, bottom: 48, fontSize: 24}),
+        ...(vertical ? {left: 44, top: 112, fontSize: 28} : {left: MARGIN, bottom: 48, fontSize: 24}),
         fontFamily: F.body,
         fontWeight: 500,
         color: C.muted,

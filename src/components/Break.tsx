@@ -60,10 +60,10 @@ export const Break: React.FC<{kind: BreakKind; rail: RailEntry[]; durationInFram
                 <MaskWords text="Not on this list." start={BREAK_BEATS.line1} step={5} dur={22} />
               </div>
               <div style={{display: 'flex', flexDirection: V ? 'column' : 'row', alignItems: 'center', gap: V ? 28 : 36, opacity: fade(BREAK_BEATS.chips)}}>
-                <Chip text={`TEXAS · #${rankOf('Texas')} · ${fmtUSD(tx.display)}`} delay={BREAK_BEATS.chips} size={V ? 40 : 46} from="left" />
-                <Chip text={`FLORIDA · #${rankOf('Florida')} · ${fmtUSD(fl.display)}`} delay={BREAK_BEATS.chips + 14} size={V ? 40 : 46} from="right" color={C.amber} />
+                <Chip text={`TEXAS · #${rankOf('Texas')} · ${fmtUSD(tx.display)}`} delay={BREAK_BEATS.chips} size={V ? 44 : 46} from="left" />
+                <Chip text={`FLORIDA · #${rankOf('Florida')} · ${fmtUSD(fl.display)}`} delay={BREAK_BEATS.chips + 14} size={V ? 44 : 46} from="right" color={C.amber} />
               </div>
-              <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 46 : 40, color: C.muted, textAlign: 'center', opacity: fade(sec(5.4))}}>
+              <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 40, color: C.muted, textAlign: 'center', opacity: fade(sec(5.4))}}>
                 <MaskWords text="No wage tax doesn’t fix the prices." start={sec(5.4)} step={4} dur={20} />
               </div>
             </>
@@ -72,7 +72,7 @@ export const Break: React.FC<{kind: BreakKind; rail: RailEntry[]; durationInFram
               <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 92 : 88, color: C.text, textAlign: 'center', lineHeight: 1.1, opacity: fade(BREAK_BEATS.line1)}}>
                 <MaskWords text="Cheap doesn’t mean you’d earn $100K there." start={BREAK_BEATS.line1} step={4} dur={22} />
               </div>
-              <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 50 : 46, color: C.muted, textAlign: 'center', lineHeight: 1.3, opacity: fade(sec(4.6))}}>
+              <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 56 : 46, color: C.muted, textAlign: 'center', lineHeight: 1.3, opacity: fade(sec(4.6))}}>
                 <MaskWords text="This ranks prices, not paychecks." start={sec(4.6)} step={4} dur={22} />
               </div>
             </>

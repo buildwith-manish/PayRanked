@@ -115,13 +115,13 @@ const ProfileCard: React.FC<{
             gap: V ? 34 : 28,
           }}
         >
-          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: V ? 42 : 36, color, letterSpacing: '0.18em', opacity: ramp(f, start + 6, start + 16)}}>
+          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: V ? 46 : 36, color, letterSpacing: '0.18em', opacity: ramp(f, start + 6, start + 16)}}>
             {label}
           </div>
           <div style={{fontFamily: F.display, fontWeight: 700, fontSize: V ? 104 : 84, color: C.text, lineHeight: 1.05, opacity: ramp(f, start + 10, start + 22)}}>
             <MaskWords text={headline} start={start + 10} step={3} dur={20} />
           </div>
-          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 46 : 38, color: C.muted, lineHeight: V ? 1.35 : 1.4, maxWidth: 1100, opacity: ramp(f, start + 20, start + 32)}}>
+          <div style={{fontFamily: F.body, fontWeight: 500, fontSize: V ? 54 : 38, color: C.muted, lineHeight: V ? 1.3 : 1.4, maxWidth: 1100, opacity: ramp(f, start + 20, start + 32)}}>
             {body}
           </div>
         </Glass>
