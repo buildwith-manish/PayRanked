@@ -124,3 +124,11 @@ badge and the video length (2.0-2.7 s); hold to the end. No description line, no
 - **Focus:** removed the glow around the panel, quieter glow on "#1"; the Related video button gets a soft white pulse before the tap, so it is the brightest thing.
 - Not verified (not rendered): the camera push must not push the headline out of frame, and the morph must not show the title and thumbnail
   at the same time. Check the stills at 2.0, 2.3 s, 2.5 s, 2.8 s, 3.1 s and the last frame of the card.
+
+## Short 1 without the "Welcome to PayRanked" clip
+- Short 1 no longer contains the welcome line at all (voice-over clip 005, its title card, its sounds). After the cold open (27 s) the Short
+  goes straight to the method opener at the gauge: Shot 3 is entered 6.3 s in (`SHORT1_METHOD_SKIP`), voice clip 006 onward, music and sound
+  cues shifted by the same 6.3 s. The long video (Video1) keeps its welcome as before.
+- Short 1 is now 38.4 s (was 44.7 s): 27 s cold open + 7.4 s method (ends where it did, at 13.7 s of Shot 3) + 4 s end card. Render `TOTAL`
+  for Short 1 is 2304 frames. The vertical-only centred welcome card I built earlier is removed (it was dead code).
+- Check: the join at 27 s (cold open to the gauge drawing in) and that the first voice word of clip 006 is not clipped (stills 26, 27.3, 28.5 s).

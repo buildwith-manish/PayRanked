@@ -21,7 +21,7 @@ import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
-import {CtaVariant, Short1EndCard, SHORT1_CTA_SECONDS, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {CtaVariant, Short1EndCard, SHORT1_CTA_SECONDS, SHORT1_FRAMES, SHORT1_METHOD_END, SHORT1_METHOD_SECONDS, SHORT1_METHOD_SKIP} from './shots/Short1';
 import {HOOK_SECONDS, SHORT_HOOK_ANIMS} from './shots/HookKit';
 import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
@@ -250,7 +250,7 @@ const GradedReveals = timeline.map((_, i) => graded(RankReveal, START.shot4 + ti
 const GradedBreaks = breaks.map((b, i) => graded(Break, START.shot4 + b.from, CUES.breaks[i]));
 
 const SHORT1_METHOD_OFFSET = 27;
-const SHORT1_SOURCE_METHOD_START = START.shot3;
+const SHORT1_SOURCE_METHOD_START = START.shot3 + sec(SHORT1_METHOD_SKIP); // music and cues of the method opener start at the gauge
 const MUTED_WORDS: Record<string, [number, number]> = {
   '002_v02_cold_open': [1.04, 1.48],
   '003_v03_cold_open': [0.48, 0.94],
@@ -260,12 +260,12 @@ const Short1Audio: React.FC = () => (
   <>
     {AUDIO.vo && voManifest.map((clip: any) => {
       const isShot1 = clip.shot === 'shot1';
-      const isMethod = clip.shot === 'shot3' && clip.at < SHORT1_METHOD_SECONDS;
+      const isMethod = clip.shot === 'shot3' && clip.at >= SHORT1_METHOD_SKIP - 0.1 && clip.at < SHORT1_METHOD_END; // clip 005 (the welcome line) is not in the Short
       if (!isShot1 && !isMethod) return null;
       const sourceStart = isShot1 ? clip.at - clip.lead : SHORT1_SOURCE_METHOD_START + clip.at - clip.lead;
-      const localStart = isShot1 ? sourceStart : SHORT1_METHOD_OFFSET + clip.at - clip.lead;
+      const localStart = isShot1 ? sourceStart : SHORT1_METHOD_OFFSET + clip.at - clip.lead - SHORT1_METHOD_SKIP;
       const mute = MUTED_WORDS[clip.id];
-      const maxDuration = isMethod ? SHORT1_METHOD_SECONDS - clip.at + clip.lead : clip.duration;
+      const maxDuration = isMethod ? SHORT1_METHOD_END - clip.at + clip.lead : clip.duration;
       return (
         <Sequence key={clip.id} from={toReal(sec(localStart))} durationInFrames={toReal(sec(Math.min(clip.duration, maxDuration))) + (maxDuration < clip.duration ? 0 : 10)} layout="none" name={`short vo ${clip.id}`}>
           <Audio
@@ -300,8 +300,11 @@ const Short1: React.FC<{cta?: CtaVariant}> = ({cta = 'youtube'}) => (
           <SfxTrack cues={CUES.shot1} offset={START.shot1} />
         </Sequence>
         <Sequence from={toReal(sec(SHORT1_METHOD_OFFSET))} durationInFrames={toReal(sec(SHORT1_METHOD_SECONDS))} name="Short 1 method opener">
-          <Shot3 />
-          <SfxTrack cues={CUES.shot3} offset={START.shot3} />
+          {/* starts at the gauge (6.3 s into Shot 3): no welcome clip */}
+          <FrameOffset offset={sec(SHORT1_METHOD_SKIP)}>
+            <Shot3 />
+            <SfxTrack cues={CUES.shot3.map((c) => ({...c, at: c.at - sec(SHORT1_METHOD_SKIP)})).filter((c) => c.at >= 0 && c.at < sec(SHORT1_METHOD_SECONDS))} offset={START.shot3 + sec(SHORT1_METHOD_SKIP)} />
+          </FrameOffset>
         </Sequence>
         <Sequence from={toReal(sec(27 + SHORT1_METHOD_SECONDS))} durationInFrames={toReal(sec(SHORT1_CTA_SECONDS))} name="Short 1 end card">
           <Short1EndCard variant={cta} />

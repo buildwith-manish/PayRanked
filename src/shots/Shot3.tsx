@@ -5,7 +5,7 @@ import {Gauge, useNeedle} from '../components/Gauge';
 import {Count} from '../components/Count';
 import {Leaderboard} from '../components/Leaderboard';
 import {SourceTag, win} from '../components/common';
-import {MaskChars, MaskLine, MaskWords} from '../components/MaskText';
+import {MaskLine, MaskWords} from '../components/MaskText';
 import {MotionBlur} from '../components/MotionBlur';
 import {glide, ramp, snap, tween} from '../motion';
 import {byName, fmtUSD, SALARY} from '../data';
@@ -112,32 +112,6 @@ export const Shot3: React.FC = () => {
             </div>
           </div>
         )}
-        {/* Vertical Shorts: the welcome is a centred title card, not a caption in the top third. A small "WELCOME TO" label, the
-            brand name letter by letter (Pay in white, Ranked in mint), a rule that draws under it, then the promise in two lines with
-            the money words in mint. It drifts slowly while it is up and lifts away as the gauge arrives. */}
-        {V && (
-          <div style={{
-            position: 'absolute', left: 56, right: 56, top: 560,
-            textAlign: 'center',
-            opacity: win(f, 0, T.gaugeIn, 8),
-            transform: `translateY(${-24 * ramp(f, 0, T.gaugeIn) - 50 * ramp(f, T.gaugeIn - 14, T.gaugeIn, glide)}px) scale(${1 + 0.04 * ramp(f, 0, T.gaugeIn)})`,
-          }}>
-            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, letterSpacing: '0.34em', color: C.muted}}>
-              <MaskLine start={2} dur={18}>WELCOME TO</MaskLine>
-            </div>
-            <div style={{marginTop: 26, fontFamily: F.display, fontWeight: 700, fontSize: 176, lineHeight: 1.05, letterSpacing: '-0.02em', whiteSpace: 'nowrap'}}>
-              <MaskChars text="Pay" start={8} step={3} dur={20} style={{color: C.text}} />
-              <MaskChars text="Ranked" start={17} step={3} dur={20} style={{color: C.mint, textShadow: `0 0 ${30 + 14 * Math.sin(f / 9)}px ${C.mint}55`}} />
-            </div>
-            <div style={{margin: '34px auto 0', height: 8, width: 380 * ramp(f, 30, 50, glide), borderRadius: 4, background: C.mint, boxShadow: `0 0 26px ${C.mint}88`}} />
-            <div style={{marginTop: 44, fontFamily: F.body, fontWeight: 500, fontSize: 58, lineHeight: 1.28, color: C.muted}}>
-              <MaskWords text="where we rank places by" start={44} step={3} dur={20} />
-              <br />
-              <MaskWords text="what your money actually buys" start={56} step={3} dur={20} wordStyle={(w) => (['money', 'actually', 'buys'].includes(w) ? {color: C.mint} : undefined)} />
-            </div>
-          </div>
-        )}
-
         {/* gauge */}
         <div style={{position: 'absolute', left: W / 2 - (V ? 490 : 450), top: V ? 640 : 200, opacity: gaugeOpacity, transform: `scale(${1 - 0.1 * (1 - gaugeOpacity)})`}}>
           <Gauge value={needle} size={V ? 980 : 900} tint={tint} drawFrames={60} drawDelay={T.gaugeIn} jitter={f > T.toCal && f < T.formula} />

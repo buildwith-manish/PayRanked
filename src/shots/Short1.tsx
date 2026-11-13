@@ -14,7 +14,11 @@ import {Glass} from '../components/Glass';
 
 // 13.7 s (was 13.5): clip 006 "...A hundred is the national average." is silent from 7.80 s to 8.12 s (measured on the WAV), and 13.7 s lands the cut
 // at 7.82 s into the clip. 13.5 s cut inside "average"; the next beat (needle to California) starts at 13.72 s, so the picture stays clean.
-export const SHORT1_METHOD_SECONDS = 13.7;
+export const SHORT1_METHOD_END = 13.7;
+// The Short has no "Welcome to PayRanked" clip: the method opener starts at the gauge, 6.3 s into the long video's Shot 3 (the welcome line,
+// voice-over clip 005 and its title card, runs 0-6.3 s). The cut-in is the same moment the long video draws the gauge.
+export const SHORT1_METHOD_SKIP = 6.3;
+export const SHORT1_METHOD_SECONDS = Math.round((SHORT1_METHOD_END - SHORT1_METHOD_SKIP) * 10) / 10; // 7.4 s
 export const SHORT1_CTA_SECONDS = 4; // 120 design frames
 export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS);
 
