@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill} from 'remotion';
+import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {Shot1} from './Shot1';
 import {Shot3} from './Shot3';
 import {C, F, sec, tabular} from '../theme';
@@ -174,10 +174,10 @@ const SocialEndCard: React.FC<{variant: CtaVariant}> = ({variant}) => {
 // under it, a dark pill with a play triangle and the long video's title: the "Related video" button. The card shows that block,
 // a touch point taps the pill, and the long video's thumbnail opens. About 2.5 s of demo inside the 3.5 s card.
 // ---------------------------------------------------------------------------------------------------------------------
-/** The channel handle and the long video's title as the real button shows them (the title is cut with "..." when it is long, as on YouTube).
- *  TITLE IS A PLACEHOLDER (the first line of video-description.txt): replace it with the exact title of the long video. */
+/** The channel handle and the long video's title as the real button shows them: on a phone the title is cut with "..." after about 40
+ *  characters of this pill, so the full title is kept here and CSS does the cutting. */
 export const CHANNEL_HANDLE = '@PayRanked';
-export const LONG_VIDEO_TITLE = 'Where does $100,000 go the furthest? We ranked all 50 states';
+export const LONG_VIDEO_TITLE = 'Your $100K Is Worth Up to $115K in These 10 States (Ranked)';
 
 const Y_T = {head: 4, hero: 20, panel: 22, ui: 30, pill: 38, finger: 46, tap: 60, open: 63, openEnd: 82};
 const Y_CUES: Cue[] = [
@@ -212,17 +212,6 @@ const Headline: React.FC<{start: number}> = ({start}) => {
   );
 };
 
-/** The stand-in thumbnail, built from the video's own style and data (the real thumbnail is not in the repo). 800 x 450. */
-const StandInThumbnail: React.FC = () => (
-  <div style={{position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, overflow: 'hidden'}}>
-    <div style={{position: 'absolute', right: -80, top: -80, width: 420, height: 420, borderRadius: 210, background: `${C.mint}33`, filter: 'blur(70px)'}} />
-    <div style={{position: 'absolute', left: 44, top: 38, fontFamily: F.body, fontWeight: 700, fontSize: 28, letterSpacing: '0.28em', color: C.mint}}>RANKED · 50 STATES</div>
-    <div style={{position: 'absolute', left: 44, top: 96, fontFamily: F.display, fontWeight: 700, fontSize: 138, lineHeight: 1, color: C.text}}>$100,000</div>
-    <div style={{position: 'absolute', left: 44, top: 250, width: 520, fontFamily: F.display, fontWeight: 700, fontSize: 54, lineHeight: 1.12, color: C.mint}}>goes the furthest in…?</div>
-    <div style={{position: 'absolute', left: 44, bottom: 36, fontFamily: F.body, fontWeight: 600, fontSize: 28, color: C.muted}}>by real purchasing power</div>
-  </div>
-);
-
 const YouTubeEndCard: React.FC = () => {
   const f = useDesignFrame();
   const fade = ramp(f, 0, 8);
@@ -253,14 +242,14 @@ const YouTubeEndCard: React.FC = () => {
       <div style={{position: 'absolute', left: (1080 - PANEL_W) / 2, top: 640, width: PANEL_W, height: panelH, borderRadius: 40, background: '#000', border: '2px solid rgba(232,238,247,0.14)', boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 ${30 + 20 * open}px ${C.mint}33`, opacity: ramp(f, Y_T.panel, Y_T.panel + 6), transform: `translateY(${(1 - panelIn) * 120}px) scale(${0.92 + 0.08 * panelIn})`, overflow: 'hidden'}}>
         {/* channel row: avatar, handle, Subscribe */}
         <div style={{position: 'absolute', left: 40, right: 40, top: 40, display: 'flex', alignItems: 'center', gap: 22, opacity: uiIn * uiOut}}>
-          <div style={{width: 96, height: 96, borderRadius: 48, background: `linear-gradient(135deg, ${C.navy1}, ${C.emerald})`, border: `3px solid ${C.mint}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.mint}}>P</div>
+          <Img src={staticFile('profile.png')} style={{width: 96, height: 96, borderRadius: 48, objectFit: 'cover', flex: 'none'}} />
           <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, color: '#fff'}}>{CHANNEL_HANDLE}</div>
           <div style={{padding: '16px 34px', borderRadius: 999, background: '#fff', fontFamily: F.body, fontWeight: 700, fontSize: 36, color: '#000'}}>Subscribe</div>
         </div>
         {/* the Related video button: dark pill, play triangle, the long video's title */}
         <div style={{position: 'absolute', left: 40, top: PILL_TOP, width: PILL_W, height: 84, borderRadius: 42, background: tapP > 0 && tapP < 1 ? '#4a4a4a' : '#2a2a2a', display: 'flex', alignItems: 'center', gap: 22, padding: '0 30px', opacity: pillIn * uiOut, transform: `translateY(${(1 - pillIn) * 30}px) scale(${press})`}}>
           <div style={{width: 0, height: 0, flex: 'none', borderTop: '16px solid transparent', borderBottom: '16px solid transparent', borderLeft: '28px solid #fff'}} />
-          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 36, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{LONG_VIDEO_TITLE}</div>
+          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 32, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{LONG_VIDEO_TITLE}</div>
         </div>
         {/* tap rings */}
         {[0, 5].map((d) => {
@@ -271,9 +260,7 @@ const YouTubeEndCard: React.FC = () => {
         <div style={{position: 'absolute', left: PANEL_W * 0.5 + (1 - finger) * 260, top: PILL_TOP + 42 + (1 - finger) * 210, width: 68, height: 68, marginLeft: -34, marginTop: -34, borderRadius: 34, background: 'rgba(255,255,255,0.5)', border: '4px solid rgba(255,255,255,0.92)', opacity: ramp(f, Y_T.finger, Y_T.finger + 6) * (1 - ramp(f, Y_T.tap + 10, Y_T.tap + 16)), transform: `scale(${1 - 0.28 * Math.sin(Math.PI * tapP)})`}} />
         {/* the thumbnail opens out of the pill and fills the panel */}
         <div style={{position: 'absolute', left: 40, top: 55, width: PANEL_W - 80, height: ((PANEL_W - 80) * 9) / 16, borderRadius: 18, overflow: 'hidden', opacity: ramp(f, Y_T.open, Y_T.open + 6), transform: `translateY(${(1 - open) * (PILL_TOP - 55)}px) scale(${0.3 + 0.7 * open}, ${0.18 + 0.82 * open})`, transformOrigin: '50% 100%'}}>
-          <div style={{position: 'absolute', left: 0, top: 0, width: 800, height: 450, transform: `scale(${(PANEL_W - 80) / 800})`, transformOrigin: '0 0'}}>
-            <StandInThumbnail />
-          </div>
+          <Img src={staticFile('thumbnail.jpg')} style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}} />
           {/* play badge and length */}
           <div style={{position: 'absolute', left: '50%', top: '50%', width: 130, height: 130, marginLeft: -65, marginTop: -65, borderRadius: 65, background: 'rgba(0,0,0,0.55)', border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: ramp(f, Y_T.openEnd - 8, Y_T.openEnd + 2), transform: `scale(${0.7 + 0.3 * tween(f, Y_T.openEnd - 8, 12, slam)})`}}>
             <div style={{width: 0, height: 0, marginLeft: 10, borderTop: '28px solid transparent', borderBottom: '28px solid transparent', borderLeft: '46px solid #fff'}} />

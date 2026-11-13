@@ -104,8 +104,8 @@ and the long video's title). Layout and timing (3.5 s): "Full ranking + #1" land
 the avatar ("P" mark), `@PayRanked` and a white Subscribe pill, then the dark "Related video" pill with the title (1.0-1.6 s); a touch point
 glides in and taps the pill (2.0 s: press, rings, click); the long video's thumbnail opens out of the pill and fills the panel with a play
 badge and the video length (2.0-2.7 s); hold to the end. No description line, no "earns commission".
-- **Replace the title:** `LONG_VIDEO_TITLE` in `src/shots/Short1.tsx` is a placeholder (first words of the video description). Put the exact
-  title of the long video there. It is cut with "..." like on YouTube, so a long title is fine. `CHANNEL_HANDLE` is `@PayRanked`.
-- **Replace the thumbnail:** it is a stand-in built from the video's style (`StandInThumbnail`), because the real thumbnail is not in the repo.
-  To use the real one: add `public/thumbnail.png` (1280x720) and swap `<StandInThumbnail />` for `<Img src={staticFile('thumbnail.png')} />` (tell me and I do it).
+- **Real assets:** `public/profile.png` (the "P" profile, round avatar) and `public/thumbnail.jpg` (the real 1280x720 thumbnail, opened by the tap).
+  Title: "Your $100K Is Worth Up to $115K in These 10 States (Ranked)" (`LONG_VIDEO_TITLE`). On a phone the pill cuts a long title with "..."; the
+  card does the same with CSS (32 px type in an 800 px pill), so it reads "Your $100K Is Worth Up to $115K in These 10 S…" or close to it.
+  Check the cut in the Studio: if it cuts too early or too late, change the font size on the title line in `YouTubeEndCard`.
 - The Instagram / Facebook end card is unchanged (countdown preview card + "link in comments" bubble).
