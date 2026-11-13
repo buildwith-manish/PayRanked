@@ -56,7 +56,7 @@ const mmss = (frames: number) => {
 /** The long video's countdown, #10 to #6, as five rows. #1 stays locked. */
 const PREVIEW_ROWS = COUNTDOWN.filter((c) => c.rank >= 6 && c.rank <= 10).map((c) => ({label: c.label, name: c.names.join(' · '), extra: byName(c.names[0]).display - 100000, value: fmtUSD(byName(c.names[0]).display)}));
 
-export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'youtube'}) => {
+const SocialEndCard: React.FC<{variant: CtaVariant}> = ({variant}) => {
   const f = useDesignFrame();
   const fade = ramp(f, 0, 10);
   const card = tween(f, CTA_T.card, 22, snap);
@@ -168,3 +168,123 @@ export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'yout
     </AbsoluteFill>
   );
 };
+
+// ---------------------------------------------------------------------------------------------------------------------
+// YouTube end card: a demo of the real thing. The bottom of a Short on YouTube shows the channel row (avatar, @handle, Subscribe) and,
+// under it, a dark pill with a play triangle and the long video's title: the "Related video" button. The card shows that block,
+// a touch point taps the pill, and the long video's thumbnail opens. About 2.5 s of demo inside the 3.5 s card.
+// ---------------------------------------------------------------------------------------------------------------------
+/** The channel handle and the long video's title as the real button shows them (the title is cut with "..." when it is long, as on YouTube).
+ *  TITLE IS A PLACEHOLDER (the first line of video-description.txt): replace it with the exact title of the long video. */
+export const CHANNEL_HANDLE = '@PayRanked';
+export const LONG_VIDEO_TITLE = 'Where does $100,000 go the furthest? We ranked all 50 states';
+
+const Y_T = {head: 4, hero: 20, panel: 22, ui: 30, pill: 38, finger: 46, tap: 60, open: 63, openEnd: 82};
+const Y_CUES: Cue[] = [
+  {sfx: 'hit_med', at: Y_T.hero, gain: 0.4, hero: true},
+  {sfx: 'whoosh_s', at: Y_T.panel + 2, gain: 0.25, hero: true},
+  {sfx: 'pop', at: Y_T.pill + 2, gain: 0.3, hero: true},
+  {sfx: 'click', at: Y_T.tap, gain: 0.45, hero: true},
+  {sfx: 'ding_hi', at: Y_T.open + 4, gain: 0.3, hero: true},
+];
+const PANEL_W = 880;
+const PANEL_H0 = 330; // the channel block
+const PANEL_H1 = 560; // after the thumbnail opens (16:9 at 800 px wide = 450 px, plus padding)
+
+const Headline: React.FC<{start: number}> = ({start}) => {
+  const f = useDesignFrame();
+  const words = [{t: 'Full'}, {t: 'ranking'}, {t: '+'}, {t: '#1', hero: true}];
+  const shine = ramp(f, start + 18, start + 40);
+  const glow = 0.5 + 0.5 * Math.sin(f / 7);
+  return (
+    <div style={{position: 'relative', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: 26, fontFamily: F.display, fontWeight: 700, lineHeight: 1.12, color: C.text, padding: '10px 0'}}>
+      {words.map((w, i) => {
+        const at = start + i * 4 + (w.hero ? 4 : 0);
+        const p = tween(f, at, w.hero ? 16 : 14, slam);
+        return (
+          <span key={i} style={{display: 'inline-block', opacity: ramp(f, at, at + 4), color: w.hero ? C.mint : C.text, fontSize: w.hero ? 150 : 104, transform: `translateY(${(1 - p) * 40}px) scale(${1 + (1 - p) * (w.hero ? 1.1 : 0.4)})`, filter: p < 0.9 ? `blur(${(1 - p) * 7}px)` : undefined, textShadow: w.hero ? `0 0 ${24 + 26 * glow}px ${C.mint}88` : undefined}}>
+            {w.t}
+          </span>
+        );
+      })}
+      <div style={{position: 'absolute', top: 0, bottom: 0, left: `${-20 + 140 * shine}%`, width: 90, transform: 'skewX(-20deg)', background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.28), rgba(255,255,255,0))', opacity: shine > 0 && shine < 1 ? 1 : 0, pointerEvents: 'none'}} />
+    </div>
+  );
+};
+
+/** The stand-in thumbnail, built from the video's own style and data (the real thumbnail is not in the repo). 800 x 450. */
+const StandInThumbnail: React.FC = () => (
+  <div style={{position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, overflow: 'hidden'}}>
+    <div style={{position: 'absolute', right: -80, top: -80, width: 420, height: 420, borderRadius: 210, background: `${C.mint}33`, filter: 'blur(70px)'}} />
+    <div style={{position: 'absolute', left: 44, top: 38, fontFamily: F.body, fontWeight: 700, fontSize: 28, letterSpacing: '0.28em', color: C.mint}}>RANKED · 50 STATES</div>
+    <div style={{position: 'absolute', left: 44, top: 96, fontFamily: F.display, fontWeight: 700, fontSize: 138, lineHeight: 1, color: C.text}}>$100,000</div>
+    <div style={{position: 'absolute', left: 44, top: 250, width: 520, fontFamily: F.display, fontWeight: 700, fontSize: 54, lineHeight: 1.12, color: C.mint}}>goes the furthest in…?</div>
+    <div style={{position: 'absolute', left: 44, bottom: 36, fontFamily: F.body, fontWeight: 600, fontSize: 28, color: C.muted}}>by real purchasing power</div>
+  </div>
+);
+
+const YouTubeEndCard: React.FC = () => {
+  const f = useDesignFrame();
+  const fade = ramp(f, 0, 8);
+  const panelIn = tween(f, Y_T.panel, 20, slam);
+  const uiIn = ramp(f, Y_T.ui, Y_T.ui + 8);
+  const pillIn = tween(f, Y_T.pill, 14, snap);
+  const finger = ramp(f, Y_T.finger, Y_T.tap, glide);
+  const tapP = ramp(f, Y_T.tap, Y_T.tap + 8);
+  const press = 1 - 0.05 * Math.sin(Math.PI * tapP);
+  const open = ramp(f, Y_T.open, Y_T.openEnd, glide);
+  const uiOut = 1 - ramp(f, Y_T.open - 2, Y_T.open + 8);
+  const panelH = PANEL_H0 + (PANEL_H1 - PANEL_H0) * open;
+  const PILL_W = PANEL_W - 80;
+  const PILL_TOP = PANEL_H0 - 40 - 84; // the pill's top inside the panel before it opens
+  return (
+    <AbsoluteFill style={{background: `linear-gradient(160deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, opacity: fade}}>
+      <div style={{position: 'absolute', left: 40, right: 40, top: 200, textAlign: 'center'}}>
+        <Headline start={Y_T.head} />
+      </div>
+      <Flash at={Y_T.hero} duration={8} peak={0.22} />
+
+      {/* label above the demo */}
+      <div style={{position: 'absolute', left: 0, right: 0, top: 560, textAlign: 'center', fontFamily: F.body, fontWeight: 700, fontSize: 34, letterSpacing: '0.26em', color: C.mint, opacity: ramp(f, Y_T.panel + 4, Y_T.panel + 14) * (1 - 0.0 * open)}}>
+        TAP &quot;RELATED VIDEO&quot;
+      </div>
+
+      {/* the demo panel: black, like the bottom of a Short */}
+      <div style={{position: 'absolute', left: (1080 - PANEL_W) / 2, top: 640, width: PANEL_W, height: panelH, borderRadius: 40, background: '#000', border: '2px solid rgba(232,238,247,0.14)', boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 ${30 + 20 * open}px ${C.mint}33`, opacity: ramp(f, Y_T.panel, Y_T.panel + 6), transform: `translateY(${(1 - panelIn) * 120}px) scale(${0.92 + 0.08 * panelIn})`, overflow: 'hidden'}}>
+        {/* channel row: avatar, handle, Subscribe */}
+        <div style={{position: 'absolute', left: 40, right: 40, top: 40, display: 'flex', alignItems: 'center', gap: 22, opacity: uiIn * uiOut}}>
+          <div style={{width: 96, height: 96, borderRadius: 48, background: `linear-gradient(135deg, ${C.navy1}, ${C.emerald})`, border: `3px solid ${C.mint}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.mint}}>P</div>
+          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, color: '#fff'}}>{CHANNEL_HANDLE}</div>
+          <div style={{padding: '16px 34px', borderRadius: 999, background: '#fff', fontFamily: F.body, fontWeight: 700, fontSize: 36, color: '#000'}}>Subscribe</div>
+        </div>
+        {/* the Related video button: dark pill, play triangle, the long video's title */}
+        <div style={{position: 'absolute', left: 40, top: PILL_TOP, width: PILL_W, height: 84, borderRadius: 42, background: tapP > 0 && tapP < 1 ? '#4a4a4a' : '#2a2a2a', display: 'flex', alignItems: 'center', gap: 22, padding: '0 30px', opacity: pillIn * uiOut, transform: `translateY(${(1 - pillIn) * 30}px) scale(${press})`}}>
+          <div style={{width: 0, height: 0, flex: 'none', borderTop: '16px solid transparent', borderBottom: '16px solid transparent', borderLeft: '28px solid #fff'}} />
+          <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 36, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{LONG_VIDEO_TITLE}</div>
+        </div>
+        {/* tap rings */}
+        {[0, 5].map((d) => {
+          const r = ramp(f, Y_T.tap + d, Y_T.tap + d + 16);
+          return <div key={d} style={{position: 'absolute', left: 40 - r * 30, top: PILL_TOP - r * 30, width: PILL_W + r * 60, height: 84 + r * 60, borderRadius: 999, border: `4px solid ${C.mint}`, opacity: r > 0 && r < 1 ? 0.8 * (1 - r) : 0}} />;
+        })}
+        {/* the touch point glides in from below right and taps the pill */}
+        <div style={{position: 'absolute', left: PANEL_W * 0.5 + (1 - finger) * 260, top: PILL_TOP + 42 + (1 - finger) * 210, width: 68, height: 68, marginLeft: -34, marginTop: -34, borderRadius: 34, background: 'rgba(255,255,255,0.5)', border: '4px solid rgba(255,255,255,0.92)', opacity: ramp(f, Y_T.finger, Y_T.finger + 6) * (1 - ramp(f, Y_T.tap + 10, Y_T.tap + 16)), transform: `scale(${1 - 0.28 * Math.sin(Math.PI * tapP)})`}} />
+        {/* the thumbnail opens out of the pill and fills the panel */}
+        <div style={{position: 'absolute', left: 40, top: 55, width: PANEL_W - 80, height: ((PANEL_W - 80) * 9) / 16, borderRadius: 18, overflow: 'hidden', opacity: ramp(f, Y_T.open, Y_T.open + 6), transform: `translateY(${(1 - open) * (PILL_TOP - 55)}px) scale(${0.3 + 0.7 * open}, ${0.18 + 0.82 * open})`, transformOrigin: '50% 100%'}}>
+          <div style={{position: 'absolute', left: 0, top: 0, width: 800, height: 450, transform: `scale(${(PANEL_W - 80) / 800})`, transformOrigin: '0 0'}}>
+            <StandInThumbnail />
+          </div>
+          {/* play badge and length */}
+          <div style={{position: 'absolute', left: '50%', top: '50%', width: 130, height: 130, marginLeft: -65, marginTop: -65, borderRadius: 65, background: 'rgba(0,0,0,0.55)', border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: ramp(f, Y_T.openEnd - 8, Y_T.openEnd + 2), transform: `scale(${0.7 + 0.3 * tween(f, Y_T.openEnd - 8, 12, slam)})`}}>
+            <div style={{width: 0, height: 0, marginLeft: 10, borderTop: '28px solid transparent', borderBottom: '28px solid transparent', borderLeft: '46px solid #fff'}} />
+          </div>
+          <div style={{position: 'absolute', right: 16, bottom: 14, padding: '4px 12px', borderRadius: 8, background: 'rgba(0,0,0,0.8)', fontFamily: F.body, fontWeight: 700, fontSize: 28, color: '#fff', ...tabular, opacity: ramp(f, Y_T.openEnd - 4, Y_T.openEnd + 4)}}>{mmss(VIDEO_FRAMES)}</div>
+        </div>
+      </div>
+      <SfxTrack cues={Y_CUES} offset={10_000_000} />
+    </AbsoluteFill>
+  );
+};
+
+/** The end card of every Short: the YouTube demo, or the comment bubble for Instagram and Facebook. */
+export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'youtube'}) => (variant === 'youtube' ? <YouTubeEndCard /> : <SocialEndCard variant={variant} />);

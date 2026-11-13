@@ -97,3 +97,15 @@ social line (`CTA_LINE` in `src/shots/Short1.tsx`), for example to "search PayRa
 - **Instagram / Facebook version:** a "link in comments" bubble with a pointer and a bobbing chevron.
 - Timing: the tap lands at 2.9 s of the 3.5 s card, so it holds about 0.6 s after. If that is too short, `SHORT1_CTA_SECONDS` can grow
   (the render `TOTAL`s would need the same change).
+
+## End card v4 (YouTube): the real "Related video" button, demonstrated
+The YouTube end card is now a demo of the real thing (the bottom of a Short shows the channel row and, under it, a dark pill with a play triangle
+and the long video's title). Layout and timing (3.5 s): "Full ranking + #1" lands with the "#1" slam (0-0.9 s); a black panel slides up with
+the avatar ("P" mark), `@PayRanked` and a white Subscribe pill, then the dark "Related video" pill with the title (1.0-1.6 s); a touch point
+glides in and taps the pill (2.0 s: press, rings, click); the long video's thumbnail opens out of the pill and fills the panel with a play
+badge and the video length (2.0-2.7 s); hold to the end. No description line, no "earns commission".
+- **Replace the title:** `LONG_VIDEO_TITLE` in `src/shots/Short1.tsx` is a placeholder (first words of the video description). Put the exact
+  title of the long video there. It is cut with "..." like on YouTube, so a long title is fine. `CHANNEL_HANDLE` is `@PayRanked`.
+- **Replace the thumbnail:** it is a stand-in built from the video's style (`StandInThumbnail`), because the real thumbnail is not in the repo.
+  To use the real one: add `public/thumbnail.png` (1280x720) and swap `<StandInThumbnail />` for `<Img src={staticFile('thumbnail.png')} />` (tell me and I do it).
+- The Instagram / Facebook end card is unchanged (countdown preview card + "link in comments" bubble).
