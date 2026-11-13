@@ -21,7 +21,7 @@ import {Break} from './components/Break';
 import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
 import {CUES, Cue} from './audio/cues';
 import {MasterAudio, SfxTrack} from './audio/Sfx';
-import {CtaVariant, Short1EndCard, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
+import {CtaVariant, Short1EndCard, SHORT1_CTA_SECONDS, SHORT1_FRAMES, SHORT1_METHOD_SECONDS} from './shots/Short1';
 import {HOOK_SECONDS, SHORT_HOOK_ANIMS} from './shots/HookKit';
 import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
@@ -303,7 +303,7 @@ const Short1: React.FC<{cta?: CtaVariant}> = ({cta = 'youtube'}) => (
           <Shot3 />
           <SfxTrack cues={CUES.shot3} offset={START.shot3} />
         </Sequence>
-        <Sequence from={toReal(sec(27 + SHORT1_METHOD_SECONDS))} durationInFrames={toReal(sec(3.5))} name="Short 1 end card">
+        <Sequence from={toReal(sec(27 + SHORT1_METHOD_SECONDS))} durationInFrames={toReal(sec(SHORT1_CTA_SECONDS))} name="Short 1 end card">
           <Short1EndCard variant={cta} />
         </Sequence>
         <Short1Audio />

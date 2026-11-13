@@ -109,3 +109,18 @@ badge and the video length (2.0-2.7 s); hold to the end. No description line, no
   card does the same with CSS (32 px type in an 800 px pill), so it reads "Your $100K Is Worth Up to $115K in These 10 S…" or close to it.
   Check the cut in the Studio: if it cuts too early or too late, change the font size on the title line in `YouTubeEndCard`.
 - The Instagram / Facebook end card is unchanged (countdown preview card + "link in comments" bubble).
+
+## End card v5 (YouTube): cinematic tap, one continuous morph, 4 s card
+- **Camera:** pushes in 10% toward the button from 1.7 s, taps at 2.27 s, pulls back as the thumbnail opens, then drifts slowly.
+- **Tap:** the touch point has a soft shadow that tightens on the press; the button gets a clear pressed state (lighter grey, scale 0.94), two rings.
+- **One continuous move:** the Related video pill IS the thumbnail: on the tap it stretches (height 84 -> 450, corners 42 -> 18) while the
+  title fades out and the thumbnail fades in inside it; the channel row fades away. It lands with a small damped bounce, then drifts slowly
+  (slight zoom and pan); the play badge pulses gently.
+- **Sound (existing library, not heard here):** low thud (`hit_big`) on the "#1" slam, `tap_0` + `click` on the tap, `whoosh_m` as it opens,
+  `shimmer` as it lands.
+- **Timing:** the end card is now 4 s (`SHORT1_CTA_SECONDS`), every render `TOTAL` is +30 frames (Short 1 2682, 2 3540, 3 2640, 4 3240,
+  5 2640, 6 1380, 7 1560). Easing: one `settle` curve with a small overshoot on arrivals in the demo.
+- **Loop:** the last 10 frames fade to the navy the Shorts start on, so the loop restarts cleanly. Applies to the Instagram / Facebook card too (it holds 0.5 s longer).
+- **Focus:** removed the glow around the panel, quieter glow on "#1"; the Related video button gets a soft white pulse before the tap, so it is the brightest thing.
+- Not verified (not rendered): the camera push must not push the headline out of frame, and the morph must not show the title and thumbnail
+  at the same time. Check the stills at 2.0, 2.3 s, 2.5 s, 2.8 s, 3.1 s and the last frame of the card.
