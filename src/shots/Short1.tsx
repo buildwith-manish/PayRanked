@@ -233,11 +233,6 @@ const YouTubeEndCard: React.FC = () => {
       </div>
       <Flash at={Y_T.hero} duration={8} peak={0.22} />
 
-      {/* label above the demo */}
-      <div style={{position: 'absolute', left: 0, right: 0, top: 560, textAlign: 'center', fontFamily: F.body, fontWeight: 700, fontSize: 34, letterSpacing: '0.26em', color: C.mint, opacity: ramp(f, Y_T.panel + 4, Y_T.panel + 14) * (1 - 0.0 * open)}}>
-        TAP &quot;RELATED VIDEO&quot;
-      </div>
-
       {/* the demo panel: black, like the bottom of a Short */}
       <div style={{position: 'absolute', left: (1080 - PANEL_W) / 2, top: 640, width: PANEL_W, height: panelH, borderRadius: 40, background: '#000', border: '2px solid rgba(232,238,247,0.14)', boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 ${30 + 20 * open}px ${C.mint}33`, opacity: ramp(f, Y_T.panel, Y_T.panel + 6), transform: `translateY(${(1 - panelIn) * 120}px) scale(${0.92 + 0.08 * panelIn})`, overflow: 'hidden'}}>
         {/* channel row: avatar, handle, Subscribe */}
