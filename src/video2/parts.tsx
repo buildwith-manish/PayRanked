@@ -35,8 +35,14 @@ export const Tag: React.FC<{text: string; color?: string; size?: number}> = ({te
   <div style={{display: 'inline-block', fontFamily: FONT.text, fontWeight: 600, fontSize: size, color, border: `1.5px solid ${color}`, borderRadius: 999, padding: '6px 20px', letterSpacing: 1}}>{text}</div>
 );
 
+/** Outlined tag with a faint tint (no solid neon fill, no glow). */
 export const Pill: React.FC<{text: string; color: string; size?: number}> = ({text, color, size = 34}) => (
-  <div style={{display: 'inline-block', fontFamily: FONT.text, fontWeight: 700, fontSize: size, color: C.navy3, background: color, borderRadius: 999, padding: '10px 28px', boxShadow: `0 0 30px ${color}66`}}>{text}</div>
+  <div style={{display: 'inline-block', fontFamily: FONT.text, fontWeight: 600, fontSize: size, color, background: `${color}1F`, border: `1.5px solid ${color}`, borderRadius: 999, padding: '10px 28px'}}>{text}</div>
+);
+
+/** Small tracked-out meta text (kickers and captions), the quiet third tier under the numeral and the name. */
+export const Meta: React.FC<{children: React.ReactNode; color?: string; size?: number; style?: React.CSSProperties}> = ({children, color = C.muted, size = 28, style}) => (
+  <div style={{fontFamily: FONT.text, fontWeight: 600, fontSize: size, color, letterSpacing: 3, textTransform: 'uppercase', opacity: 0.85, ...style}}>{children}</div>
 );
 
 export const Source: React.FC<{text: string}> = ({text}) => (
@@ -94,7 +100,7 @@ export const Dial: React.FC<{value: number; at: number; width?: number; hideValu
       <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`} stroke="rgba(255,255,255,0.14)" strokeWidth={18} fill="none" strokeLinecap="round" />
       <line x1={t0x} y1={t0y} x2={t1x} y2={t1y} stroke={C.text} strokeWidth={4} />
       <text x={cx} y={cy - R - 18} textAnchor="middle" fill={C.muted} fontSize={22} fontFamily={FONT.text}>100 = U.S. average</text>
-      <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={col} strokeWidth={8} strokeLinecap="round" style={{filter: `drop-shadow(0 0 10px ${col})`}} />
+      <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={col} strokeWidth={8} strokeLinecap="round" />
       <circle cx={cx} cy={cy} r={12} fill={col} />
       {!hideValue && <text x={cx} y={cy + 50} textAnchor="middle" fill={col} fontSize={34} fontWeight={700} fontFamily={FONT.num}>{cur.toFixed(1)}</text>}
     </svg>
@@ -115,7 +121,7 @@ export const IndexBar: React.FC<{label: string; value: number; color: string; at
         <span style={{color, fontFamily: FONT.num, fontVariantNumeric: 'tabular-nums'}}>{(100 + (value - 100) * p).toFixed(1)}</span>
       </div>
       <div style={{position: 'relative', height: 30, borderRadius: 15, background: 'rgba(255,255,255,0.08)'}}>
-        <div style={{position: 'absolute', top: 0, height: '100%', left: half + (px < 0 ? -barW : 0), width: barW, borderRadius: 15, background: color, boxShadow: `0 0 22px ${color}88`}} />
+        <div style={{position: 'absolute', top: 0, height: '100%', left: half + (px < 0 ? -barW : 0), width: barW, borderRadius: 15, background: color}} />
         <div style={{position: 'absolute', left: half - 1.5, top: -8, width: 3, height: 46, background: C.text, opacity: 0.8}} />
       </div>
     </div>

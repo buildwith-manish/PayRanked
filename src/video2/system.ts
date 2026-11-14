@@ -8,15 +8,12 @@ import {C, F} from '../theme';
 export const ROLE = {
   buying: C.mint,     // buying power (the $50,000 stack, the ranking number)
   rent: '#FF8A3D',    // rent price level / median rent
-  goods: '#4DA3FF',   // goods price level
-  services: '#2EE6D6',// services price level
+  goods: '#7FA6D6',   // goods price level (quiet tint)
+  services: '#78C2BB',// services price level (quiet tint)
   wage: '#B084FF',    // median wage (the twist)
   loss: C.red,        // a drop in rank or value
   neutral: C.muted,   // national average / reference
 } as const;
-
-/** Highlight used for 'takeaway' tags (one place, not hard-coded in scenes). */
-export const GOLD = '#FFD25A';
 
 export type Role = keyof typeof ROLE;
 export const ROLE_LABEL: Record<Exclude<Role, 'neutral' | 'loss'>, string> = {

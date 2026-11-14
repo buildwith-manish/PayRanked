@@ -3,9 +3,9 @@ import {useDesignFrame} from '../clock';
 import {C} from '../theme';
 import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
-import {FONT, GOLD, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
+import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
 import {LocatorMap, MetroMap} from './MetroMap';
-import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source, Tag} from './parts';
+import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, Meta, RankSlam, Source, Tag} from './parts';
 import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
 import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
 
@@ -27,8 +27,8 @@ export const ColdOpen: React.FC = () => {
   const big = TYPE.title * 0.72;
   return (
     <>
-      <Enter at={4} style={{left: 300, top: 60}}><Label>PERSON A</Label></Enter>
-      <Enter at={10} style={{left: 840, top: 60}}><Label>PERSON B</Label></Enter>
+      <Enter at={4} style={{left: 300, top: 60}}><Meta>Person A</Meta></Enter>
+      <Enter at={10} style={{left: 840, top: 60}}><Meta>Person B</Meta></Enter>
       <Stack dollars={50000} at={4} color={ROLE.buying} left={330} top={110} scale={1.25} />
       <Stack dollars={50000 - (50000 - mia.buyingPower50k) * split} at={10} color={split > 0.5 ? ROLE.loss : ROLE.buying} left={870} top={110} scale={1.25} />
       <Enter at={rel[0] + 30} style={{left: 300, top: 600}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: big, color: C.text}}>$50,000 a year</div></Enter>
@@ -111,7 +111,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       <div style={{position: 'absolute', left: 500, top: 100}}><RankSlam text={`#${rank}`} at={0} /></div>
       <Enter at={10} style={{left: 500, top: 300}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: shownName(m).length > 10 ? 56 : TYPE.title, color: C.text, whiteSpace: 'nowrap'}}>{shownName(m)}</div></Enter>
       <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={625} top={450} />
-      <Enter at={tPower} style={{left: 1000, top: 110}}><Label>BUYING POWER OF $50,000</Label></Enter>
+      <Enter at={tPower} style={{left: 1000, top: 110}}><Meta size={30}>Buying power of $50,000</Meta></Enter>
       <div style={{position: 'absolute', left: 1000, top: 160}}>
         <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
       </div>
@@ -124,7 +124,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       </Enter>
       <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} hideValue /></div>
       <Enter at={tBars + 10} style={{left: 1390, top: 410}}>
-        <Label>PRICE LEVEL</Label>
+        <Meta size={30}>Price level</Meta>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 72, color: m.bea.allItems > 100 ? ROLE.rent : ROLE.buying}}>{m.bea.allItems.toFixed(1)}</div>
       </Enter>
       <div style={{position: 'absolute', left: 1000, top: 650, display: 'flex', flexDirection: 'column', gap: 20}}>
@@ -142,7 +142,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       )}
       {tWin >= 0 && (
         <Enter at={tWin} style={{left: 500, top: 960}}>
-          <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color={GOLD} size={30} />
+          <Tag text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color={C.text} size={30} />
         </Enter>
       )}
       <Enter at={8} style={{left: 1556, top: 160}}>
@@ -175,7 +175,7 @@ export const RentBreak: React.FC = () => {
           <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 74, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
             <div style={{width: 360, fontFamily: FONT.text, fontWeight: 600, fontSize: 34, color: C.text}}>{shownName(m)}</div>
             <div style={{flex: 1, height: 36, borderRadius: 18, background: 'rgba(255,255,255,0.08)', position: 'relative'}}>
-              <div style={{width: `${(m.rentShareOfWagePct / 60) * 100 * p}%`, height: '100%', borderRadius: 18, background: m.rentShareOfWagePct > 40 ? ROLE.rent : `${ROLE.rent}99`, boxShadow: `0 0 20px ${ROLE.rent}66`}} />
+              <div style={{width: `${(m.rentShareOfWagePct / 60) * 100 * p}%`, height: '100%', borderRadius: 18, background: m.rentShareOfWagePct > 40 ? ROLE.rent : `${ROLE.rent}99`}} />
               <div style={{position: 'absolute', left: `${(40 / 60) * 100}%`, top: -6, width: 3, height: 48, background: C.text, opacity: 0.7}} />
             </div>
             <div style={{width: 120, textAlign: 'right', fontFamily: FONT.num, fontWeight: 700, fontSize: 38, color: ROLE.rent}}>{(m.rentShareOfWagePct * p).toFixed(0)}%</div>
@@ -196,7 +196,7 @@ const RankChip: React.FC<{from: number; to: number; at: number; size?: number}> 
   const up = to < from, same = to === from;
   const col = same ? C.muted : up ? ROLE.buying : ROLE.loss;
   return (
-    <div style={{display: 'inline-block', marginTop: size < 44 ? 0 : 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '100% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: size, color: col, textShadow: `0 0 24px ${col}77`, whiteSpace: 'nowrap'}}>
+    <div style={{display: 'inline-block', marginTop: size < 44 ? 0 : 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '100% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: size, color: col, whiteSpace: 'nowrap'}}>
       {same ? '•' : up ? '▲' : '▼'} #{from} → #{to}{same ? '' : ` (${up ? '+' : '−'}${Math.abs(from - to)})`}
     </div>
   );
@@ -218,7 +218,7 @@ export const Twist: React.FC = () => {
   const changed = Math.round(METROS.filter((m) => m.twistRank !== m.rank).length * tween(f, tHou, 60, glide));
   return (
     <>
-      <Enter at={tHou} style={{left: 1350, top: 150}}><Label size={26}>RANKS CHANGED</Label></Enter>
+      <Enter at={tHou} style={{left: 1350, top: 150}}><Meta size={24}>Ranks changed</Meta></Enter>
       <Enter at={tHou} style={{left: 1670, top: 128}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage, fontVariantNumeric: 'tabular-nums'}}>{changed}/10</div>
       </Enter>
@@ -260,7 +260,7 @@ export const Twist: React.FC = () => {
           );
         })}
       </svg>
-      <Enter at={tHou + 40} style={{left: 1268, top: top0 - 40}}><Label size={22}>WAS</Label></Enter>
+      <Enter at={tHou + 40} style={{left: 1268, top: top0 - 40}}><Meta size={22}>Was</Meta></Enter>
       <div style={{position: 'absolute', left: 160, top: 1000, opacity: 0.8}}><Label size={22}>bars start at $0 · wages are before taxes</Label></div>
       {tiePairs.map(([a, b]) => {
         const y1 = top0 + (a.twistRank - 1) * rowH + 6, y2 = top0 + b.twistRank * rowH - 16;
@@ -288,11 +288,11 @@ export const Twist: React.FC = () => {
                   </div>
                   <div style={{display: 'flex', gap: 28, marginTop: 6}}>
                     <div>
-                      <Label color={ROLE.wage} size={24}>MEDIAN WAGE</Label>
+                      <Meta color={ROLE.wage} size={22}>Median wage</Meta>
                       <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 46, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
                     </div>
                     <div>
-                      <Label color={ROLE.buying} size={24}>AFTER PRICES</Label>
+                      <Meta color={ROLE.buying} size={22}>After prices</Meta>
                       <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={at0 + 20} dur={36} color={ROLE.buying} size={46} /></div>
                     </div>
                   </div>
@@ -300,9 +300,9 @@ export const Twist: React.FC = () => {
               ) : (
                 <>
                   <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 48, color: C.text}}>{shownName(m)}</div>
-                  <Label color={ROLE.wage}>MEDIAN WAGE</Label>
+                  <Meta color={ROLE.wage} size={28}>Median wage</Meta>
                   <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
-                  <Label color={ROLE.buying}>AFTER PRICES</Label>
+                  <Meta color={ROLE.buying} size={28}>After prices</Meta>
                   <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={at0 + 20} dur={36} color={ROLE.buying} size={64} /></div>
                   <RankChip from={m.rank} to={m.twistRank} at={at0 + 60} />
                 </>
@@ -312,7 +312,7 @@ export const Twist: React.FC = () => {
         );
       })}
       <Enter at={tPill} style={{left: 1330, top: 735}}>
-        <Pill text="Cheapest isn't automatically best" color={GOLD} size={28} />
+        <Tag text="Cheapest isn't automatically best" color={C.text} size={28} />
       </Enter>
     </>
   );
@@ -340,7 +340,7 @@ export const Takeaway: React.FC = () => {
         <Enter at={rel[1]} style={{left: 160, top: 120}}><Label color={ROLE.rent} size={TYPE.title * 0.6}>RULE 2 · put rent next to your pay</Label></Enter>
         {[...METROS].sort((a, b) => b.rentShareOfWagePct - a.rentShareOfWagePct).map((m, i) => (
           <Enter key={m.rank} at={rel[1] + 30 + i * 4} style={{left: 160 + (i % 5) * 340, top: 300 + Math.floor(i / 5) * 260}}>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 80, fontVariantNumeric: 'tabular-nums', color: m.rentShareOfWagePct > 40 ? ROLE.rent : C.muted, textShadow: m.rentShareOfWagePct > 40 ? `0 0 ${10 + 14 * tween(f, rel[1] + 90, 20, slam)}px ${ROLE.rent}88` : 'none'}}>{(m.rentShareOfWagePct * tween(f, rel[1] + 30 + i * 4, 30, glide)).toFixed(0)}%</div>
+            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 80, fontVariantNumeric: 'tabular-nums', color: m.rentShareOfWagePct > 40 ? ROLE.rent : C.muted}}>{(m.rentShareOfWagePct * tween(f, rel[1] + 30 + i * 4, 30, glide)).toFixed(0)}%</div>
             <Label color={C.text} size={30}>{shownName(m)}</Label>
           </Enter>
         ))}
@@ -356,7 +356,7 @@ export const Takeaway: React.FC = () => {
           </div>
         </Enter>
         {[{v: wageUp, c: ROLE.wage, at: rel[2] + 40, y: 690}, {v: priceUp, c: ROLE.rent, at: rel[2] + 90, y: 740}].map((b) => (
-          <div key={b.y} style={{position: 'absolute', left: 160, top: b.y, height: 26, width: Math.max(8, (b.v / Math.max(wageUp, priceUp)) * 900 * tween(f, b.at, 36, glide)), borderRadius: 13, background: b.c, boxShadow: `0 0 22px ${b.c}88`}} />
+          <div key={b.y} style={{position: 'absolute', left: 160, top: b.y, height: 26, width: Math.max(8, (b.v / Math.max(wageUp, priceUp)) * 900 * tween(f, b.at, 36, glide)), borderRadius: 13, background: b.c}} />
         ))}
         <Enter at={rel[2] + 150} style={{left: 160, top: 830}}><Pill text={`Pay grows ${wageUp > priceUp ? 'faster' : 'slower'} than prices: ${Math.abs(wageUp - priceUp).toFixed(0)} points`} color={wageUp > priceUp ? ROLE.buying : ROLE.loss} size={34} /></Enter>
       </div>
