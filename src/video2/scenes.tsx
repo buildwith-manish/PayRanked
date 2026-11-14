@@ -261,7 +261,7 @@ export const Twist: React.FC = () => {
         })}
       </svg>
       <Enter at={tHou + 40} style={{left: 1268, top: top0 - 40}}><Label size={22}>WAS</Label></Enter>
-      <div style={{position: 'absolute', left: 160, top: 1000, opacity: 0.8}}><Label size={22}>bars start at $0</Label></div>
+      <div style={{position: 'absolute', left: 160, top: 1000, opacity: 0.8}}><Label size={22}>bars start at $0 · wages are before taxes</Label></div>
       {tiePairs.map(([a, b]) => {
         const y1 = top0 + (a.twistRank - 1) * rowH + 6, y2 = top0 + b.twistRank * rowH - 16;
         const o = tween(f, tHou + 80, 16);
@@ -344,7 +344,7 @@ export const Takeaway: React.FC = () => {
             <Label color={C.text} size={30}>{shownName(m)}</Label>
           </Enter>
         ))}
-        <Enter at={rel[1] + 90} style={{left: 160, top: 840}}><Pill text={`${over40} of 10 cities: rent is over 40% of the typical wage`} color={ROLE.rent} size={34} /></Enter>
+        <Enter at={rel[1] + 90} style={{left: 160, top: 840}}><Pill text={`${over40} of 10 cities: rent is over 40% of the typical wage, before taxes`} color={ROLE.rent} size={34} /></Enter>
       </div>
       <div style={{position: 'absolute', inset: 0, ...card(2)}}>
         <Enter at={rel[2]} style={{left: 160, top: 120}}><Label color={ROLE.wage} size={TYPE.title * 0.6}>RULE 3 · judge a job offer the same way</Label></Enter>
@@ -364,6 +364,7 @@ export const Takeaway: React.FC = () => {
         <Enter at={rel[3]} style={{left: 160, top: 300}}>
           <Label color={C.text} size={TYPE.title * 0.6}>Medians for each metro area, 2024.</Label>
           <Label size={TYPE.label}>Your own situation will differ.</Label>
+          <Label size={30} style={{marginTop: 14}}>Wages are before taxes; rent is the metro median.</Label>
         </Enter>
         <Enter at={rel[3] + 40} style={{left: 160, top: 560}}><Source text="BEA price levels" /><Source text="Census rent" /><Source text="BLS wages" /><Source text="formula + sources in description" /></Enter>
       </div>
