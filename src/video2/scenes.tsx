@@ -3,9 +3,9 @@ import {useDesignFrame} from '../clock';
 import {C} from '../theme';
 import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
-import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
+import {FONT, GOLD, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
 import {LocatorMap, MetroMap} from './MetroMap';
-import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source} from './parts';
+import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source, Tag} from './parts';
 import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
 import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
 
@@ -65,7 +65,7 @@ export const Method: React.FC = () => {
     <>
       <div style={{position: 'absolute', inset: 0, opacity: 1 - mapIn}}>
       <Enter at={6} style={{left: 160, top: 90}}><Label color={ROLE.buying} size={TYPE.title * 0.6}>THE METHOD</Label></Enter>
-      <Enter at={rel[0] + 24} style={{left: 160, top: 190}}><Dial value={114.2} at={tDial} width={620} /></Enter>
+      <Enter at={rel[0] + 24} style={{left: 160, top: 190}}><Dial value={byRank(10).bea.allItems} at={tDial} width={620} /></Enter>
       <Enter at={rel[0] + 10} style={{left: 960, top: 190}}>
         <div style={{fontFamily: FONT.text, fontWeight: 600, fontSize: TYPE.label, color: C.text, width: 800}}>Bureau of Economic Analysis<br /><span style={{color: C.muted}}>price level of every metro area</span></div>
       </Enter>
@@ -104,6 +104,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
   revealed[rank] = 6;
   const diff = power - 50000;
   const good = diff >= 0;
+  const atAvg = diff === 0;
   return (
     <>
       <Ladder revealed={revealed} active={rank} />
@@ -115,7 +116,11 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
         <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
       </div>
       <Enter at={tPower + 24} style={{left: 1000, top: 285}}>
-        <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
+        {atAvg ? (
+          <Label color={C.text}>RIGHT AT THE AVERAGE</Label>
+        ) : (
+          <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
+        )}
       </Enter>
       <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} /></div>
       <Enter at={tBars + 10} style={{left: 1390, top: 410}}>
@@ -137,7 +142,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       )}
       {tWin >= 0 && (
         <Enter at={tWin} style={{left: 500, top: 960}}>
-          <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color="#FFD25A" size={30} />
+          <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color={GOLD} size={30} />
         </Enter>
       )}
       <Enter at={8} style={{left: 1556, top: 160}}>
@@ -167,7 +172,7 @@ export const RentBreak: React.FC = () => {
         const at = i === 0 ? tMiami : tLA + (i - 1) * 8;
         const p = tween(f, at, 24, glide);
         return (
-          <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 78, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
+          <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 74, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
             <div style={{width: 360, fontFamily: FONT.text, fontWeight: 600, fontSize: 34, color: C.text}}>{shownName(m)}</div>
             <div style={{flex: 1, height: 36, borderRadius: 18, background: 'rgba(255,255,255,0.08)', position: 'relative'}}>
               <div style={{width: `${(m.rentShareOfWagePct / 60) * 100 * p}%`, height: '100%', borderRadius: 18, background: m.rentShareOfWagePct > 40 ? ROLE.rent : `${ROLE.rent}99`, boxShadow: `0 0 20px ${ROLE.rent}66`}} />
@@ -177,7 +182,8 @@ export const RentBreak: React.FC = () => {
           </div>
         );
       })}
-      <Enter at={tNote} style={{left: 520, top: 985}}><Label size={30}>white tick = 40% of the paycheck</Label></Enter>
+      <Enter at={tNote} style={{left: 160, top: 922}}><Tag text="OUR OWN CALCULATION · yearly rent ÷ median wage, before taxes" size={24} /></Enter>
+      <Enter at={tNote + 6} style={{left: 160, top: 990}}><Label size={28}>white tick = 40%, our own threshold</Label></Enter>
     </>
   );
 };
@@ -205,6 +211,9 @@ export const Twist: React.FC = () => {
   const hou = byRank(1), dc = byRank(7), ny = byRank(8), phl = byRank(3), mia = byRank(10);
   const featured: Metro[] = stage === 1 ? [hou] : stage === 2 ? [dc] : stage === 3 ? [ny, phl] : stage >= 4 ? [mia] : [];
   const maxV = 65000, minV = 38000;
+  // metros whose after-price paycheck is the same to the nearest $100 are shown as ties, so ranks 4/5 and 7/8 are not read as real gaps
+  const byTwist = [...METROS].sort((x, y) => x.twistRank - y.twistRank);
+  const tiePairs = byTwist.slice(1).map((m, i) => [byTwist[i], m] as const).filter(([a, b]) => Math.abs(a.wageAfterPrices - b.wageAfterPrices) < 50);
   const pulse = 0.5 + 0.5 * Math.sin(f / 7);
   const changed = Math.round(METROS.filter((m) => m.twistRank !== m.rank).length * tween(f, tHou, 60, glide));
   return (
@@ -236,6 +245,18 @@ export const Twist: React.FC = () => {
             <div style={{width: Math.max(10, w) * 0.7, height: 22, borderRadius: 11, background: col, opacity: 0.9}} />
             <div style={{marginLeft: 'auto', fontFamily: FONT.num, fontWeight: 700, fontSize: 34, color: col, fontVariantNumeric: 'tabular-nums'}}>{money(value)}</div>
           </div>
+        );
+      })}
+      {tiePairs.map(([a, b]) => {
+        const y1 = top0 + (a.twistRank - 1) * rowH + 6, y2 = top0 + b.twistRank * rowH - 16;
+        const o = tween(f, tHou + 80, 16);
+        return (
+          <React.Fragment key={`tie-${a.rank}-${b.rank}`}>
+            <svg width={40} height={y2 - y1 + 4} style={{position: 'absolute', left: 116, top: y1 - 2, opacity: o, overflow: 'visible'}}>
+              <path d={`M 34 2 H 12 V ${y2 - y1 + 2} H 34`} fill="none" stroke={C.text} strokeOpacity={0.75} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div style={{position: 'absolute', left: 90, top: (y1 + y2) / 2 - 30, opacity: o, fontFamily: FONT.text, fontWeight: 700, fontSize: 22, letterSpacing: 3, color: C.text, writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>TIE</div>
+          </React.Fragment>
         );
       })}
       {featured.map((m, i) => {
@@ -276,7 +297,7 @@ export const Twist: React.FC = () => {
         );
       })}
       <Enter at={tPill} style={{left: 1220, top: 735}}>
-        <Pill text="Cheapest isn't automatically best" color="#FFD25A" size={34} />
+        <Pill text="Cheapest isn't automatically best" color={GOLD} size={34} />
       </Enter>
     </>
   );

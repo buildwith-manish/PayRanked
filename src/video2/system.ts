@@ -15,6 +15,9 @@ export const ROLE = {
   neutral: C.muted,   // national average / reference
 } as const;
 
+/** Highlight used for 'takeaway' tags (one place, not hard-coded in scenes). */
+export const GOLD = '#FFD25A';
+
 export type Role = keyof typeof ROLE;
 export const ROLE_LABEL: Record<Exclude<Role, 'neutral' | 'loss'>, string> = {
   buying: 'Buying power',

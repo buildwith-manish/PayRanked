@@ -30,6 +30,11 @@ export const Label: React.FC<{children: React.ReactNode; color?: string; size?: 
   <div style={{fontFamily: FONT.text, fontWeight: 600, fontSize: size, color, letterSpacing: 1, ...style}}>{children}</div>
 );
 
+/** Hairline outlined tag: quieter than a solid Pill, for secondary notes and labels. */
+export const Tag: React.FC<{text: string; color?: string; size?: number}> = ({text, color = C.muted, size = 26}) => (
+  <div style={{display: 'inline-block', fontFamily: FONT.text, fontWeight: 600, fontSize: size, color, border: `1.5px solid ${color}`, borderRadius: 999, padding: '6px 20px', letterSpacing: 1}}>{text}</div>
+);
+
 export const Pill: React.FC<{text: string; color: string; size?: number}> = ({text, color, size = 34}) => (
   <div style={{display: 'inline-block', fontFamily: FONT.text, fontWeight: 700, fontSize: size, color: C.navy3, background: color, borderRadius: 999, padding: '10px 28px', boxShadow: `0 0 30px ${color}66`}}>{text}</div>
 );
