@@ -27,6 +27,7 @@ const HEAD_TOP: Record<string, number> = {
   'man-warning': 0.33,
   'man-intense': 0.24,
   'man-skeptical': 0.31,
+  'man-inviting': 0.30,
 };
 /** Place a man so the top of his head is at headY (px) whatever his picture's headroom is, so every thumbnail has the face at the same height. */
 const man = (file: string, cx: number, w: number, headY = 900): Layer => ({file, cx, w, cy: headY - HEAD_TOP[file] * w * 1.75 + (w * 1.75) / 2});
@@ -123,7 +124,7 @@ export const THUMBS: ThumbSpec[] = [
     layers: [man('man-intense', 540, 1480, 820)],
   },
   {
-    // Hook: try this with your own salary. (No man yet: add man-inviting.jpg, then add it as a layer.)
+    // Hook: try this with your own salary. (The man's open hand points at the arrow.)
     id: 7,
     bg: 'bg-navy-gold',
     kicker: 'YOUR TURN',
@@ -132,8 +133,8 @@ export const THUMBS: ThumbSpec[] = [
     sub: 'with your own salary',
     accent: 'gold',
     layers: [
-      {file: 'obj-coins', cx: 250, cy: 1450, w: 700, glow: 'rgba(255,176,32,0.3)'},
-      {file: 'obj-arrow-up', cx: 690, cy: 1250, w: 950, glow: 'rgba(255,176,32,0.4)'},
+      {file: 'obj-arrow-up', cx: 240, cy: 1380, w: 850, glow: 'rgba(255,176,32,0.4)'},
+      man('man-inviting', 610, 1400, 790),
     ],
   },
 ];
