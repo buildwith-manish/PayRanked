@@ -122,7 +122,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
           <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
         )}
       </Enter>
-      <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} /></div>
+      <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} hideValue /></div>
       <Enter at={tBars + 10} style={{left: 1390, top: 410}}>
         <Label>PRICE LEVEL</Label>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 72, color: m.bea.allItems > 100 ? ROLE.rent : ROLE.buying}}>{m.bea.allItems.toFixed(1)}</div>
@@ -196,7 +196,7 @@ const RankChip: React.FC<{from: number; to: number; at: number; size?: number}> 
   const up = to < from, same = to === from;
   const col = same ? C.muted : up ? ROLE.buying : ROLE.loss;
   return (
-    <div style={{display: 'inline-block', marginTop: size < 44 ? 0 : 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '100% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: size, color: col, textShadow: `0 0 24px ${col}77`}}>
+    <div style={{display: 'inline-block', marginTop: size < 44 ? 0 : 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '100% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: size, color: col, textShadow: `0 0 24px ${col}77`, whiteSpace: 'nowrap'}}>
       {same ? '•' : up ? '▲' : '▼'} #{from} → #{to}{same ? '' : ` (${up ? '+' : '−'}${Math.abs(from - to)})`}
     </div>
   );
@@ -210,7 +210,7 @@ export const Twist: React.FC = () => {
   const stage = f >= tMia ? 4 : f >= tNY ? 3 : f >= tDC ? 2 : f >= tHou ? 1 : 0;
   const hou = byRank(1), dc = byRank(7), ny = byRank(8), phl = byRank(3), mia = byRank(10);
   const featured: Metro[] = stage === 1 ? [hou] : stage === 2 ? [dc] : stage === 3 ? [ny, phl] : stage >= 4 ? [mia] : [];
-  const maxV = 65000, minV = 38000;
+  const maxV = 65000; // bars start at $0, so a $5k gap looks like a $5k gap
   // metros whose after-price paycheck is the same to the nearest $100 are shown as ties, so ranks 4/5 and 7/8 are not read as real gaps
   const byTwist = [...METROS].sort((x, y) => x.twistRank - y.twistRank);
   const tiePairs = byTwist.slice(1).map((m, i) => [byTwist[i], m] as const).filter(([a, b]) => Math.abs(a.wageAfterPrices - b.wageAfterPrices) < 50);
@@ -218,8 +218,8 @@ export const Twist: React.FC = () => {
   const changed = Math.round(METROS.filter((m) => m.twistRank !== m.rank).length * tween(f, tHou, 60, glide));
   return (
     <>
-      <Enter at={tHou} style={{left: 1280, top: 150}}><Label size={26}>RANKS CHANGED</Label></Enter>
-      <Enter at={tHou} style={{left: 1600, top: 128}}>
+      <Enter at={tHou} style={{left: 1350, top: 150}}><Label size={26}>RANKS CHANGED</Label></Enter>
+      <Enter at={tHou} style={{left: 1670, top: 128}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage, fontVariantNumeric: 'tabular-nums'}}>{changed}/10</div>
       </Enter>
       <Enter at={4} style={{left: 160, top: 70}}>
@@ -228,7 +228,7 @@ export const Twist: React.FC = () => {
         </div>
       </Enter>
       <Enter at={tBadge} style={{left: 960, top: 70}}><Pill text="OUR OWN CALCULATION · wage ÷ price level" color={ROLE.wage} size={28} /></Enter>
-      <Enter at={rel[1] + 60} style={{left: 1280, top: 830, width: 540}}><Label size={24}>Atlanta/Chicago and Dallas/Phoenix are within about $20 of each other: treat each pair as a tie.</Label></Enter>
+      <Enter at={rel[1] + 60} style={{left: 1330, top: 830, width: 490}}><Label size={24}>Atlanta/Chicago and Dallas/Phoenix are within about $20 of each other: treat each pair as a tie.</Label></Enter>
       {METROS.map((m) => {
         const stag = (m.rank - 1) * 6;
         const p = tween(f, tHou + stag, 30, glide);
@@ -237,16 +237,31 @@ export const Twist: React.FC = () => {
         const lit = featured.includes(m);
         const col = f >= tHou ? (m.twistRank < m.rank ? ROLE.buying : m.twistRank > m.rank ? ROLE.loss : C.text) : ROLE.buying;
         const shownRank = p > 0.5 ? m.twistRank : m.rank;
-        const w = ((value - minV) / (maxV - minV)) * 560;
         return (
           <div key={m.rank} style={{position: 'absolute', left: 160, top: y, height: rowH - 10, width: 1000, display: 'flex', alignItems: 'center', borderRadius: 14, padding: '0 16px', background: lit ? `${col}22` : 'rgba(255,255,255,0.05)', border: `1.5px solid ${lit ? col : 'rgba(255,255,255,0.08)'}`, boxShadow: lit ? `0 0 ${16 + pulse * 22}px ${col}77` : 'none'}}>
             <div style={{width: 60, fontFamily: FONT.num, fontWeight: 700, fontSize: 36, color: col}}>{shownRank}</div>
             <div style={{width: 300, fontFamily: FONT.text, fontWeight: 600, fontSize: 32, color: C.text}}>{shownName(m)}</div>
-            <div style={{width: Math.max(10, w) * 0.7, height: 22, borderRadius: 11, background: col, opacity: 0.9}} />
+            <div style={{width: (value / maxV) * 380, height: 22, borderRadius: 11, background: col, opacity: 0.9}} />
             <div style={{marginLeft: 'auto', fontFamily: FONT.num, fontWeight: 700, fontSize: 34, color: col, fontVariantNumeric: 'tabular-nums'}}>{money(value)}</div>
           </div>
         );
       })}
+      <svg width={150} height={1080} style={{position: 'absolute', left: 1166, top: 0, opacity: tween(f, tHou + 40, 20), overflow: 'visible'}}>
+        {METROS.map((m) => {
+          const p = tween(f, tHou + (m.rank - 1) * 6, 30, glide);
+          const yNew = top0 + ((m.rank - 1) + (m.twistRank - m.rank) * p) * rowH + (rowH - 10) / 2;
+          const yOld = top0 + (m.rank - 1) * rowH + (rowH - 10) / 2;
+          const c = m.twistRank < m.rank ? ROLE.buying : m.twistRank > m.rank ? ROLE.loss : C.muted;
+          return (
+            <g key={`slope-${m.rank}`}>
+              <path d={`M 0 ${yNew} C 50 ${yNew}, 50 ${yOld}, 100 ${yOld}`} fill="none" stroke={c} strokeWidth={m.twistRank === m.rank ? 2 : 3.5} strokeOpacity={m.twistRank === m.rank ? 0.5 : 0.95} strokeLinecap="round" />
+              <text x={112} y={yOld + 9} fill={C.muted} fontSize={26} fontWeight={700} fontFamily={FONT.num}>{m.rank}</text>
+            </g>
+          );
+        })}
+      </svg>
+      <Enter at={tHou + 40} style={{left: 1268, top: top0 - 40}}><Label size={22}>WAS</Label></Enter>
+      <div style={{position: 'absolute', left: 160, top: 1000, opacity: 0.8}}><Label size={22}>bars start at $0</Label></div>
       {tiePairs.map(([a, b]) => {
         const y1 = top0 + (a.twistRank - 1) * rowH + 6, y2 = top0 + b.twistRank * rowH - 16;
         const o = tween(f, tHou + 80, 16);
@@ -263,13 +278,13 @@ export const Twist: React.FC = () => {
         const two = featured.length > 1;
         const at0 = stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia;
         return (
-          <Enter key={`${stage}-${m.rank}`} at={at0} style={{left: 1280, top: two ? 235 + i * 255 : 250, width: 540}}>
+          <Enter key={`${stage}-${m.rank}`} at={at0} style={{left: 1330, top: two ? 235 + i * 255 : 250, width: 490}}>
             <div style={{borderRadius: 20, padding: two ? '16px 24px' : 24, background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${ROLE.wage}`}}>
               {two ? (
                 <>
                   <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
-                    <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 40, color: C.text}}>{shownName(m)}</div>
-                    <RankChip from={m.rank} to={m.twistRank} at={at0 + 60} size={34} />
+                    <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 36, color: C.text, whiteSpace: 'nowrap'}}>{shownName(m)}</div>
+                    <RankChip from={m.rank} to={m.twistRank} at={at0 + 60} size={28} />
                   </div>
                   <div style={{display: 'flex', gap: 28, marginTop: 6}}>
                     <div>
@@ -296,8 +311,8 @@ export const Twist: React.FC = () => {
           </Enter>
         );
       })}
-      <Enter at={tPill} style={{left: 1220, top: 735}}>
-        <Pill text="Cheapest isn't automatically best" color={GOLD} size={34} />
+      <Enter at={tPill} style={{left: 1330, top: 735}}>
+        <Pill text="Cheapest isn't automatically best" color={GOLD} size={28} />
       </Enter>
     </>
   );

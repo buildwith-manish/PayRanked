@@ -78,7 +78,7 @@ export const Ladder: React.FC<{revealed: Record<number, number>; active?: number
 };
 
 /** Half-circle dial for a price level, national average = 100 at the top. */
-export const Dial: React.FC<{value: number; at: number; width?: number}> = ({value, at, width = 340}) => {
+export const Dial: React.FC<{value: number; at: number; width?: number; hideValue?: boolean}> = ({value, at, width = 340, hideValue = false}) => {
   const f = useDesignFrame();
   const lo = 70, hi = 130;
   const ang = (v: number) => Math.PI - ((v - lo) / (hi - lo)) * Math.PI;
@@ -96,15 +96,18 @@ export const Dial: React.FC<{value: number; at: number; width?: number}> = ({val
       <text x={cx} y={cy - R - 18} textAnchor="middle" fill={C.muted} fontSize={22} fontFamily={FONT.text}>100 = U.S. average</text>
       <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={col} strokeWidth={8} strokeLinecap="round" style={{filter: `drop-shadow(0 0 10px ${col})`}} />
       <circle cx={cx} cy={cy} r={12} fill={col} />
-      <text x={cx} y={cy + 50} textAnchor="middle" fill={col} fontSize={34} fontWeight={700} fontFamily={FONT.num}>{cur.toFixed(1)}</text>
+      {!hideValue && <text x={cx} y={cy + 50} textAnchor="middle" fill={col} fontSize={34} fontWeight={700} fontFamily={FONT.num}>{cur.toFixed(1)}</text>}
     </svg>
   );
 };
 
-/** Horizontal index bar (100 = average) with a tick at 100. */
-export const IndexBar: React.FC<{label: string; value: number; color: string; at: number; width?: number; max?: number}> = ({label, value, color, at, width = 800, max = 180}) => {
+/** Index bar centred on 100 (the national average): longer to the right = pricier than average, to the left = cheaper. */
+export const IndexBar: React.FC<{label: string; value: number; color: string; at: number; width?: number; span?: number}> = ({label, value, color, at, width = 800, span = 75}) => {
   const f = useDesignFrame();
   const p = tween(f, at, MOTION.enterFrames + 10, glide);
+  const half = width / 2;
+  const px = Math.max(-half, Math.min(half, ((value - 100) / span) * half)) * p;
+  const barW = Math.max(p > 0 ? 6 : 0, Math.abs(px));
   return (
     <div style={{width, opacity: tween(f, at, 8)}}>
       <div style={{display: 'flex', justifyContent: 'space-between', fontFamily: FONT.text, fontWeight: 600, fontSize: TYPE.label, color: C.text, marginBottom: 8}}>
@@ -112,8 +115,8 @@ export const IndexBar: React.FC<{label: string; value: number; color: string; at
         <span style={{color, fontFamily: FONT.num, fontVariantNumeric: 'tabular-nums'}}>{(100 + (value - 100) * p).toFixed(1)}</span>
       </div>
       <div style={{position: 'relative', height: 30, borderRadius: 15, background: 'rgba(255,255,255,0.08)'}}>
-        <div style={{width: `${((value * p) / max) * 100}%`, height: '100%', borderRadius: 15, background: color, boxShadow: `0 0 22px ${color}88`}} />
-        <div style={{position: 'absolute', left: `${(100 / max) * 100}%`, top: -8, width: 3, height: 46, background: C.text, opacity: 0.8}} />
+        <div style={{position: 'absolute', top: 0, height: '100%', left: half + (px < 0 ? -barW : 0), width: barW, borderRadius: 15, background: color, boxShadow: `0 0 22px ${color}88`}} />
+        <div style={{position: 'absolute', left: half - 1.5, top: -8, width: 3, height: 46, background: C.text, opacity: 0.8}} />
       </div>
     </div>
   );
