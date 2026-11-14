@@ -9,7 +9,10 @@ import {VIDEO2_CUES} from './sfx2';
 import {cityPrefix, cue, d, group, section} from './layout';
 import {SceneCamera, SceneCameraProps, sceneCameraOffset} from './camera';
 import {useDesignFrame} from '../clock';
+import {glide, tween} from '../motion';
 import {ROLE} from './system';
+import {cityBeats} from './beats';
+import {CountdownNav} from './CountdownNav';
 import {ColdOpen, CityScene, Method, Outro, RentBreak, Takeaway, Twist} from './scenes';
 
 const Seq: React.FC<{from: number; frames: number; name: string; children: React.ReactNode}> = ({from, frames, name, children}) => (
@@ -36,10 +39,10 @@ export const Video2: React.FC = () => {
   type Cam = Omit<SceneCameraProps, 'frames' | 'children'>;
   const coldG = group('s01_');
   const twistG = group('s04_');
-  const parts: {name: string; g: ReturnType<typeof group>; node: React.ReactNode; cam: Cam}[] = [
+  const parts: {name: string; g: ReturnType<typeof group>; node: React.ReactNode; cam: Cam; rank?: number}[] = [
     {name: 'coldOpen', g: coldG, node: <ColdOpen />, cam: {seed: 0, enter: 'none', exit: 'whip', punchAts: [cue(coldG, ['gap', 'six'], coldG.rel[2], {from: 2})]}},
     {name: 'method', g: group('s02_'), node: <Method />, cam: {seed: 1}},
-    ...Array.from({length: 10}, (_, i) => 10 - i).map((rank) => ({name: `city ${rank}`, g: group(cityPrefix(rank)), node: <CityScene rank={rank} />, cam: cityCam(rank)})),
+    ...Array.from({length: 10}, (_, i) => 10 - i).map((rank) => ({name: `city ${rank}`, g: group(cityPrefix(rank)), node: <CityScene rank={rank} />, cam: cityCam(rank), rank})),
     {name: 'rentBreak', g: group('s03_'), node: <RentBreak />, cam: {seed: 2, exit: 'build'}},
     {name: 'twist', g: twistG, node: <Twist />, cam: {seed: 3, enter: 'flash', flashColor: ROLE.wage, punchAts: [cue(twistG, 'houston', twistG.rel[1], {from: 1})]}},
     {name: 'takeaway', g: group('s05_'), node: <Takeaway />, cam: {seed: 4}},
@@ -47,14 +50,28 @@ export const Video2: React.FC = () => {
   ];
   // Background sits outside every scene's own <Sequence>, so it can't read SceneCamera's offset directly. Find
   // whichever part is on screen at the current (global) design frame and replay the same pure camera math for it,
-  // so the background drifts/whips with the foreground instead of staying static.
+  // so the background drifts/whips with the foreground instead of staying static. The same pass also drives
+  // CountdownNav (video2 step 6: ladder + locator + NEXT merged into one persistent device) whenever a city is
+  // the active part, including a short slide of its highlight into the next row across the cut.
   const globalFrame = useDesignFrame();
+  const SLIDE_OUT = 24, SLIDE_IN = 14;
   let parallax: [number, number] = [0, 0];
+  let nav: {slidePos: number; activeRank: number; localFrame: number; pinAt: number; nextAt: number} | null = null;
   for (const p of parts) {
     const local = globalFrame - p.g.from;
     if (local >= 0 && local < p.g.frames) {
       const off = sceneCameraOffset(local, p.g.frames, p.cam.seed, p.cam.enter, p.cam.exit, p.cam.punchAts);
       parallax = [off.x, off.y];
+      if (p.rank) {
+        const {tPin, tNext} = cityBeats(p.rank);
+        let slidePos = p.rank;
+        if (p.rank > 1 && local >= p.g.frames - SLIDE_OUT) {
+          slidePos = p.rank - tween(local, p.g.frames - SLIDE_OUT, SLIDE_OUT, glide);
+        } else if (p.rank < 10 && local < SLIDE_IN) {
+          slidePos = p.rank + 1 - tween(local, 0, SLIDE_IN, glide);
+        }
+        nav = {slidePos, activeRank: p.rank, localFrame: local, pinAt: tPin, nextAt: tNext};
+      }
       break;
     }
   }
@@ -69,6 +86,7 @@ export const Video2: React.FC = () => {
           <SceneCamera frames={p.g.frames} {...p.cam}>{p.node}</SceneCamera>
         </Seq>
       ))}
+      {nav && <CountdownNav slidePos={nav.slidePos} activeRank={nav.activeRank} localFrame={nav.localFrame} pinAt={nav.pinAt} nextAt={nav.nextAt} />}
       <Seq from={d(intro.start)} frames={d(intro.seconds)} name="intro">
         <AbsoluteFill style={{backgroundColor: C.navy3}}>
           <OffthreadVideo src={staticFile('intro.mp4')} />
