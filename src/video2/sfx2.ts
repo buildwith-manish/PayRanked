@@ -110,6 +110,11 @@ for (let rank = 10; rank >= 1; rank--) {
   add('rise_up', o + b.tNY, 0.45);
   add('lock', o + b.tMia, 0.5); // Miami: last again
   add('ding', o + b.tPill, 0.5);
+  // card beats: the after-prices number counts (soft ticks), then the rank chip lands (quiet chip)
+  [b.tHou + 10, b.tDC, b.tNY, b.tNY + 40, b.tMia].forEach((at) => {
+    ticks(o + at + 20, 5, 6, 0.22);
+    add('chip_1', o + at + 60, 0.32);
+  });
 }
 
 /* ---- takeaway + outro */
@@ -124,6 +129,10 @@ for (let rank = 10; rank >= 1; rank--) {
   add('ding', o + rel[1] + 90, 0.45);
   add('hit_med', o + rel[2] + 20, 0.6);
   add('click', o + rel[3] + 40, 0.4);
+  // rule 3: the wage % counts, then the price % counts, bars grow under them, then the net-gap pill
+  ticks(o + rel[2] + 40, 5, 6, 0.22);
+  ticks(o + rel[2] + 90, 5, 6, 0.22);
+  add('ding', o + rel[2] + 150, 0.4);
 }
 {
   const g = group('s06_');
@@ -132,6 +141,7 @@ for (let rank = 10; rank >= 1; rank--) {
   whoosh(o + 6);
   for (let i = 0; i < 3; i++) add((`chip_${i}`) as SfxName, o + rel[0] + 30 + i * 70, 0.5);
   add('pop', o + rel[1], 0.4);
+  for (let i = 0; i < 2; i++) ticks(o + rel[0] + 50 + i * 70, 4, 6, 0.2); // the two card values count up
   const endAt = g.frames - d(END_SCREEN_SECONDS);
   add('ding', o + endAt, 0.5);
 }
