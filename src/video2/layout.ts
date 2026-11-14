@@ -3,7 +3,7 @@ import layoutRaw from '../audio/vo-layout.json';
 import metrosRaw from '../data/metros.json';
 import {DESIGN_FPS} from '../clock';
 
-export type Shot = {id: string; section: string; start: number; seconds: number; speechStart: number; speechEnd: number};
+export type Shot = {id: string; section: string; start: number; seconds: number; speechStart: number; speechEnd: number; text: string; words: [string, number][]};
 export const SHOTS = layoutRaw.shots as unknown as Shot[];
 export const SECTIONS = layoutRaw.sections as {id: string; start: number; seconds: number}[];
 export const END_SCREEN_SECONDS = layoutRaw.endScreenSeconds;
@@ -23,6 +23,7 @@ export const group = (prefix: string) => {
   const end = list[list.length - 1].start + list[list.length - 1].seconds;
   return {
     list,
+    shots: list,
     rel: list.map((s) => d(s.start - t0)),
     speech: list.map((s) => d(s.speechStart - t0)),
     from: d(t0),
@@ -32,3 +33,29 @@ export const group = (prefix: string) => {
 export const cityPrefix = (rank: number) => `r${String(rank).padStart(2, '0')}_`;
 
 export const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
+
+export type Group = ReturnType<typeof group>;
+const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, '');
+/** A visual beat lands this long BEFORE the word it illustrates. */
+export const AHEAD = 0.25;
+
+/**
+ * Scene-local design frame at which one of `words` is heard (first match at or after clip index `from`), minus AHEAD.
+ * Uses the recognised word times (scripts/vo_words.py); if the recogniser missed the word, falls back to its character
+ * position in the line, spread over the clip's speech. Returns `fallback` when the word is not in the lines at all.
+ */
+export const cue = (g: Group, words: string | string[], fallback: number, opts: {from?: number; ahead?: number} = {}): number => {
+  const want = (Array.isArray(words) ? words : [words]).map(norm);
+  const ahead = opts.ahead ?? AHEAD;
+  for (let i = opts.from ?? 0; i < g.shots.length; i++) {
+    const sh = g.shots[i];
+    const hit = sh.words.find(([w]) => want.includes(norm(w)));
+    if (hit) return d(sh.speechStart + hit[1] - ahead) - g.from;
+    const text = sh.text.toLowerCase();
+    for (const w of want) {
+      const m = new RegExp(`\\b${w}\\b`).exec(text);
+      if (m) return d(sh.speechStart + (m.index / text.length) * (sh.speechEnd - sh.speechStart) - ahead) - g.from;
+    }
+  }
+  return fallback;
+};

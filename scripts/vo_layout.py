@@ -68,7 +68,7 @@ for n, r in enumerate(rows, 1):
     wps = wc / (end - lead)
     # a very short line is naturally fast ("Let's start at the bottom." = 5 words in ~1 s), so only flag longer lines or extreme rates
     if (wc >= 8 and wps > 4.5) or wps > 6.5: problems.append(f'{r["id"]}: {wps:.1f} words/s, probably truncated')
-    clips.append(dict(n=n, id=r['id'], file=f'voiceover/clips_wav/{f}', dur=len(d) / sr, lead=lead, speech=end - lead, sec=SECTION_OF(r['id'])))
+    clips.append(dict(n=n, id=r['id'], text=r['text'], file=f'voiceover/clips_wav/{f}', dur=len(d) / sr, lead=lead, speech=end - lead, sec=SECTION_OF(r['id'])))
 
 # ---- timeline
 t, shots, sections = 0.0, [], {}
@@ -114,7 +114,7 @@ json.dump(man, open(MANIFEST, 'w'), indent=2)
 lay = dict(totalSeconds=round(total, 4), introSeconds=INTRO_SECONDS, endScreenSeconds=END_SCREEN, onsetSeconds=ONSET,
            sections=[dict(id=s['id'], start=round(s['start'], 4), seconds=s['seconds']) for s in secs],
            shots=[dict(id=c['id'], section=c['sec'], start=round(c['start'], 4), seconds=round(c['seconds'], 4),
-                       speechStart=round(c['start'] + ONSET, 4), speechEnd=round(c['start'] + ONSET + c['speech'], 4),
+                       speechStart=round(c['start'] + ONSET, 4), speechEnd=round(c['start'] + ONSET + c['speech'], 4), text=c['text'],
                        words=[[w, round(tw - c['lead'], 3)] for w, tw in words.get(c['id'], words.get(f"{c['n']:03d}_{c['id']}", []))])
                   for c in clips])
 json.dump(lay, open(LAYOUT, 'w'), indent=1)

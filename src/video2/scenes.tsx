@@ -5,7 +5,7 @@ import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
 import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
 import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source} from './parts';
-import {END_SCREEN_SECONDS, METROS, Metro, byRank, cityPrefix, d, group, money, shownName} from './layout';
+import {END_SCREEN_SECONDS, METROS, Metro, byRank, cityPrefix, cue, d, group, money, shownName} from './layout';
 
 const Stack: React.FC<{dollars: number; at: number; color: string; left: number; top: number; ref10?: boolean; scale?: number}> = ({dollars, at, color, left, top, ref10 = true, scale = 1}) => (
   <div style={{position: 'absolute', left, top, transform: `scale(${scale})`, transformOrigin: '0% 0%'}}>
@@ -19,8 +19,15 @@ export const ColdOpen: React.FC = () => {
   const {rel} = group('s01_');
   const hou = byRank(1), mia = byRank(10);
   const gap = hou.buyingPower50k - mia.buyingPower50k;
-  const split = tween(f, rel[1] + 6, 30, glide);
-  const crack = tween(f, rel[3] + 60, 14, slam);
+  const g = group('s01_');
+  const tOther = cue(g, 'other', rel[1] + 6, {from: 1});
+  const tOnly = cue(g, 'only', rel[1] + 80, {from: 1});
+  const tFirst = cue(g, 'fifty', rel[1] + 20, {from: 1});
+  const tGap = cue(g, ['gap', 'six'], rel[2], {from: 2});
+  const tWinner = cue(g, 'winner', rel[3] + 30, {from: 3});
+  const tStops = cue(g, 'stops', rel[3] + 60, {from: 3});
+  const split = tween(f, tOther, 30, glide);
+  const crack = tween(f, tStops, 14, slam);
   const big = TYPE.title * 0.72;
   return (
     <>
@@ -30,15 +37,15 @@ export const ColdOpen: React.FC = () => {
       <Stack dollars={50000 - (50000 - mia.buyingPower50k) * split} at={10} color={split > 0.5 ? ROLE.loss : ROLE.buying} left={870} top={110} scale={1.25} />
       <Enter at={rel[0] + 30} style={{left: 300, top: 600}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: big, color: C.text}}>$50,000 a year</div></Enter>
       <Enter at={rel[0] + 36} style={{left: 840, top: 600}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: big, color: C.text}}>$50,000 a year</div></Enter>
-      <Enter at={rel[1] + 20} style={{left: 300, top: 710}}><CountMoney from={50000} to={hou.buyingPower50k} at={rel[1] + 20} color={ROLE.buying} size={TYPE.number * 0.8} /></Enter>
-      <Enter at={rel[1] + 20} style={{left: 840, top: 710}}><CountMoney from={50000} to={mia.buyingPower50k} at={rel[1] + 80} color={ROLE.loss} size={TYPE.number * 0.8} /></Enter>
+      <Enter at={tFirst} style={{left: 300, top: 710}}><CountMoney from={50000} to={hou.buyingPower50k} at={tFirst} color={ROLE.buying} size={TYPE.number * 0.8} /></Enter>
+      <Enter at={tOnly} style={{left: 840, top: 710}}><CountMoney from={50000} to={mia.buyingPower50k} at={tOnly} color={ROLE.loss} size={TYPE.number * 0.8} /></Enter>
       <Enter at={rel[1] + 20} style={{left: 300, top: 850}}><Label size={32}>buys this much at average U.S. prices</Label></Enter>
-      <div style={{position: 'absolute', left: 1290, top: 220, opacity: tween(f, rel[2], 8), transform: `scale(${1 + (1 - tween(f, rel[2], 14, slam)) * 0.8})`, transformOrigin: '0% 50%'}}>
+      <div style={{position: 'absolute', left: 1290, top: 220, opacity: tween(f, tGap, 8), transform: `scale(${1 + (1 - tween(f, tGap, 14, slam)) * 0.8})`, transformOrigin: '0% 50%'}}>
         <div style={{fontFamily: FONT.text, fontWeight: 700, fontSize: TYPE.label, color: C.muted}}>THE GAP</div>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.hero * 0.62, color: ROLE.loss, textShadow: `0 0 50px ${ROLE.loss}88`}}>{money(gap)}</div>
         <div style={{fontFamily: FONT.text, fontSize: 32, color: C.text}}>just from where they live</div>
       </div>
-      <Enter at={rel[3] + 30} style={{left: 1290, top: 620}}>
+      <Enter at={tWinner} style={{left: 1290, top: 620}}>
         <div style={{display: 'flex', alignItems: 'center', gap: 24}}>
           <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 110, color: crack > 0.5 ? C.muted : ROLE.buying, transform: `rotate(${crack * -8}deg)`}}>#1</div>
           <Label color={C.text} size={32}>{crack > 0.5 ? 'stops winning' : '10 metros ranked'}</Label>
@@ -55,15 +62,22 @@ export const ColdOpen: React.FC = () => {
 export const Method: React.FC = () => {
   const f = useDesignFrame();
   const {rel} = group('s02_');
-  const eq = tween(f, rel[1] + 150, 20, glide);
+  const g = group('s02_');
+  const tDial = cue(g, ['hundred', 'average'], rel[0] + 60);
+  const tAbove = cue(g, 'above', rel[1] + 30, {from: 1});
+  const tEq = cue(g, 'multiply', rel[1] + 150, {from: 1});
+  const tRent = cue(g, 'rent', rel[2] + 6, {from: 2});
+  const tGoods = cue(g, 'goods', tRent + 8, {from: 2});
+  const tServ = cue(g, 'services', tGoods + 8, {from: 2});
+  const eq = tween(f, tEq, 20, glide);
   return (
     <>
       <Enter at={6} style={{left: 160, top: 90}}><Label color={ROLE.buying} size={TYPE.title * 0.6}>THE METHOD</Label></Enter>
-      <Enter at={rel[0] + 24} style={{left: 160, top: 190}}><Dial value={114.2} at={rel[1] + 20} width={620} /></Enter>
+      <Enter at={rel[0] + 24} style={{left: 160, top: 190}}><Dial value={114.2} at={tDial} width={620} /></Enter>
       <Enter at={rel[0] + 10} style={{left: 960, top: 190}}>
         <div style={{fontFamily: FONT.text, fontWeight: 600, fontSize: TYPE.label, color: C.text, width: 800}}>Bureau of Economic Analysis<br /><span style={{color: C.muted}}>price level of every metro area</span></div>
       </Enter>
-      <Enter at={rel[1] + 30} style={{left: 960, top: 360}}>
+      <Enter at={tAbove} style={{left: 960, top: 360}}>
         <div style={{fontFamily: FONT.text, fontSize: TYPE.label, color: C.text, lineHeight: 1.5}}>
           <span style={{color: ROLE.rent}}>Above 100</span> prices run higher<br /><span style={{color: ROLE.buying}}>Below 100</span> prices run lower
         </div>
@@ -73,9 +87,9 @@ export const Method: React.FC = () => {
       </div>
       <div style={{position: 'absolute', left: 160, top: 790, width: 1300}}>
         <div style={{display: 'flex', gap: 36}}>
-          <Enter at={rel[2] + 6} style={{position: 'relative'}}><Pill text={ROLE_LABEL.rent} color={ROLE.rent} /></Enter>
-          <Enter at={rel[2] + 14} style={{position: 'relative'}}><Pill text={ROLE_LABEL.goods} color={ROLE.goods} /></Enter>
-          <Enter at={rel[2] + 22} style={{position: 'relative'}}><Pill text="Other services" color={ROLE.services} /></Enter>
+          <Enter at={tRent} style={{position: 'relative'}}><Pill text={ROLE_LABEL.rent} color={ROLE.rent} /></Enter>
+          <Enter at={tGoods} style={{position: 'relative'}}><Pill text={ROLE_LABEL.goods} color={ROLE.goods} /></Enter>
+          <Enter at={tServ} style={{position: 'relative'}}><Pill text="Other services" color={ROLE.services} /></Enter>
         </div>
       </div>
       <Enter at={rel[2] + 60} style={{left: 160, top: 900}}><Label>2024 data · metro areas, not just city limits</Label></Enter>
@@ -92,11 +106,16 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
   const n = g.list.length;
   const rel = g.rel;
   const power = m.buyingPower50k;
-  const tPower = n >= 5 ? rel[1] + 4 : rel[0] + 60;
-  const tBars = n >= 5 ? rel[2] : rel[1];
-  const tRent = n >= 5 ? rel[3] : rel[1] + Math.round(g.list[1].seconds * 30 * 0.6);
-  const tNext = rel[n - 1];
-  const tWin = rank === 1 ? rel[4] : -1;
+  // every beat is cued to the word it illustrates (scripts/vo_words.py); the clip-start times are only the fallback
+  const tPower = n >= 5 ? g.speech[1] : cue(g, 'buys', rel[0] + 60);
+  const tDial = cue(g, ['price', 'prices'], n >= 5 ? rel[1] + 60 : rel[1], {from: 1});
+  const tRentBar = cue(g, 'rent', tDial + 12, {from: 1});
+  const tGoodsBar = cue(g, 'goods', tRentBar + 10, {from: 1});
+  const tServBar = cue(g, ['services', 'service'], tGoodsBar + 10, {from: 1});
+  const tBars = tDial;
+  const tRent = cue(g, 'median', rel[n >= 5 ? 3 : 1] + 120, {from: 1});
+  const tNext = cue(g, ['next', 'half'], rel[n - 1], {from: n - 1});
+  const tWin = rank === 1 ? cue(g, 'wins', rel[4], {from: 4}) : -1;
   const revealed: Record<number, number> = {};
   for (let r = 10; r > rank; r--) revealed[r] = -1;
   revealed[rank] = 6;
@@ -121,15 +140,15 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 72, color: m.bea.allItems > 100 ? ROLE.rent : ROLE.buying}}>{m.bea.allItems.toFixed(1)}</div>
       </Enter>
       <div style={{position: 'absolute', left: 1000, top: 650, display: 'flex', flexDirection: 'column', gap: 20}}>
-        <IndexBar label={ROLE_LABEL.rent} value={m.bea.rents} color={ROLE.rent} at={tBars + 12} />
-        <IndexBar label={ROLE_LABEL.goods} value={m.bea.goods} color={ROLE.goods} at={tBars + 20} />
-        <IndexBar label="Other services" value={m.bea.otherServices} color={ROLE.services} at={tBars + 28} />
+        <IndexBar label={ROLE_LABEL.rent} value={m.bea.rents} color={ROLE.rent} at={tRentBar} />
+        <IndexBar label={ROLE_LABEL.goods} value={m.bea.goods} color={ROLE.goods} at={tGoodsBar} />
+        <IndexBar label="Other services" value={m.bea.otherServices} color={ROLE.services} at={tServBar} />
       </div>
       <Enter at={tRent} style={{left: 500, top: 880}}>
         <Pill text={`Median rent ${money(m.census.medianGrossRent)}/mo`} color={ROLE.rent} />
       </Enter>
       {rank === 7 && (
-        <Enter at={rel[3] + 40} style={{left: 500, top: 960}}>
+        <Enter at={cue(g, 'remember', rel[3] + 40, {from: 3})} style={{left: 500, top: 960}}>
           <Pill text={`Median wage ${money(m.wage.medianAnnual)} — remember this`} color={ROLE.wage} size={28} />
         </Enter>
       )}
@@ -151,6 +170,9 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
 export const RentBreak: React.FC = () => {
   const f = useDesignFrame();
   const {rel} = group('s03_');
+  const g = group('s03_');
+  const tMiami = cue(g, 'miami', rel[0] + 40);
+  const tLA = cue(g, 'angeles', rel[1], {from: 1});
   const rows = [...METROS].sort((a, b) => b.rentShareOfWagePct - a.rentShareOfWagePct);
   return (
     <>
@@ -158,7 +180,7 @@ export const RentBreak: React.FC = () => {
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title, color: ROLE.rent}}>A year of rent vs. the typical paycheck</div>
       </Enter>
       {rows.map((m, i) => {
-        const at = i === 0 ? rel[0] + 40 : rel[1] + (i - 1) * 8;
+        const at = i === 0 ? tMiami : tLA + (i - 1) * 8;
         const p = tween(f, at, 24, glide);
         return (
           <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 82, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
@@ -182,7 +204,11 @@ export const Twist: React.FC = () => {
   const g = group('s04_');
   const rel = g.rel;
   const rowH = 80, top0 = 190;
-  const stage = f >= rel[4] ? 4 : f >= rel[3] ? 3 : f >= rel[2] ? 2 : f >= rel[1] ? 1 : 0;
+  const tHou = cue(g, 'houston', rel[1], {from: 1});
+  const tDC = cue(g, 'washington', rel[2], {from: 2});
+  const tNY = cue(g, ['new', 'york'], rel[3], {from: 3});
+  const tMia = cue(g, 'miami', rel[4], {from: 4});
+  const stage = f >= tMia ? 4 : f >= tNY ? 3 : f >= tDC ? 2 : f >= tHou ? 1 : 0;
   const hou = byRank(1), dc = byRank(7), ny = byRank(8), phl = byRank(3), mia = byRank(10);
   const featured: Metro[] = stage === 1 ? [hou] : stage === 2 ? [dc] : stage === 3 ? [ny, phl] : stage >= 4 ? [mia] : [];
   const maxV = 65000, minV = 38000;
@@ -190,18 +216,18 @@ export const Twist: React.FC = () => {
     <>
       <Enter at={4} style={{left: 160, top: 70}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title * 0.8, color: ROLE.wage}}>
-          {f >= rel[1] ? 'Paycheck after prices' : 'Same ranking…'}
+          {f >= tHou ? 'Paycheck after prices' : 'Same ranking…'}
         </div>
       </Enter>
       <Enter at={rel[0] + 60} style={{left: 960, top: 70}}><Pill text="OUR OWN CALCULATION · wage ÷ price level" color={ROLE.wage} size={28} /></Enter>
       <Enter at={rel[1] + 60} style={{left: 1280, top: 830, width: 540}}><Label size={24}>Atlanta/Chicago and Dallas/Phoenix are within about $20 of each other: treat each pair as a tie.</Label></Enter>
       {METROS.map((m) => {
         const stag = (m.rank - 1) * 6;
-        const p = tween(f, rel[1] + stag, 30, glide);
+        const p = tween(f, tHou + stag, 30, glide);
         const y = top0 + ((m.rank - 1) + (m.twistRank - m.rank) * p) * rowH;
         const value = m.buyingPower50k + (m.wageAfterPrices - m.buyingPower50k) * p;
         const lit = featured.includes(m);
-        const col = f >= rel[1] ? (m.twistRank < m.rank ? ROLE.buying : m.twistRank > m.rank ? ROLE.loss : C.text) : ROLE.buying;
+        const col = f >= tHou ? (m.twistRank < m.rank ? ROLE.buying : m.twistRank > m.rank ? ROLE.loss : C.text) : ROLE.buying;
         const shownRank = p > 0.5 ? m.twistRank : m.rank;
         const w = ((value - minV) / (maxV - minV)) * 560;
         return (
@@ -214,7 +240,7 @@ export const Twist: React.FC = () => {
         );
       })}
       {featured.map((m, i) => (
-        <Enter key={`${stage}-${m.rank}`} at={stage === 1 ? rel[1] + 10 : stage === 2 ? rel[2] : stage === 3 ? rel[3] + i * 40 : rel[4]} style={{left: 1280, top: 250 + i * 270, width: 540}}>
+        <Enter key={`${stage}-${m.rank}`} at={stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia} style={{left: 1280, top: 250 + i * 270, width: 540}}>
           <div style={{borderRadius: 20, padding: 24, background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${ROLE.wage}`}}>
             <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 48, color: C.text}}>{shownName(m)}</div>
             <Label color={ROLE.wage}>MEDIAN WAGE</Label>
