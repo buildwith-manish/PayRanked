@@ -29,7 +29,10 @@ export const methodBeats = () => {
   const tRent = cue(g, 'rent', rel[2] + 6, {from: 2});
   const tGoods = cue(g, 'goods', tRent + 8, {from: 2});
   const tServ = cue(g, 'services', tGoods + 8, {from: 2});
-  return {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources: rel[3] + 10};
+  // the map moment: ten metro pins light up west to east as the voice says "these are metro areas", before the countdown
+  const tMap = cue(g, ['metro'], rel[2] + 240, {from: 2}) - 10;
+  const tMapOut = rel[3] + 55;
+  return {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources: rel[3] + 10, tMap, tMapOut};
 };
 
 export const cityBeats = (rank: number) => {

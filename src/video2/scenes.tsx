@@ -4,6 +4,7 @@ import {C} from '../theme';
 import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
 import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
+import {MetroMap} from './MetroMap';
 import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source} from './parts';
 import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
 import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
@@ -56,7 +57,7 @@ export const ColdOpen: React.FC = () => {
 /* ------------------------------------------------------------------ method */
 export const Method: React.FC = () => {
   const f = useDesignFrame();
-  const {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources} = methodBeats();
+  const {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources, tMap, tMapOut} = methodBeats();
   const rel = g.rel;
   const eq = tween(f, tEq, 20, glide);
   return (
@@ -83,6 +84,7 @@ export const Method: React.FC = () => {
       </div>
       <Enter at={rel[2] + 60} style={{left: 160, top: 900}}><Label>2024 data · metro areas, not just city limits</Label></Enter>
       <Enter at={tSources} style={{left: 1200, top: 900}}><Source text="BEA" /><Source text="CENSUS rent" /><Source text="BLS wages" /></Enter>
+      <MetroMap at={tMap} out={tMapOut} />
     </>
   );
 };

@@ -52,6 +52,9 @@ const whoosh = (t: number) => add('whoosh_m', t, 0.45);
   add('chip_2', o + b.tServ, 0.5);
   add('click', o + b.tSources, 0.4);
   add('click', o + b.tSources + 3, 0.35);
+  // the map moment: a soft whoosh in, then one quiet pop per pin (10 pins, west to east)
+  whoosh(o + b.tMap);
+  for (let i = 0; i < 10; i++) add('pop', o + b.tMap + 26 + i * 9, 0.28);
 }
 
 /* ---- the countdown */
