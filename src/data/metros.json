@@ -1,106 +1,354 @@
 {
-  "_note": "SKELETON. Countdown order (1 = best buying power of $50,000) from the verified data file. All values are null until copied from that data file; do not fill from memory. Houston and Miami buying power are the only figures known so far.",
+  "_note": "Source: metro-verified-data-and-todo.md (prepared 14 Nov 2026). Inputs are VERIFIED unless a tax status says otherwise. buyingPower50k is the file's figure (re-derived here from allItems and matched within $100). wageAfterPrices and rentShareOfWagePct are derived (wage / (allItems/100); 12 x rent / wage), not official figures. Rank = countdown order by buying power of $50,000. Show 'typical resident = single filer in the principal city, wages only' wherever take-home is used.",
   "dataYear": 2024,
+  "taxAssumptions": "single filer, 2024 standard deduction $14,600, wages only, federal $4,016 (formula; $4,019 by IRS table), FICA $3,825",
+  "sources": {
+    "prices": "BEA Regional Price Parities 2024 via FRED",
+    "rent": "Census ACS 2024 1-year B25064",
+    "wages": "BLS OEWS May 2024 median, all occupations",
+    "taxes": "IRS 2024; state and local tax authorities"
+  },
+  "creditLine": "Data: BEA Regional Price Parities (2024, via FRED); U.S. Census Bureau ACS 2024 1-year median gross rent; BLS OEWS May 2024 median wages; IRS 2024 tax rules; state and local tax authorities (CA FTB, GA DOR, IL DOR, DC OTR, Philadelphia Department of Revenue, NYC). Take-home figures are estimates for a single filer living in each city, wages only. Metro boundaries differ slightly between sources.",
   "metros": [
     {
       "rank": 1,
       "name": "Houston",
+      "cbsa": 26420,
+      "bea": {
+        "name": "Houston-The Woodlands-Sugar Land",
+        "allItems": 98.629,
+        "rents": 104.51,
+        "goods": 100.639,
+        "otherServices": 95.595
+      },
       "buyingPower50k": 50700,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "census": {
+        "name": "Houston-Pasadena-The Woodlands, TX",
+        "medianGrossRent": 1469,
+        "marginOfError": 15
+      },
+      "wage": {
+        "medianHourly": 23.31,
+        "medianAnnual": 48490
+      },
+      "annualRent": 17628,
+      "rentShareOfWagePct": 36.4,
+      "wageAfterPrices": 49200.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 0,
+        "local": 0,
+        "takeHome": 42159,
+        "status": "verified"
+      },
+      "twistRank": 6
     },
     {
       "rank": 2,
       "name": "Atlanta",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 12060,
+      "bea": {
+        "name": "Atlanta-Sandy Springs-Roswell",
+        "allItems": 100.058,
+        "rents": 111.022,
+        "goods": 100.416,
+        "otherServices": 96.701
+      },
+      "buyingPower50k": 50000,
+      "census": {
+        "name": "Atlanta-Sandy Springs-Roswell, GA",
+        "medianGrossRent": 1770,
+        "marginOfError": 16
+      },
+      "wage": {
+        "medianHourly": 23.93,
+        "medianAnnual": 49770
+      },
+      "annualRent": 21240,
+      "rentShareOfWagePct": 42.7,
+      "wageAfterPrices": 49700.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 2048,
+        "local": 0,
+        "takeHome": 40111,
+        "status": "verified"
+      },
+      "twistRank": 4
     },
     {
       "rank": 3,
       "name": "Philadelphia",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 37980,
+      "bea": {
+        "name": "Philadelphia-Camden-Wilmington",
+        "allItems": 102.554,
+        "rents": 113.141,
+        "goods": 96.833,
+        "otherServices": 103.052
+      },
+      "buyingPower50k": 48800,
+      "census": {
+        "name": "Philadelphia-Camden-Wilmington, PA-NJ-DE-MD",
+        "medianGrossRent": 1567,
+        "marginOfError": 20
+      },
+      "wage": {
+        "medianHourly": 24.89,
+        "medianAnnual": 51760
+      },
+      "annualRent": 18804,
+      "rentShareOfWagePct": 36.3,
+      "wageAfterPrices": 50500.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 1535,
+        "local": 1875,
+        "takeHome": 38749,
+        "status": "city rate verified; PA 3.07% not re-checked"
+      },
+      "twistRank": 3
     },
     {
       "rank": 4,
       "name": "Dallas",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 19100,
+      "bea": {
+        "name": "Dallas-Fort Worth-Arlington",
+        "allItems": 103.09,
+        "rents": 117.874,
+        "goods": 102.838,
+        "otherServices": 99.673
+      },
+      "buyingPower50k": 48500,
+      "census": {
+        "name": "Dallas-Fort Worth-Arlington, TX",
+        "medianGrossRent": 1718,
+        "marginOfError": 13
+      },
+      "wage": {
+        "medianHourly": 23.91,
+        "medianAnnual": 49740
+      },
+      "annualRent": 20616,
+      "rentShareOfWagePct": 41.4,
+      "wageAfterPrices": 48200.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 0,
+        "local": 0,
+        "takeHome": 42159,
+        "status": "verified"
+      },
+      "twistRank": 7
     },
     {
       "rank": 5,
       "name": "Phoenix",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 38060,
+      "bea": {
+        "name": "Phoenix-Mesa-Scottsdale",
+        "allItems": 103.316,
+        "rents": 121.236,
+        "goods": 95.024,
+        "otherServices": 104.016
+      },
+      "buyingPower50k": 48400,
+      "census": {
+        "name": "Phoenix-Mesa-Chandler, AZ",
+        "medianGrossRent": 1819,
+        "marginOfError": 19
+      },
+      "wage": {
+        "medianHourly": 23.96,
+        "medianAnnual": 49840
+      },
+      "annualRent": 21828,
+      "rentShareOfWagePct": 43.8,
+      "wageAfterPrices": 48200.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 885,
+        "local": 0,
+        "takeHome": 41274,
+        "status": "arithmetic ok; AZ 2.5% rule not re-checked"
+      },
+      "twistRank": 8
     },
     {
       "rank": 6,
       "name": "Chicago",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 16980,
+      "bea": {
+        "name": "Chicago-Naperville-Elgin",
+        "allItems": 103.595,
+        "rents": 112.01,
+        "goods": 107.258,
+        "otherServices": 100.492
+      },
+      "buyingPower50k": 48300,
+      "census": {
+        "name": "Chicago-Naperville-Elgin, IL-IN",
+        "medianGrossRent": 1469,
+        "marginOfError": 13
+      },
+      "wage": {
+        "medianHourly": 24.76,
+        "medianAnnual": 51510
+      },
+      "annualRent": 17628,
+      "rentShareOfWagePct": 34.2,
+      "wageAfterPrices": 49700.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 2338,
+        "local": 0,
+        "takeHome": 39821,
+        "status": "verified"
+      },
+      "twistRank": 5
     },
     {
       "rank": 7,
       "name": "Washington",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 47900,
+      "bea": {
+        "name": "Washington-Arlington-Alexandria",
+        "allItems": 108.884,
+        "rents": 151.134,
+        "goods": 104.847,
+        "otherServices": 102.321
+      },
+      "buyingPower50k": 45900,
+      "census": {
+        "name": "Washington-Arlington-Alexandria, DC-VA-MD-WV",
+        "medianGrossRent": 2037,
+        "marginOfError": 21
+      },
+      "wage": {
+        "medianHourly": 32.9,
+        "medianAnnual": 68430
+      },
+      "annualRent": 24444,
+      "rentShareOfWagePct": 35.7,
+      "wageAfterPrices": 62800.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 1924,
+        "local": 0,
+        "takeHome": 40235,
+        "status": "verified (DC resident)"
+      },
+      "twistRank": 1
     },
     {
       "rank": 8,
       "name": "New York",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 35620,
+      "bea": {
+        "name": "New York-Newark-Jersey City",
+        "allItems": 112.563,
+        "rents": 148.616,
+        "goods": 110.261,
+        "otherServices": 105.836
+      },
+      "buyingPower50k": 44400,
+      "census": {
+        "name": "New York-Newark-Jersey City, NY-NJ",
+        "medianGrossRent": 1851,
+        "marginOfError": 10
+      },
+      "wage": {
+        "medianHourly": 29.07,
+        "medianAnnual": 60460
+      },
+      "annualRent": 22212,
+      "rentShareOfWagePct": 36.7,
+      "wageAfterPrices": 53700.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 2145,
+        "local": 1508,
+        "takeHome": 38506,
+        "status": "NYC verified; NY State top brackets from memory"
+      },
+      "twistRank": 2
     },
     {
       "rank": 9,
       "name": "Los Angeles",
-      "buyingPower50k": null,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "cbsa": 31080,
+      "bea": {
+        "name": "Los Angeles-Long Beach-Anaheim",
+        "allItems": 113.566,
+        "rents": 170.433,
+        "goods": 106.623,
+        "otherServices": 104.362
+      },
+      "buyingPower50k": 44000,
+      "census": {
+        "name": "Los Angeles-Long Beach-Anaheim, CA",
+        "medianGrossRent": 2114,
+        "marginOfError": 13
+      },
+      "wage": {
+        "medianHourly": 25.72,
+        "medianAnnual": 53490
+      },
+      "annualRent": 25368,
+      "rentShareOfWagePct": 47.4,
+      "wageAfterPrices": 47100.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 1096,
+        "local": 0,
+        "takeHome": 41063,
+        "status": "rates verified; excludes state disability insurance"
+      },
+      "twistRank": 9
     },
     {
       "rank": 10,
       "name": "Miami",
+      "cbsa": 33100,
+      "bea": {
+        "name": "Miami-Fort Lauderdale-West Palm Beach",
+        "allItems": 114.155,
+        "rents": 155.551,
+        "goods": 103.556,
+        "otherServices": 109.113
+      },
       "buyingPower50k": 43800,
-      "priceLevel": null,
-      "medianWage": null,
-      "medianRent": null,
-      "rentShareOfWage": null,
-      "source": null
+      "census": {
+        "name": "Miami-Fort Lauderdale-West Palm Beach, FL",
+        "medianGrossRent": 2083,
+        "marginOfError": 21
+      },
+      "wage": {
+        "medianHourly": 23.04,
+        "medianAnnual": 47920
+      },
+      "annualRent": 24996,
+      "rentShareOfWagePct": 52.2,
+      "wageAfterPrices": 42000.0,
+      "tax50k": {
+        "federal": 4016,
+        "fica": 3825,
+        "state": 0,
+        "local": 0,
+        "takeHome": 42159,
+        "status": "verified"
+      },
+      "twistRank": 10
     }
   ]
 }
