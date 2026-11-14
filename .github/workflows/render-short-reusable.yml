@@ -1,0 +1,197 @@
+name: Render Short (reusable)
+# Used by Render Short 1 ... Render Short 7. Do not run this one directly.
+#
+# The three versions of a Short (YouTube, Facebook = "-Social", Instagram) differ only in the 4 s end card, so the body is rendered
+# ONCE and each end card on its own, then body + end card are joined per version. About 1.1x the work of one full render instead of 3x.
+#
+#   plan    reads the Short's frame count from Remotion (nothing hardcoded) and builds the list of versions to produce
+#   body    4 parallel chunks of everything before the end card, rendered from the YouTube composition
+#   end     one job per version, the last 240 frames only
+#   check   guard: the last body frames must be byte-identical in all three versions (fails if someone makes the body variant-specific)
+#   join    per version: body chunks + that version's end card, video copied (no re-encode), audio encoded to AAC once, then frame count
+#           AND duration verified
+#
+# Why the chunks are MKV with uncompressed (PCM) audio: AAC adds ~50 ms of padding to every chunk, and when ffmpeg joins AAC chunks it
+# shifts the next chunk by that padding. The old workflow therefore froze the picture for 50 ms at every seam and made the Short 0.2 s
+# too long. PCM has no padding, so the chunks join exactly; the audio is compressed to AAC once, at the end.
+on:
+  workflow_call:
+    inputs:
+      short:
+        description: Short number, 1-7
+        required: true
+        type: number
+      ref:
+        description: Git ref to render
+        required: true
+        type: string
+      variants:
+        description: all | youtube | social | instagram
+        required: false
+        type: string
+        default: all
+
+env:
+  SHORT: ${{ inputs.short }}
+  END_FRAMES: 240
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      total: ${{ steps.total.outputs.total }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.ref }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - id: total
+        run: |
+          TOTAL=$(bash scripts/short-frames.sh total "$SHORT")
+          echo "Short $SHORT: $TOTAL frames ($(( TOTAL - END_FRAMES )) body + $END_FRAMES end card)"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+      - id: matrix
+        env:
+          WANT_VARIANTS: ${{ inputs.variants }}
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os, sys
+          all_v = [
+              {"variant": "youtube",   "comp": "",           "file": ""},
+              {"variant": "social",    "comp": "-Social",    "file": "-social"},
+              {"variant": "instagram", "comp": "-Instagram", "file": "-instagram"},
+          ]
+          want = os.environ.get("WANT_VARIANTS", "").strip() or "all"
+          pick = all_v if want == "all" else [v for v in all_v if v["variant"] == want]
+          if not pick:
+              sys.exit("unknown variants value: " + want)
+          print("matrix=" + json.dumps({"include": pick}))
+          EOF
+
+  body:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.ref }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - name: Render body chunk
+        run: |
+          read START END < <(bash scripts/short-frames.sh body "${{ needs.plan.outputs.total }}" 4 "${{ matrix.chunk }}")
+          echo "Body chunk ${{ matrix.chunk }}: frames $START-$END"
+          mkdir -p out
+          npx remotion render src/index.ts "Short${SHORT}-Vertical" "out/body-${{ matrix.chunk }}.mkv" \
+            --frames=$START-$END \
+            --codec=h264-mkv --crf=16 --x264-preset=slow --audio-codec=pcm-16 \
+            --scale=1 --concurrency=4 --color-space=bt709 --log=error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short${{ inputs.short }}-body-${{ matrix.chunk }}
+          path: out/body-${{ matrix.chunk }}.mkv
+          retention-days: 7
+
+  end:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.ref }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - name: Render end card
+        run: |
+          read START END < <(bash scripts/short-frames.sh end "${{ needs.plan.outputs.total }}")
+          echo "End card (${{ matrix.variant }}): frames $START-$END"
+          mkdir -p out
+          npx remotion render src/index.ts "Short${SHORT}-Vertical${{ matrix.comp }}" "out/end-${{ matrix.variant }}.mkv" \
+            --frames=$START-$END \
+            --codec=h264-mkv --crf=16 --x264-preset=slow --audio-codec=pcm-16 \
+            --scale=1 --concurrency=4 --color-space=bt709 --log=error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short${{ inputs.short }}-end-${{ matrix.variant }}
+          path: out/end-${{ matrix.variant }}.mkv
+          retention-days: 7
+
+  check:
+    # The whole approach assumes nothing before the end card depends on the version. Prove it on every run, on stills (cheap).
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ inputs.ref }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20', cache: npm}
+      - run: npm ci
+      - name: Body frames must be identical in all three versions
+        run: |
+          TOTAL=${{ needs.plan.outputs.total }}
+          mkdir -p out/seam
+          for fr in $(( TOTAL / 2 )) $(( TOTAL - END_FRAMES - 1 )); do
+            for sfx in "" "-Social" "-Instagram"; do
+              npx remotion still src/index.ts "Short${SHORT}-Vertical${sfx}" "out/seam/f${fr}${sfx}.png" --frame="$fr" --scale=0.4 --log=error
+            done
+            a=$(md5sum "out/seam/f${fr}.png" | cut -d' ' -f1)
+            b=$(md5sum "out/seam/f${fr}-Social.png" | cut -d' ' -f1)
+            c=$(md5sum "out/seam/f${fr}-Instagram.png" | cut -d' ' -f1)
+            echo "frame $fr: youtube=$a facebook=$b instagram=$c"
+            if [ "$a" != "$b" ] || [ "$a" != "$c" ]; then
+              echo "::error::Frame $fr differs between versions, so the body is no longer shared. Check END_FRAMES (scripts/short-frames.sh) and anything variant-specific before the end card."
+              exit 1
+            fi
+          done
+
+  join:
+    needs: [plan, body, end, check]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'short${{ inputs.short }}-body-*', path: parts, merge-multiple: true}
+      - uses: actions/download-artifact@v4
+        with: {name: 'short${{ inputs.short }}-end-${{ matrix.variant }}', path: parts}
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Join body + end card
+        run: |
+          OUT="short${SHORT}-vertical${{ matrix.file }}.mp4"
+          : > concat.txt
+          for i in 1 2 3 4; do echo "file 'parts/body-$i.mkv'" >> concat.txt; done
+          echo "file 'parts/end-${{ matrix.variant }}.mkv'" >> concat.txt
+          mkdir -p out
+          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart "out/$OUT"
+          ffprobe -v error -show_entries stream=codec_type,width,height,r_frame_rate -show_entries format=duration -of default=nw=1 "out/$OUT"
+          WANT=${{ needs.plan.outputs.total }}
+          # 1) exactly the frames the composition has: no lost or doubled frame at a seam
+          GOT=$(ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 "out/$OUT")
+          echo "video frames: got $GOT, want $WANT"
+          if [ "$GOT" != "$WANT" ]; then echo "::error::$OUT has $GOT frames, expected $WANT"; exit 1; fi
+          # 2) exactly the right length, video and audio: a frozen frame at a seam shows up here even when the frame count is right
+          python3 - "out/$OUT" "$WANT" <<'EOF'
+          import json, subprocess, sys
+          path, total = sys.argv[1], int(sys.argv[2])
+          want = total / 60
+          out = subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,duration", "-of", "json", path])
+          for st in json.loads(out)["streams"]:
+              got = float(st["duration"])
+              print(f"{st['codec_type']}: {got:.3f}s (want {want:.3f}s)")
+              if abs(got - want) > 0.05:
+                  sys.exit(f"::error::{path}: {st['codec_type']} is {got:.3f}s long, expected {want:.3f}s: a seam is adding or losing time")
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short${{ inputs.short }}-vertical${{ matrix.file }}
+          path: out/short${{ inputs.short }}-vertical${{ matrix.file }}.mp4

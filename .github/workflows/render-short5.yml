@@ -1,4 +1,6 @@
 name: Render Short 5
+# Renders the body once and the three end cards (YouTube, Facebook, Instagram) separately, then joins them: see render-short-reusable.yml.
+# Run it from the feat/short-1-vertical branch ("Use workflow from"), so this version of the workflow is the one that runs.
 on:
   workflow_dispatch:
     inputs:
@@ -6,62 +8,17 @@ on:
         description: Git ref to render
         required: true
         default: feat/short-1-vertical
-      variant:
-        description: 'End card: youtube = Related video button; social = Facebook, link in comments; instagram = link in bio'
+      variants:
+        description: 'Which versions: all = YouTube + Facebook + Instagram; or just one'
         required: true
-        default: youtube
+        default: all
         type: choice
-        options: [youtube, social, instagram]
+        options: [all, youtube, social, instagram]
 
 jobs:
   render:
-    env:
-      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || inputs.variant == 'instagram' && '-Instagram' || '' }}
-      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || inputs.variant == 'instagram' && '-instagram' || '' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        chunk: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-        with: {ref: ${{ inputs.ref }}}
-      - uses: actions/setup-node@v4
-        with: {node-version: '20', cache: npm}
-      - run: npm ci
-      - id: range
-        run: |
-          TOTAL=2640
-          PER_CHUNK=$(( (TOTAL + 3) / 4 ))
-          START=$(( (${{ matrix.chunk }} - 1) * PER_CHUNK ))
-          END=$(( START + PER_CHUNK - 1 ))
-          if [ "$END" -ge "$TOTAL" ]; then END=$((TOTAL - 1)); fi
-          echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END" >> "$GITHUB_OUTPUT"
-      - run: |
-          mkdir -p out
-          npx remotion render src/index.ts "Short5-Vertical${COMP_SUFFIX}" out/chunk-${{ matrix.chunk }}.mp4 \
-            --frames=${{ steps.range.outputs.start }}-${{ steps.range.outputs.end }} \
-            --codec=h264 --crf=16 --x264-preset=slow --audio-codec=aac \
-            --audio-bitrate=320k --scale=1 --concurrency=4 --color-space=bt709 --log=error
-      - uses: actions/upload-artifact@v4
-        with: {name: short5-chunk-${{ matrix.chunk }}, path: out/chunk-${{ matrix.chunk }}.mp4}
-  concatenate:
-    env:
-      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || inputs.variant == 'instagram' && '-Instagram' || '' }}
-      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || inputs.variant == 'instagram' && '-instagram' || '' }}
-    needs: render
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with: {pattern: short5-chunk-*, path: out/chunks, merge-multiple: true}
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: |
-          : > concat.txt
-          for i in 1 2 3 4; do echo "file 'out/chunks/chunk-$i.mp4'" >> concat.txt; done
-          ffmpeg -y -v error -f concat -safe 0 -i concat.txt -c:v copy -c:a aac -b:a 320k -movflags +faststart out/short5-vertical$FILE_SUFFIX.mp4
-          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=nw=1 out/short5-vertical$FILE_SUFFIX.mp4
-      - uses: actions/upload-artifact@v4
-        with:
-          name: short5-vertical${{ env.FILE_SUFFIX }}
-          path: out/short5-vertical${{ env.FILE_SUFFIX }}.mp4
+    uses: ./.github/workflows/render-short-reusable.yml
+    with:
+      short: 5
+      ref: ${{ inputs.ref }}
+      variants: ${{ inputs.variants }}
