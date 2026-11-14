@@ -1,5 +1,5 @@
 {
-  "_note": "Source: metro-verified-data-and-todo.md (prepared 14 Nov 2026). Inputs are VERIFIED unless a tax status says otherwise. buyingPower50k is the file's figure (re-derived here from allItems and matched within $100). wageAfterPrices and rentShareOfWagePct are derived (wage / (allItems/100); 12 x rent / wage), not official figures. Rank = countdown order by buying power of $50,000. Show 'typical resident = single filer in the principal city, wages only' wherever take-home is used. Update 14 Nov 2026: PA, AZ, NY State and CA SDI re-checked against official pages; LA take-home now includes $550 SDI.",
+  "_note": "Source: metro-verified-data-and-todo.md (prepared 14 Nov 2026). Inputs are VERIFIED unless a tax status says otherwise. buyingPower50k is the file's figure (re-derived here from allItems and matched within $100). wageAfterPrices and rentShareOfWagePct are derived (wage / (allItems/100); 12 x rent / wage), not official figures. Rank = countdown order by buying power of $50,000. Show 'typical resident = single filer in the principal city, wages only' wherever take-home is used. Update 14 Nov 2026: PA, AZ, NY State and CA SDI re-checked against official pages; state payroll insurance (CA SDI, NY PFL) is listed separately and excluded from take-home for all cities.",
   "dataYear": 2024,
   "taxAssumptions": "single filer, 2024 standard deduction $14,600, wages only, federal $4,016 (formula; $4,019 by IRS table), FICA $3,825",
   "sources": {
@@ -278,7 +278,11 @@
         "state": 2145,
         "local": 1508,
         "takeHome": 38506,
-        "status": "verified: NYC rates; NYS $8,000 deduction and no household credit at $50,000 (IT-201 instructions); NYS single schedule ($600 + 5.5% over $13,900) gives $2,145"
+        "status": "verified: NYC rates; NYS $8,000 deduction, no household credit (IT-201 instructions); NYS single schedule gives $2,145. Take-home excludes NY PFL (~$187)",
+        "statePayrollInsurance": {
+          "paidFamilyLeave": 187,
+          "note": "PFL 0.373% of wages, 2024 (cap $333.25); NY SDI up to about $31/yr not verified"
+        }
       },
       "twistRank": 2
     },
@@ -311,8 +315,8 @@
         "fica": 3825,
         "state": 1096,
         "local": 0,
-        "takeHome": 40513,
-        "status": "verified: CA income tax (FTB) plus SDI 1.1% with no wage cap in 2024 (EDD) = $550",
+        "takeHome": 41063,
+        "status": "verified: CA income tax (FTB, recomputed $1,096). Take-home excludes SDI $550 (1.1%, no wage cap in 2024, EDD) to match the other cities",
         "stateDisabilityInsurance": 550
       },
       "twistRank": 9
@@ -351,5 +355,6 @@
       },
       "twistRank": 10
     }
-  ]
+  ],
+  "takeHomeBasis": "Take-home = $50,000 minus federal income tax, FICA, state and local income tax. It excludes state payroll insurance (CA SDI $550, NY PFL about $187) for every city so the ten are comparable; say so on screen if take-home is shown."
 }
