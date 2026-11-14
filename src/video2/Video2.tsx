@@ -7,7 +7,8 @@ import {toReal} from '../clock';
 import {MasterAudio, SfxTrack} from '../audio/Sfx';
 import {VIDEO2_CUES} from './sfx2';
 import {cityPrefix, cue, d, group, section} from './layout';
-import {SceneCamera, SceneCameraProps} from './camera';
+import {SceneCamera, SceneCameraProps, sceneCameraOffset} from './camera';
+import {useDesignFrame} from '../clock';
 import {ROLE} from './system';
 import {ColdOpen, CityScene, Method, Outro, RentBreak, Takeaway, Twist} from './scenes';
 
@@ -44,11 +45,25 @@ export const Video2: React.FC = () => {
     {name: 'takeaway', g: group('s05_'), node: <Takeaway />, cam: {seed: 4}},
     {name: 'outro', g: group('s06_'), node: <Outro />, cam: {seed: 5, exit: 'none'}},
   ];
+  // Background sits outside every scene's own <Sequence>, so it can't read SceneCamera's offset directly. Find
+  // whichever part is on screen at the current (global) design frame and replay the same pure camera math for it,
+  // so the background drifts/whips with the foreground instead of staying static.
+  const globalFrame = useDesignFrame();
+  let parallax: [number, number] = [0, 0];
+  for (const p of parts) {
+    const local = globalFrame - p.g.from;
+    if (local >= 0 && local < p.g.frames) {
+      const off = sceneCameraOffset(local, p.g.frames, p.cam.seed, p.cam.enter, p.cam.exit, p.cam.punchAts);
+      parallax = [off.x, off.y];
+      break;
+    }
+  }
+
   return (
     <AbsoluteFill style={{backgroundColor: C.navy3}}>
       <MasterAudio />
       <SfxTrack cues={VIDEO2_CUES} offset={0} />
-      <Background />
+      <Background parallax={parallax} />
       {parts.map((p) => (
         <Seq key={p.name} from={p.g.from} frames={p.g.frames} name={p.name}>
           <SceneCamera frames={p.g.frames} {...p.cam}>{p.node}</SceneCamera>

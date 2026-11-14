@@ -46,7 +46,9 @@ export const Background: React.FC<{
       />
       <svg width={W} height={H} style={{position: 'absolute', inset: 0, opacity: 0.03, mixBlendMode: 'overlay'}}>
         <filter id="grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed={frame % 7} />
+          {/* `frame` is already the 30fps design clock; floor it so grain reseeds once per design frame
+              (~30/s) instead of every render frame (60/s), which read as busy/flickery. */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed={Math.floor(frame) % 7} />
         </filter>
         <rect width={W} height={H} filter="url(#grain)" />
       </svg>

@@ -40,13 +40,22 @@ const offsetX = (f: number, frames: number, enter: string, exit: string) => {
   return x;
 };
 
-export const SceneCamera: React.FC<SceneCameraProps> = ({frames, seed = 0, enter = 'whip', exit = 'whip', flashColor = '#ffffff', punchAts = [], children}) => {
-  const f = useDesignFrame();
-  const uid = useRef(Math.random().toString(36).slice(2, 8));
-  const id = `whip_${uid.current}`;
+export type CameraOffset = {x: number; y: number; scale: number; blurPx: number; build: number; flash: number};
 
+/**
+ * Pure function version of the camera math, usable outside a scene's own <Sequence> (e.g. by the persistent
+ * Background to get the same offset for parallax). `f` is the design frame local to the scene (0 at scene start).
+ */
+export const sceneCameraOffset = (
+  f: number,
+  frames: number,
+  seed = 0,
+  enter: 'whip' | 'flash' | 'none' = 'whip',
+  exit: 'whip' | 'build' | 'none' = 'whip',
+  punchAts: number[] = []
+): CameraOffset => {
   const x = offsetX(f, frames, enter, exit);
-  const blur = blurLength(x - offsetX(f - 1, frames, enter, exit), 0.5, 48);
+  const blurPx = blurLength(x - offsetX(f - 1, frames, enter, exit), 0.5, 48);
 
   // slow drift: alternate the direction per scene so consecutive cities do not push the same way
   const s = Math.min(1, Math.max(0, f / frames));
@@ -65,6 +74,16 @@ export const SceneCamera: React.FC<SceneCameraProps> = ({frames, seed = 0, enter
   if (enter === 'flash') scale += 0.05 * Math.exp(-since / 6);
   for (const a of punchAts) if (f >= a) scale += 0.025 * Math.exp(-(f - a) / 5);
 
+  return {x: x + dx, y: dy, scale, blurPx, build, flash};
+};
+
+export const SceneCamera: React.FC<SceneCameraProps> = ({frames, seed = 0, enter = 'whip', exit = 'whip', flashColor = '#ffffff', punchAts = [], children}) => {
+  const f = useDesignFrame();
+  const uid = useRef(Math.random().toString(36).slice(2, 8));
+  const id = `whip_${uid.current}`;
+
+  const {x, y: dy, scale, blurPx: blur, build, flash} = sceneCameraOffset(f, frames, seed, enter, exit, punchAts);
+
   return (
     <AbsoluteFill>
       {blur > 0 && (
@@ -76,7 +95,7 @@ export const SceneCamera: React.FC<SceneCameraProps> = ({frames, seed = 0, enter
           </defs>
         </svg>
       )}
-      <AbsoluteFill style={{transform: `translate(${x + dx}px, ${dy}px) scale(${scale})`, transformOrigin: '50% 50%', filter: blur > 0 ? `url(#${id})` : undefined}}>
+      <AbsoluteFill style={{transform: `translate(${x}px, ${dy}px) scale(${scale})`, transformOrigin: '50% 50%', filter: blur > 0 ? `url(#${id})` : undefined}}>
         {children}
       </AbsoluteFill>
       {build > 0 && (
