@@ -197,7 +197,8 @@ var NEWSLETTER_ACTION = '';   // paste your Beehiiv / Buttondown / Kit form acti
 /* ====================== */
 var $ = function(id){ return document.getElementById(id); };
 var CHANNEL_URL = 'https://www.youtube.com/channel/' + CHANNEL_ID;
-var RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
+/* UULF + channel ID (without the UC) is YouTube's automatic long-form-only playlist, so Shorts never appear */
+var RSS = 'https://www.youtube.com/feeds/videos.xml?playlist_id=UULF' + CHANNEL_ID.slice(2);
 var API = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS);
 var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -262,7 +263,7 @@ function render(items){
   var s = $('skelList'); if (s) s.remove();
   if (vids.length > 1){ $('list').innerHTML = vids.slice(1).map(rowHTML).join(''); $('moreWrap').hidden = false; }
 }
-var KEY = 'payranked_feed_v2';
+var KEY = 'payranked_feed_v3';
 try { var c = JSON.parse(sessionStorage.getItem(KEY)); if (c && Date.now() - c.t < 600000){ render(c.items); return; } } catch(e){}
 var ctrl = 'AbortController' in window ? new AbortController() : null, to = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 9000);
 fetch(API, ctrl ? {signal: ctrl.signal} : undefined)
