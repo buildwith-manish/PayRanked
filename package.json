@@ -11,7 +11,7 @@
     "previews": "node scripts/dump-cues.mjs && python3 scripts/make_audio_previews.py",
     "vo-envelope": "python3 scripts/vo_envelope.py",
     "timing": "node scripts/export-timing.mjs",
-    "music": "node scripts/export-timing.mjs && python3 scripts/make_music.py",
+    "music": "python3 scripts/make_music2.py",
     "vo-cues": "node scripts/export-timing.mjs && python3 scripts/vo_cues.py"
   },
   "dependencies": {

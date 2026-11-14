@@ -8,7 +8,7 @@ export const AUDIO = {
    * Voice clips come from voiceover-manifest.json, so an empty manifest plays nothing.
    */
   vo: true, // plays whatever is listed in voiceover-manifest.json (empty until the clips are recorded)
-  music: false, // off until public/music.mp3 is generated for Video 2 (npm run music)
+  music: true, // public/music.mp3 comes from scripts/make_music2.py (Video 2)
   sfx: true,
 
   voLevel: 0.9, // clips in public/voiceover are levelled to -15 LUFS (scripts/normalize_vo.py); 0.9 leaves headroom for music + SFX
