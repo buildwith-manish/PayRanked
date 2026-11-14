@@ -158,7 +158,7 @@ jobs:
           #   With 4 Chromium instances at once that exceeded the 300 s default and failed some pieces. 20 min is plenty.
           # Up to 3 attempts per piece: a rare slow-frame timeout then costs one retry instead of the whole job.
           for attempt in 1 2 3; do
-            if npx remotion render src/index.ts Video1 "$OUT" \
+            if npx remotion render src/index.ts Video2 "$OUT" \
               --frames=$START-$END \
               --codec=h264 --crf=14 \
               --x264-preset=fast \

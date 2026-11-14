@@ -129,7 +129,7 @@ jobs:
           #   source the cleaner the result. --color-space=bt709 tags the video as HD/4K (Remotion's h264 default is bt601,
           #   which makes YouTube shift the colours slightly).
           # 4K + 60fps + motion blur all stay ON (config-level, not flag-level).
-          npx remotion render src/index.ts Video1 "out/clips/group-${{ matrix.group }}.mp4" \
+          npx remotion render src/index.ts Video2 "out/clips/group-${{ matrix.group }}.mp4" \
             --frames=$START-$END \
             --codec=h264 --crf=14 \
             --x264-preset=fast \

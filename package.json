@@ -1,22 +1,18 @@
 {
-  "name": "payranked-video1",
+  "name": "payranked",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "remotion studio",
-    "still": "remotion still src/index.ts RankReveal-Arkansas out/arkansas.png --frame=900",
-    "stills": "bash scripts/stills.sh",
     "typecheck": "tsc --noEmit",
-    "camera-check": "node scripts/camera-check.mjs",
-    "render:half": "remotion render src/index.ts Video1 out/video1-half.mp4 --scale=0.5",
-    "render": "remotion render src/index.ts Video1 out/video1.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
+    "render:half": "remotion render src/index.ts Video2 out/video2-half.mp4 --scale=0.5",
+    "render": "remotion render src/index.ts Video2 out/video2.mp4 --codec=h264 --crf=16 --x264-preset=slow --tune=film --audio-codec=aac --audio-bitrate=320k",
     "sfx": "python3 scripts/make_sfx.py",
     "previews": "node scripts/dump-cues.mjs && python3 scripts/make_audio_previews.py",
     "vo-envelope": "python3 scripts/vo_envelope.py",
     "timing": "node scripts/export-timing.mjs",
     "music": "node scripts/export-timing.mjs && python3 scripts/make_music.py",
-    "vo-cues": "node scripts/export-timing.mjs && python3 scripts/vo_cues.py",
-    "review": "bash scripts/review-render.sh"
+    "vo-cues": "node scripts/export-timing.mjs && python3 scripts/vo_cues.py"
   },
   "dependencies": {
     "@react-three/fiber": "8.17.10",
@@ -27,19 +23,14 @@
     "@remotion/shapes": "4.0.250",
     "@remotion/three": "4.0.250",
     "@remotion/transitions": "4.0.250",
-    "d3-geo": "^3.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "4.0.250",
-    "three": "^0.166.1",
-    "topojson-client": "^3.1.0",
-    "us-atlas": "^3.0.1"
+    "three": "^0.166.1"
   },
   "devDependencies": {
-    "@types/d3-geo": "^3.1.0",
     "@types/react": "^18.3.3",
     "@types/three": "^0.166.0",
-    "@types/topojson-client": "^3.1.5",
     "typescript": "^5.5.4"
   }
 }

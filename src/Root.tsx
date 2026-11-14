@@ -5,129 +5,22 @@
 import './fontshare/load-fonts';
 
 import React from 'react';
-import {AbsoluteFill, Composition, Sequence} from 'remotion';
-import {RankReveal} from './components/RankReveal';
-import {Shot1, SHOT1_FRAMES} from './shots/Shot1';
-import {Shot2, SHOT2_FRAMES} from './shots/Shot2';
-import {Shot3, SHOT3_FRAMES} from './shots/Shot3';
-import {Shot5, SHOT5_FRAMES} from './shots/Shot5';
-import {Shot55, SHOT55_FRAMES} from './shots/Shot55'; // EXTEND-4: practical takeaways
-import {Shot6, SHOT6_FRAMES} from './shots/Shot6';
+import {Composition} from 'remotion';
 import {Grade} from './components/Grade';
-import {Watermark} from './components/Watermark';
-import {C, FPS, H, W} from './theme';
+import {Video2} from './video2/Video2';
+import {FPS, H, W} from './theme';
 import {toReal} from './clock';
-import {Break} from './components/Break';
-import {breaks, COUNTDOWN_TOTAL, START, timeline, VIDEO_FRAMES} from './timeline';
-import {CUES, Cue} from './audio/cues';
-import {MasterAudio, SfxTrack} from './audio/Sfx';
+import {VIDEO2_FRAMES} from './timeline2';
 
-const Countdown: React.FC = () => (
-  <AbsoluteFill>
-    {timeline.map((t, i) => (
-      <Sequence key={t.label} from={toReal(t.from)} durationInFrames={toReal(t.dur)} name={`${t.label} ${t.names.join(' + ')}`}>
-        <RankReveal rankLabel={t.label} names={t.names} durationInFrames={t.dur} railBefore={t.railBefore} fast={t.fast} versus={t.versus} />
-        <SfxTrack cues={CUES.reveals[i]} offset={START.shot4 + t.from} />
-      </Sequence>
-    ))}
-    {breaks.map((b, i) => (
-      <Sequence key={b.kind} from={toReal(b.from)} durationInFrames={toReal(b.dur)} name={`Break ${b.kind}`}>
-        <Break kind={b.kind} rail={b.rail} durationInFrames={b.dur} />
-        <SfxTrack cues={CUES.breaks[i]} offset={START.shot4 + b.from} />
-      </Sequence>
-    ))}
-  </AbsoluteFill>
-);
-
-/** Every composition goes through the same filmic grade (bloom, S-curve, split tone, lens dust). Video1 grades once, as a whole. */
-const graded =
-  <P extends object>(Comp: React.ComponentType<P>, offset = 0, cues?: Cue[]): React.FC<P> =>
-  (props) => (
-    <>
-      <Grade>
-        <Comp {...props} />
-      </Grade>
-      {cues && <SfxTrack cues={cues} offset={offset} />}
-      <MasterAudio offset={offset} />
-      {/* Channel watermark on every standalone composition too, so it appears in Remotion Studio shot previews. */}
-      <Watermark />
-    </>
-  );
-
-const Video1: React.FC = () => (
+/** Every composition goes through the same filmic grade (bloom, S-curve, split tone, lens dust). */
+const GradedVideo2: React.FC = () => (
   <Grade>
-  <AbsoluteFill style={{backgroundColor: C.navy3}}>
-    {/* voice-over and music bed (ducked by the voice, dipped on impacts); every sound effect is inside its shot's Sequence */}
-    <MasterAudio />
-    <Sequence from={toReal(START.shot1)} durationInFrames={toReal(SHOT1_FRAMES)} name="Shot 1 Cold open">
-      <Shot1 />
-      <SfxTrack cues={CUES.shot1} offset={START.shot1} />
-    </Sequence>
-    <Sequence from={toReal(START.shot2)} durationInFrames={toReal(SHOT2_FRAMES)} name="Shot 2 Intro">
-      <Shot2 />
-    </Sequence>
-    <Sequence from={toReal(START.shot3)} durationInFrames={toReal(SHOT3_FRAMES)} name="Shot 3 Method">
-      <Shot3 />
-      <SfxTrack cues={CUES.shot3} offset={START.shot3} />
-    </Sequence>
-    <Sequence from={toReal(START.shot4)} durationInFrames={toReal(COUNTDOWN_TOTAL)} name="Shot 4 Countdown">
-      <Countdown />
-    </Sequence>
-    <Sequence from={toReal(START.shot5)} durationInFrames={toReal(SHOT5_FRAMES)} name="Shot 5 Reality check">
-      <Shot5 />
-      <SfxTrack cues={CUES.shot5} offset={START.shot5} />
-    </Sequence>
-    {/* EXTEND-4: Shot 5.5 Practical Takeaways — 80s, sits between Reality Check and Outro */}
-    <Sequence from={toReal(START.shot55)} durationInFrames={toReal(SHOT55_FRAMES)} name="Shot 5.5 Practical">
-      <Shot55 />
-      <SfxTrack cues={CUES.shot55} offset={START.shot55} />
-    </Sequence>
-    <Sequence from={toReal(START.shot6)} durationInFrames={toReal(SHOT6_FRAMES)} name="Shot 6 Outro">
-      <Shot6 />
-      <SfxTrack cues={CUES.shot6} offset={START.shot6} />
-    </Sequence>
-    {/* Channel watermark — fades in at 5s, fades out 18s before end. Sits on top of every shot. */}
-    <Watermark />
-  </AbsoluteFill>
+    <Video2 />
   </Grade>
 );
 
-// Each standalone composition plays the same sound as it does inside Video1 (same cues, same voice-over slice).
-const GradedShot1 = graded(Shot1, START.shot1, CUES.shot1);
-const GradedShot2 = graded(Shot2, START.shot2);
-const GradedShot3 = graded(Shot3, START.shot3, CUES.shot3);
-const GradedShot5 = graded(Shot5, START.shot5, CUES.shot5);
-const GradedShot55 = graded(Shot55, START.shot55, CUES.shot55); // EXTEND-4
-const GradedShot6 = graded(Shot6, START.shot6, CUES.shot6);
-const GradedCountdown = graded(Countdown, START.shot4); // the reveals carry their own cues
-const GradedReveals = timeline.map((_, i) => graded(RankReveal, START.shot4 + timeline[i].from, CUES.reveals[i]));
-
-const GradedBreaks = breaks.map((b, i) => graded(Break, START.shot4 + b.from, CUES.breaks[i]));
-
-const common = {width: W, height: H, fps: FPS};
-
 export const Root: React.FC = () => (
   <>
-    <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
-    <Composition id="Shot1-ColdOpen" component={GradedShot1} durationInFrames={toReal(SHOT1_FRAMES)} {...common} />
-    <Composition id="Shot2-Intro" component={GradedShot2} durationInFrames={toReal(SHOT2_FRAMES)} {...common} />
-    <Composition id="Shot3-Method" component={GradedShot3} durationInFrames={toReal(SHOT3_FRAMES)} {...common} />
-    <Composition id="Shot4-Countdown" component={GradedCountdown} durationInFrames={toReal(COUNTDOWN_TOTAL)} {...common} />
-    <Composition id="Shot5-RealityCheck" component={GradedShot5} durationInFrames={toReal(SHOT5_FRAMES)} {...common} />
-    <Composition id="Shot55-Practical" component={GradedShot55} durationInFrames={toReal(SHOT55_FRAMES)} {...common} />
-    <Composition id="Shot6-Outro" component={GradedShot6} durationInFrames={toReal(SHOT6_FRAMES)} {...common} />
-    {breaks.map((b, i) => (
-      <Composition key={b.kind} id={`Break-${b.kind}`} component={GradedBreaks[i]} durationInFrames={toReal(b.dur)} {...common} defaultProps={{kind: b.kind, rail: b.rail, durationInFrames: b.dur}} />
-    ))}
-    {timeline.map((t, i) => (
-      <Composition
-        key={t.label}
-        id={`RankReveal-${t.names[0].replace(/\s+/g, '')}`}
-        component={GradedReveals[i]}
-        durationInFrames={toReal(t.dur)}
-        {...common}
-        defaultProps={{rankLabel: t.label, names: t.names, durationInFrames: t.dur, railBefore: t.railBefore, fast: t.fast, versus: t.versus}}
-      />
-    ))}
+    <Composition id="Video2" component={GradedVideo2} durationInFrames={toReal(VIDEO2_FRAMES)} width={W} height={H} fps={FPS} />
   </>
 );

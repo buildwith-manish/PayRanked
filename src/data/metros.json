@@ -1,0 +1,106 @@
+{
+  "_note": "SKELETON. Countdown order (1 = best buying power of $50,000) from the verified data file. All values are null until copied from that data file; do not fill from memory. Houston and Miami buying power are the only figures known so far.",
+  "dataYear": 2024,
+  "metros": [
+    {
+      "rank": 1,
+      "name": "Houston",
+      "buyingPower50k": 50700,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 2,
+      "name": "Atlanta",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 3,
+      "name": "Philadelphia",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 4,
+      "name": "Dallas",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 5,
+      "name": "Phoenix",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 6,
+      "name": "Chicago",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 7,
+      "name": "Washington",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 8,
+      "name": "New York",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 9,
+      "name": "Los Angeles",
+      "buyingPower50k": null,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    },
+    {
+      "rank": 10,
+      "name": "Miami",
+      "buyingPower50k": 43800,
+      "priceLevel": null,
+      "medianWage": null,
+      "medianRent": null,
+      "rentShareOfWage": null,
+      "source": null
+    }
+  ]
+}
