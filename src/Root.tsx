@@ -25,6 +25,7 @@ import {CtaVariant, Short1EndCard, SHORT1_CTA_SECONDS, SHORT1_FRAMES, SHORT1_MET
 import {HOOK_SECONDS, SHORT_HOOK_ANIMS} from './shots/HookKit';
 import {SHORT_END_SECONDS, SHORT_HOOKS, ShortEndCard, ShortHook} from './shots/ShortOverlays';
 import {VH, VW} from './layout';
+import {Thumbnail, THUMB_END_FRAMES, THUMB_H, THUMB_W} from './thumbnails/Thumbnail';
 import voManifest from './audio/voiceover-manifest.json';
 import {AUDIO} from './audio/config';
 import {musicGain} from './audio/duck';
@@ -231,6 +232,10 @@ export const ShortSegment: React.FC<{spec: ShortSpec; cta?: CtaVariant}> = ({spe
             <ShortEndCard variant={cta} />
           </Sequence>
           <Watermark />
+          {/* thumbnail: the last frames of the Short, so it can be picked as the cover in YouTube Studio */}
+          <Sequence from={toReal(sec(spec.seconds + SHORT_END_SECONDS)) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name={`Short ${spec.id} thumbnail`}>
+            <Thumbnail id={spec.id} />
+          </Sequence>
         </AbsoluteFill>
       </Grade>
     </AbsoluteFill>
@@ -311,6 +316,9 @@ const Short1: React.FC<{cta?: CtaVariant}> = ({cta = 'youtube'}) => (
         </Sequence>
         <Short1Audio />
         <Watermark />
+        <Sequence from={toReal(SHORT1_FRAMES) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name="Short 1 thumbnail">
+          <Thumbnail id={1} />
+        </Sequence>
       </AbsoluteFill>
     </Grade>
   </AbsoluteFill>
@@ -324,6 +332,10 @@ export const Root: React.FC = () => (
     {/* Two renders of every Short: YouTube ("on my channel") and -Social for Instagram and Facebook ("link in comments"). Only the end card differs. */}
     <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'youtube' as CtaVariant}} />
     <Composition id="Short1-Vertical-Social" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'social' as CtaVariant}} />
+    {/* Thumbnails as single stills: npx remotion still src/index.ts Short3-Thumbnail out/short3-thumb.png */}
+    {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+      <Composition key={`thumb-${n}`} id={`Short${n}-Thumbnail`} component={Thumbnail} durationInFrames={1} width={THUMB_W} height={THUMB_H} fps={FPS} defaultProps={{id: n}} />
+    ))}
     {SHORTS_2_TO_7.flatMap((spec) =>
       (['youtube', 'social'] as CtaVariant[]).map((cta) => (
         <Composition
