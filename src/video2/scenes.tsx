@@ -157,7 +157,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
           <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color="#FFD25A" size={30} />
         </Enter>
       )}
-      <Enter at={tNext} style={{left: 1330, top: 950}}>
+      <Enter at={tNext} style={{left: 1000, top: 972}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 40, color: ROLE.buying, opacity: 0.6 + 0.4 * Math.sin(f / 6)}}>
           {rank > 1 ? `NEXT  →  #${rank - 1}  ?` : 'BUT THERE IS A TWIST  →'}
         </div>
