@@ -46,12 +46,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--s
 .film{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#0a1a30;border:1px solid var(--line);isolation:isolate}
 .film video,.film img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .film::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 -40px 50px -30px rgba(6,13,24,.7)}
-.ctrl{position:absolute;z-index:2;bottom:10px;right:10px;display:flex;gap:6px}
-.ctrl button{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--text);
-  background:rgba(6,13,24,.6);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s,background .2s}
-.ctrl button:hover{border-color:var(--line-hi);background:rgba(6,13,24,.85)}
-.ctrl svg{width:16px;height:16px}
-.ctrl .on{display:none}.ctrl .unmuted .on{display:block}.ctrl .unmuted .off{display:none}
 .share{position:absolute;z-index:2;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;cursor:pointer;
   font:600 12.5px var(--sans);color:var(--text);background:rgba(6,13,24,.6);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s}
 .share:hover{border-color:var(--line-hi)}
@@ -69,11 +63,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--s
 .cta:hover{transform:translateY(-2px);box-shadow:0 18px 38px -12px rgba(61,240,168,.75)}
 .cta svg{width:20px;height:20px}
 
-/* stat */
-.stat{margin-top:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:rgba(12,22,38,.7);display:flex;align-items:center;gap:16px}
-.stat b{font:600 44px/1 var(--display);letter-spacing:-.03em;color:var(--mint);font-variant-numeric:tabular-nums;min-width:2ch}
-.stat p{font-size:13.5px;line-height:1.45;color:var(--muted)}
-.stat p strong{display:block;color:var(--text);font:600 15px var(--display);margin-bottom:3px}
 
 .sec{display:flex;align-items:baseline;justify-content:space-between;margin:26px 2px 11px}
 .sec h2{font:600 17px var(--display);letter-spacing:-.01em}
@@ -132,7 +121,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--s
 [hidden]{display:none!important}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.mesh i,.pulse::after,.skel{animation:none}*{transition:none!important}}
-@media (max-width:360px){.row{grid-template-columns:96px 1fr}.stat b{font-size:36px}}
+@media (max-width:360px){.row{grid-template-columns:96px 1fr}}
 </style>
 </head>
 <body>
@@ -147,14 +136,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     <button class="share" id="share" type="button" aria-label="Copy page link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
       Share page
-    </button>
-    <div class="ctrl">
-      <button id="snd" type="button" aria-label="Turn sound on" aria-pressed="false">
-        <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4zM23 9l-6 6M17 9l6 6"/></svg>
-        <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
-      </button>
-    </div>
-  </div>
+    </button>  </div>
 
   <div class="inner">
     <header class="head">
@@ -167,11 +149,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2C.5 9.1.5 12 .5 12s0 2.9.5 4.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.8.5-4.8s0-2.9-.5-4.8zM9.8 15.1V8.9l5.4 3.1-5.4 3.1z"/></svg>
       Subscribe on YouTube
     </a>
-
-    <div class="stat" id="stat">
-      <b id="statNum" aria-hidden="true">0</b>
-      <p><strong>States ranked by purchasing power</strong>Where $100,000 goes the furthest. Data year 2024, from BEA Regional Price Parities.</p>
-    </div>
 
     <div class="sec"><h2>Latest video</h2><span id="count"></span></div>
     <section id="hero" aria-live="polite"><div class="skel big"></div></section>
@@ -217,7 +194,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 /* ====== SETTINGS ====== */
 var CHANNEL_ID = 'UCIwKjFD6fm1etNVvtf7r-Jg';
 var NEWSLETTER_ACTION = '';   // paste your Beehiiv / Buttondown / Kit form action URL to show the signup block
-var STAT_TARGET = 50;         // number shown in the count-up card
 /* ====================== */
 var $ = function(id){ return document.getElementById(id); };
 var CHANNEL_URL = 'https://www.youtube.com/channel/' + CHANNEL_ID;
@@ -240,25 +216,6 @@ if (!reduce){
   var p = vid.play(); if (p && p.catch) p.catch(function(){ vid.hidden = true; });
 }
 vid.addEventListener('error', function(){ vid.hidden = true; poster.style.display = 'block'; }, true);
-var snd = $('snd');
-if (reduce) snd.hidden = true;
-snd.addEventListener('click', function(){
-  vid.muted = !vid.muted;
-  snd.classList.toggle('unmuted', !vid.muted);
-  snd.setAttribute('aria-pressed', String(!vid.muted));
-  snd.setAttribute('aria-label', vid.muted ? 'Turn sound on' : 'Turn sound off');
-  if (!vid.muted){ vid.currentTime = 0; vid.play(); }
-});
-
-/* count-up */
-(function(){
-  var el = $('statNum');
-  if (reduce){ el.textContent = STAT_TARGET; return; }
-  var t0, dur = 1400;
-  function tick(t){ t0 = t0 || t; var k = Math.min((t - t0) / dur, 1); el.textContent = Math.round(STAT_TARGET * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tick); }
-  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(e){ if (e[0].isIntersecting){ io.disconnect(); requestAnimationFrame(tick); } }, {threshold:.4}) : null;
-  if (io) io.observe($('stat')); else el.textContent = STAT_TARGET;
-})();
 
 /* pointer glow */
 document.addEventListener('pointermove', function(e){
@@ -291,15 +248,15 @@ function vidId(it){ var m = (it.link || '').match(/[?&]v=([\w-]{11})/) || (it.gu
 function fmt(s){ var d = new Date(String(s).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? '' : 'Z')); return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); }
 function heroHTML(v){ return '<a class="hero glow" href="'+v.url+'" target="_blank" rel="noopener"><div class="thumb"><img src="'+v.img+'" alt="" width="480" height="360" loading="lazy" decoding="async"><span class="new">Newest</span><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></div><div class="meta"><h3>'+esc(v.title)+'</h3><span class="date">'+esc(v.date)+'</span></div></a>'; }
 function rowHTML(v){ return '<a class="row glow" href="'+v.url+'" target="_blank" rel="noopener"><div class="thumb"><img src="'+v.img+'" alt="" width="480" height="360" loading="lazy" decoding="async"></div><div><h3>'+esc(v.title)+'</h3><span class="date">'+esc(v.date)+'</span></div></a>'; }
-function fallback(){
-  $('hero').innerHTML = '<a class="fallback" href="'+CHANNEL_URL+'" target="_blank" rel="noopener"><strong>Watch PayRanked on YouTube</strong><p>The latest videos could not load right now. Open the channel to see every upload.</p></a>';
+function fallback(empty){
+  $('hero').innerHTML = '<a class="fallback" href="'+CHANNEL_URL+'" target="_blank" rel="noopener"><strong>'+(empty?'First video coming soon':'Watch PayRanked on YouTube')+'</strong><p>'+(empty?'Subscribe on YouTube so you see the first ranking the moment it goes live.':'The latest videos could not load right now. Open the channel to see every upload.')+'</p></a>';
   var s = $('skelList'); if (s) s.remove(); $('moreWrap').hidden = true; $('count').textContent = '';
 }
 function render(items){
   var vids = [];
   items.forEach(function(it){ var id = vidId(it); if (id) vids.push({url:'https://www.youtube.com/watch?v='+id, img:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg', title:it.title || 'Untitled video', date:fmt(it.pubDate)}); });
   vids = vids.slice(0, 10);
-  if (!vids.length) return fallback();
+  if (!vids.length) return fallback(true);
   $('hero').innerHTML = heroHTML(vids[0]);
   $('count').textContent = vids.length + (vids.length === 1 ? ' video' : ' videos');
   var s = $('skelList'); if (s) s.remove();
@@ -310,7 +267,7 @@ try { var c = JSON.parse(sessionStorage.getItem(KEY)); if (c && Date.now() - c.t
 var ctrl = 'AbortController' in window ? new AbortController() : null, to = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 9000);
 fetch(API, ctrl ? {signal: ctrl.signal} : undefined)
   .then(function(r){ if (!r.ok) throw 0; return r.json(); })
-  .then(function(d){ clearTimeout(to); if (d.status !== 'ok' || !d.items || !d.items.length) return fallback(); try{ sessionStorage.setItem(KEY, JSON.stringify({t:Date.now(), items:d.items})); }catch(e){} render(d.items); })
+  .then(function(d){ clearTimeout(to); if (d.status !== 'ok') return fallback(); if (!d.items || !d.items.length) return fallback(true); try{ sessionStorage.setItem(KEY, JSON.stringify({t:Date.now(), items:d.items})); }catch(e){} render(d.items); })
   .catch(function(){ clearTimeout(to); fallback(); });
 })();
 </script>
