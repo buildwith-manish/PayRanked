@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PayRanked | US salaries, pay gaps and wealth data</title>
+<meta name="description" content="Visualizing US incomes, career pay gaps, and wealth-building data backed by official numbers.">
+<meta name="theme-color" content="#060d18">
+<meta property="og:title" content="PayRanked">
+<meta property="og:description" content="Visualizing US incomes, career pay gaps, and wealth-building data backed by official numbers.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="media/intro-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="preload" href="fonts/ClashDisplay-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Clash Display';src:url('fonts/ClashDisplay-Variable.woff2') format('woff2');font-weight:200 700;font-display:swap}
+@font-face{font-family:'Satoshi';src:url('fonts/Satoshi-Variable.woff2') format('woff2');font-weight:300 900;font-display:swap}
+:root{
+  --bg:#060d18;--panel:#0c1626;--panel-2:#111e33;--line:rgba(255,255,255,.08);--line-hi:rgba(61,240,168,.4);
+  --text:#e8eef7;--muted:#8da2bb;--mint:#3df0a8;--green:#0fa86a;--navy:#14396a;
+  --display:'Clash Display','Satoshi',system-ui,sans-serif;--sans:'Satoshi',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);
+  padding:max(20px,env(safe-area-inset-top)) 14px max(40px,env(safe-area-inset-bottom));display:flex;justify-content:center;overflow-x:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.mesh{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.mesh i{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+.mesh i:nth-child(1){width:60vmax;height:60vmax;left:-22vmax;top:-26vmax;opacity:.7;background:radial-gradient(circle,var(--navy),transparent 65%);animation:d1 24s ease-in-out infinite alternate}
+.mesh i:nth-child(2){width:55vmax;height:55vmax;right:-24vmax;bottom:-24vmax;opacity:.5;background:radial-gradient(circle,rgba(15,168,106,.8),transparent 65%);animation:d2 28s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(8vmax,6vmax) scale(1.1)}}
+@keyframes d2{to{transform:translate(-8vmax,-5vmax) scale(1.15)}}
+
+.card{position:relative;z-index:1;width:100%;max-width:480px;height:fit-content;padding:10px;border-radius:26px;
+  background:linear-gradient(180deg,rgba(17,30,51,.78),rgba(8,15,27,.9));border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.06)}
+.inner{padding:0 10px 14px}
+
+/* brand video: the one memorable element */
+.film{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#0a1a30;border:1px solid var(--line);isolation:isolate}
+.film video,.film img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.film::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 -40px 50px -30px rgba(6,13,24,.7)}
+.ctrl{position:absolute;z-index:2;bottom:10px;right:10px;display:flex;gap:6px}
+.ctrl button{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--text);
+  background:rgba(6,13,24,.6);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s,background .2s}
+.ctrl button:hover{border-color:var(--line-hi);background:rgba(6,13,24,.85)}
+.ctrl svg{width:16px;height:16px}
+.ctrl .on{display:none}.ctrl .unmuted .on{display:block}.ctrl .unmuted .off{display:none}
+.share{position:absolute;z-index:2;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;cursor:pointer;
+  font:600 12.5px var(--sans);color:var(--text);background:rgba(6,13,24,.6);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s}
+.share:hover{border-color:var(--line-hi)}
+.share svg{width:14px;height:14px}
+
+.head{text-align:center;margin-top:18px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font:600 12px var(--sans);color:var(--mint);border:1px solid var(--line-hi);background:rgba(61,240,168,.07)}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);position:relative}
+.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--mint);animation:ping 2s ease-out infinite}
+@keyframes ping{to{transform:scale(3.2);opacity:0}}
+.tagline{margin:14px auto 0;max-width:36ch;font-size:15px;line-height:1.55;color:var(--muted)}
+
+.cta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;padding:15px 18px;border-radius:14px;background:var(--mint);color:#03150d;
+  font:700 15.5px var(--sans);text-decoration:none;box-shadow:0 12px 32px -12px rgba(61,240,168,.6);transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 18px 38px -12px rgba(61,240,168,.75)}
+.cta svg{width:20px;height:20px}
+
+/* stat */
+.stat{margin-top:14px;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:rgba(12,22,38,.7);display:flex;align-items:center;gap:16px}
+.stat b{font:600 44px/1 var(--display);letter-spacing:-.03em;color:var(--mint);font-variant-numeric:tabular-nums;min-width:2ch}
+.stat p{font-size:13.5px;line-height:1.45;color:var(--muted)}
+.stat p strong{display:block;color:var(--text);font:600 15px var(--display);margin-bottom:3px}
+
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:26px 2px 11px}
+.sec h2{font:600 17px var(--display);letter-spacing:-.01em}
+.sec span{font:12px var(--mono);color:var(--muted)}
+
+/* cards with pointer glow */
+.glow{position:relative;overflow:hidden}
+.glow::before{content:"";position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .3s;z-index:3;
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(61,240,168,.13),transparent 70%)}
+.glow:hover::before{opacity:1}
+
+.hero{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:16px;background:var(--panel);transition:transform .25s,border-color .25s}
+.hero:hover{transform:translateY(-3px);border-color:var(--line-hi)}
+.thumb{position:relative;aspect-ratio:16/9;background:var(--panel-2);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.hero:hover .thumb img,.row:hover .thumb img{transform:scale(1.04)}
+.play{position:absolute;left:12px;bottom:12px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(6,13,24,.72);border:1px solid rgba(255,255,255,.2)}
+.play svg{width:16px;height:16px;margin-left:2px;fill:#fff}
+.new{position:absolute;top:12px;left:12px;font:700 11px var(--sans);color:#03150d;background:var(--mint);padding:4px 10px;border-radius:999px}
+.meta{padding:14px 16px 16px}
+.meta h3{font:600 17px/1.3 var(--display);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.date{display:block;margin-top:8px;font:12px var(--mono);color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center;text-decoration:none;color:inherit;padding:8px;border:1px solid var(--line);border-radius:14px;background:rgba(12,22,38,.7);transition:transform .2s,border-color .2s}
+.row:hover{transform:translateY(-2px);border-color:var(--line-hi)}
+.row .thumb{border-radius:9px}
+.row h3{font:500 14px/1.35 var(--sans);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.row .date{margin-top:6px;font-size:11.5px}
+
+.skel{border-radius:16px;border:1px solid var(--line);background:linear-gradient(100deg,var(--panel) 30%,var(--panel-2) 50%,var(--panel) 70%);background-size:200% 100%;animation:sh 1.3s linear infinite}
+.skel.big{aspect-ratio:16/10}.skel.sm{height:72px;margin-top:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.fallback{display:block;text-align:center;text-decoration:none;color:inherit;padding:28px 20px;border:1px dashed var(--line-hi);border-radius:16px;background:rgba(61,240,168,.04)}
+.fallback strong{display:block;font:600 16px var(--display);margin-bottom:6px}
+.fallback p{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* newsletter */
+.news{margin-top:26px;padding:18px;border-radius:16px;border:1px solid var(--line-hi);background:linear-gradient(160deg,rgba(61,240,168,.09),rgba(20,57,106,.2))}
+.news h2{font:600 18px/1.25 var(--display);letter-spacing:-.01em}
+.news p{margin-top:6px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.news form{display:flex;gap:8px;margin-top:14px}
+.news input{flex:1;min-width:0;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(6,13,24,.7);color:var(--text);font:500 15px var(--sans)}
+.news input::placeholder{color:#5f738d}
+.news input:focus{outline:none;border-color:var(--mint)}
+.news button{padding:0 18px;border:0;border-radius:12px;background:var(--mint);color:#03150d;font:700 14px var(--sans);cursor:pointer}
+
+.socials{display:flex;gap:10px;margin-top:20px}
+.soc{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border:1px solid var(--line);border-radius:14px;color:var(--text);text-decoration:none;font:600 14px var(--sans);background:rgba(12,22,38,.7);transition:transform .2s,border-color .2s}
+.soc:hover{transform:translateY(-2px);border-color:var(--line-hi)}
+.soc svg{width:18px;height:18px}.soc svg:not([stroke]){fill:currentColor}
+.foot{margin-top:20px;text-align:center;font:11.5px var(--mono);color:#5d7088}
+
+.toast{position:fixed;left:50%;bottom:max(28px,env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;z-index:10;padding:10px 16px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line-hi);font:600 13px var(--sans);display:flex;gap:8px;align-items:center;pointer-events:none;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast svg{width:15px;height:15px;stroke:var(--mint)}
+[hidden]{display:none!important}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.mesh i,.pulse::after,.skel{animation:none}*{transition:none!important}}
+@media (max-width:360px){.row{grid-template-columns:96px 1fr}.stat b{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="mesh" aria-hidden="true"><i></i><i></i></div>
+
+<main class="card">
+  <div class="film" id="film">
+    <img src="media/intro-poster.jpg" alt="PayRanked" width="1280" height="720" id="poster">
+    <video id="vid" muted loop playsinline autoplay preload="auto" poster="media/intro-poster.jpg" aria-label="PayRanked channel intro" hidden>
+      <source src="media/intro.mp4" type="video/mp4">
+    </video>
+    <button class="share" id="share" type="button" aria-label="Copy page link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      Share page
+    </button>
+    <div class="ctrl">
+      <button id="snd" type="button" aria-label="Turn sound on" aria-pressed="false">
+        <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4zM23 9l-6 6M17 9l6 6"/></svg>
+        <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="inner">
+    <header class="head">
+      <h1 class="sr">PayRanked</h1>
+      <div class="badge"><span class="pulse"></span>Data-backed finance</div>
+      <p class="tagline">Visualizing US incomes, career pay gaps, and wealth-building data backed by official numbers.</p>
+    </header>
+
+    <a class="cta" id="cta" href="https://www.youtube.com/channel/UCIwKjFD6fm1etNVvtf7r-Jg?sub_confirmation=1" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2C.5 9.1.5 12 .5 12s0 2.9.5 4.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.8.5-4.8s0-2.9-.5-4.8zM9.8 15.1V8.9l5.4 3.1-5.4 3.1z"/></svg>
+      Subscribe on YouTube
+    </a>
+
+    <div class="stat" id="stat">
+      <b id="statNum" aria-hidden="true">0</b>
+      <p><strong>States ranked by purchasing power</strong>Where $100,000 goes the furthest. Data year 2024, from BEA Regional Price Parities.</p>
+    </div>
+
+    <div class="sec"><h2>Latest video</h2><span id="count"></span></div>
+    <section id="hero" aria-live="polite"><div class="skel big"></div></section>
+
+    <div id="moreWrap" hidden>
+      <div class="sec"><h2>Recent uploads</h2></div>
+      <div class="list" id="list"></div>
+    </div>
+    <div id="skelList"><div class="skel sm"></div><div class="skel sm"></div></div>
+
+    <!-- Newsletter: set NEWSLETTER_ACTION in the script below. Hidden until set. -->
+    <section class="news" id="news" hidden>
+      <h2>One pay-data chart in your inbox every week</h2>
+      <p>New rankings first, with the source numbers. No spam.</p>
+      <form id="nform" method="post" target="_blank" novalidate>
+        <input type="email" name="email" id="nemail" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
+        <button type="submit">Subscribe</button>
+      </form>
+    </section>
+
+    <nav class="socials" aria-label="Social links">
+      <a class="soc" id="ig" href="https://instagram.com" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        Instagram
+      </a>
+      <a class="soc" id="fb" href="[PASTE_YOUR_FACEBOOK_PAGE_URL]" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.900 11.900v-8.400H7.100V12h3V9.400c0-3 1.800-4.700 4.500-4.700 1.300 0 2.700.2 2.700.2v3h-1.500c-1.500 0-2 .9-2 1.900V12h3.400l-.5 3.500h-2.800v8.400A12 12 0 0 0 24 12z"/></svg>
+        Facebook
+      </a>
+    </nav>
+    <p class="foot">Sources: BEA, Census Bureau, BLS, Federal Reserve</p>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">Copied!</span>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ====== SETTINGS ====== */
+var CHANNEL_ID = 'UCIwKjFD6fm1etNVvtf7r-Jg';
+var NEWSLETTER_ACTION = '';   // paste your Beehiiv / Buttondown / Kit form action URL to show the signup block
+var STAT_TARGET = 50;         // number shown in the count-up card
+/* ====================== */
+var $ = function(id){ return document.getElementById(id); };
+var CHANNEL_URL = 'https://www.youtube.com/channel/' + CHANNEL_ID;
+var RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
+var API = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS);
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* where did the visitor come from? ?src=ig hides Instagram, ?src=fb hides Facebook */
+var src = (new URLSearchParams(location.search).get('src') || '').toLowerCase();
+if (src === 'ig' || src === 'instagram') $('ig').hidden = true;
+if (src === 'fb' || src === 'facebook') $('fb').hidden = true;
+if (/PASTE_YOUR/.test($('fb').getAttribute('href'))) $('fb').hidden = true;
+if ($('ig').hidden && $('fb').hidden) document.querySelector('.socials').hidden = true;
+
+/* brand film */
+var vid = $('vid'), poster = $('poster');
+if (!reduce){
+  vid.hidden = false;
+  vid.addEventListener('playing', function(){ poster.style.display = 'none'; });
+  var p = vid.play(); if (p && p.catch) p.catch(function(){ vid.hidden = true; });
+}
+vid.addEventListener('error', function(){ vid.hidden = true; poster.style.display = 'block'; }, true);
+var snd = $('snd');
+if (reduce) snd.hidden = true;
+snd.addEventListener('click', function(){
+  vid.muted = !vid.muted;
+  snd.classList.toggle('unmuted', !vid.muted);
+  snd.setAttribute('aria-pressed', String(!vid.muted));
+  snd.setAttribute('aria-label', vid.muted ? 'Turn sound on' : 'Turn sound off');
+  if (!vid.muted){ vid.currentTime = 0; vid.play(); }
+});
+
+/* count-up */
+(function(){
+  var el = $('statNum');
+  if (reduce){ el.textContent = STAT_TARGET; return; }
+  var t0, dur = 1400;
+  function tick(t){ t0 = t0 || t; var k = Math.min((t - t0) / dur, 1); el.textContent = Math.round(STAT_TARGET * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tick); }
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(e){ if (e[0].isIntersecting){ io.disconnect(); requestAnimationFrame(tick); } }, {threshold:.4}) : null;
+  if (io) io.observe($('stat')); else el.textContent = STAT_TARGET;
+})();
+
+/* pointer glow */
+document.addEventListener('pointermove', function(e){
+  var c = e.target.closest && e.target.closest('.glow'); if (!c) return;
+  var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+});
+
+/* toast + share */
+var toast = $('toast'), tt;
+function showToast(m){ $('toastMsg').textContent = m; toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('show'); }, 1800); }
+$('share').addEventListener('click', function(){
+  var u = new URL(location.href); u.search = ''; u.hash = ''; var url = u.toString();
+  function legacy(){ var ta = document.createElement('textarea'); ta.value = url; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showToast('Copied!'); }catch(e){ showToast('Copy failed'); } document.body.removeChild(ta); }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(function(){ showToast('Copied!'); }, legacy); else legacy();
+});
+
+/* newsletter */
+if (NEWSLETTER_ACTION){
+  $('news').hidden = false; $('nform').action = NEWSLETTER_ACTION;
+  $('nform').addEventListener('submit', function(e){
+    var v = $('nemail').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ e.preventDefault(); showToast('Enter a valid email'); return; }
+    setTimeout(function(){ showToast('Check your inbox to confirm'); $('nform').reset(); }, 400);
+  });
+}
+
+/* videos */
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function vidId(it){ var m = (it.link || '').match(/[?&]v=([\w-]{11})/) || (it.guid || '').match(/([\w-]{11})$/); return m ? m[1] : null; }
+function fmt(s){ var d = new Date(String(s).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? '' : 'Z')); return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); }
+function heroHTML(v){ return '<a class="hero glow" href="'+v.url+'" target="_blank" rel="noopener"><div class="thumb"><img src="'+v.img+'" alt="" width="480" height="360" loading="lazy" decoding="async"><span class="new">Newest</span><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></div><div class="meta"><h3>'+esc(v.title)+'</h3><span class="date">'+esc(v.date)+'</span></div></a>'; }
+function rowHTML(v){ return '<a class="row glow" href="'+v.url+'" target="_blank" rel="noopener"><div class="thumb"><img src="'+v.img+'" alt="" width="480" height="360" loading="lazy" decoding="async"></div><div><h3>'+esc(v.title)+'</h3><span class="date">'+esc(v.date)+'</span></div></a>'; }
+function fallback(){
+  $('hero').innerHTML = '<a class="fallback" href="'+CHANNEL_URL+'" target="_blank" rel="noopener"><strong>Watch PayRanked on YouTube</strong><p>The latest videos could not load right now. Open the channel to see every upload.</p></a>';
+  var s = $('skelList'); if (s) s.remove(); $('moreWrap').hidden = true; $('count').textContent = '';
+}
+function render(items){
+  var vids = [];
+  items.forEach(function(it){ var id = vidId(it); if (id) vids.push({url:'https://www.youtube.com/watch?v='+id, img:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg', title:it.title || 'Untitled video', date:fmt(it.pubDate)}); });
+  vids = vids.slice(0, 10);
+  if (!vids.length) return fallback();
+  $('hero').innerHTML = heroHTML(vids[0]);
+  $('count').textContent = vids.length + (vids.length === 1 ? ' video' : ' videos');
+  var s = $('skelList'); if (s) s.remove();
+  if (vids.length > 1){ $('list').innerHTML = vids.slice(1).map(rowHTML).join(''); $('moreWrap').hidden = false; }
+}
+var KEY = 'payranked_feed_v2';
+try { var c = JSON.parse(sessionStorage.getItem(KEY)); if (c && Date.now() - c.t < 600000){ render(c.items); return; } } catch(e){}
+var ctrl = 'AbortController' in window ? new AbortController() : null, to = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 9000);
+fetch(API, ctrl ? {signal: ctrl.signal} : undefined)
+  .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+  .then(function(d){ clearTimeout(to); if (d.status !== 'ok' || !d.items || !d.items.length) return fallback(); try{ sessionStorage.setItem(KEY, JSON.stringify({t:Date.now(), items:d.items})); }catch(e){} render(d.items); })
+  .catch(function(){ clearTimeout(to); fallback(); });
+})();
+</script>
+</body>
+</html>
