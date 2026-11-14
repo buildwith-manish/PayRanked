@@ -60,8 +60,10 @@ export const Method: React.FC = () => {
   const {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources, tMap, tMapOut} = methodBeats();
   const rel = g.rel;
   const eq = tween(f, tEq, 20, glide);
+  const mapIn = tween(f, tMap, 22, glide) * (1 - tween(f, tMapOut, 14));
   return (
     <>
+      <div style={{position: 'absolute', inset: 0, opacity: 1 - mapIn}}>
       <Enter at={6} style={{left: 160, top: 90}}><Label color={ROLE.buying} size={TYPE.title * 0.6}>THE METHOD</Label></Enter>
       <Enter at={rel[0] + 24} style={{left: 160, top: 190}}><Dial value={114.2} at={tDial} width={620} /></Enter>
       <Enter at={rel[0] + 10} style={{left: 960, top: 190}}>
@@ -84,6 +86,7 @@ export const Method: React.FC = () => {
       </div>
       <Enter at={rel[2] + 60} style={{left: 160, top: 900}}><Label>2024 data · metro areas, not just city limits</Label></Enter>
       <Enter at={tSources} style={{left: 1200, top: 900}}><Source text="BEA" /><Source text="CENSUS rent" /><Source text="BLS wages" /></Enter>
+      </div>
       <MetroMap at={tMap} out={tMapOut} />
     </>
   );
