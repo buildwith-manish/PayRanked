@@ -31,7 +31,7 @@ r05_phx_a,voice,Number five. Phoenix.
 r05_phx_b,voice,Forty-eight thousand four hundred dollars of buying power.
 r05_phx_c,voice,"Phoenix has the cheapest goods of all ten, five percent below the national average. But rent prices run twenty-one percent above it."
 r05_phx_d,voice,Median rent: one thousand eight hundred nineteen dollars a month.
-r05_phx_e,voice,"That's half the list. Before the top four, I need to show you something about rent."
+r05_phx_e,voice,"That's half the list, and number one is still hiding. Before the top four, I need to show you something about rent."
 s03_break_a,voice,"Forget prices for a moment. Take a year of typical rent, and compare it with the typical paycheck. In Miami, it's fifty-two percent. Fifty-two cents of every dollar a typical worker earns, before taxes."
 s03_break_b,voice,"Los Angeles, forty-seven percent. Phoenix, forty-four. At the other end: Washington, thirty-six. Chicago, thirty-four. Rent isn't just a price. It's a bite out of the paycheck."
 r04_dal_a,voice,Number four. Dallas.
@@ -48,7 +48,7 @@ r02_atl_a,voice,Number two. Atlanta.
 r02_atl_b,voice,"Fifty thousand dollars of buying power. At one hundred point one, Atlanta is basically the national average."
 r02_atl_c,voice,"Rent prices are eleven percent above average, and other services cost about three percent less."
 r02_atl_d,voice,Median rent: one thousand seven hundred seventy dollars a month.
-r02_atl_e,voice,And number one beats it by seven hundred dollars.
+r02_atl_e,voice,And number one beats it by seven hundred dollars. Take a guess.
 r01_hou_a,voice,Number one. Houston.
 r01_hou_b,voice,"Fifty thousand seven hundred dollars of buying power. A price level of ninety-eight point six, the only one below one hundred."
 r01_hou_c,voice,"Rent prices are only four point five percent above average, and other services cost about four percent less than average, the cheapest of the ten."
