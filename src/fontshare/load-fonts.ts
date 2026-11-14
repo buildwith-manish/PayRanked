@@ -85,15 +85,22 @@ if (typeof document !== "undefined") {
 import { loadFont as loadJakarta } from "@remotion/google-fonts/PlusJakartaSans";
 import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
 
-const jakarta = loadJakarta("normal", {
-  weights: ["400", "500", "600", "700", "800"],
-  subsets: ["latin", "latin-ext"],
-});
+// Offline renders (no access to fonts.gstatic.com): set REMOTION_SKIP_GOOGLE_FONTS=1 and the system fallbacks are used.
+const SKIP_GOOGLE = process.env.REMOTION_SKIP_GOOGLE_FONTS === "1";
 
-const jetbrainsMono = loadJetBrainsMono("normal", {
-  weights: ["400", "500", "700"],
-  subsets: ["latin", "latin-ext"],
-});
+const jakarta = SKIP_GOOGLE
+  ? {fontFamily: "Plus Jakarta Sans"}
+  : loadJakarta("normal", {
+      weights: ["400", "500", "600", "700", "800"],
+      subsets: ["latin", "latin-ext"],
+    });
+
+const jetbrainsMono = SKIP_GOOGLE
+  ? {fontFamily: "JetBrains Mono"}
+  : loadJetBrainsMono("normal", {
+      weights: ["400", "500", "700"],
+      subsets: ["latin", "latin-ext"],
+    });
 
 export const PAYRANKED_FONTS = {
   body: "Satoshi, Plus Jakarta Sans, system-ui, sans-serif",
