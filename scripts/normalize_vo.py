@@ -29,13 +29,14 @@ for p in sorted(glob.glob(os.path.join(ROOT, 'public', 'voiceover', 'clips_wav',
         print(f'{os.path.basename(p):32s} {before:6.1f} LUFS')
         continue
     gain, cur = 0.0, before
-    for _ in range(4):  # the limiter eats some loudness on peaky clips, so close the gap in a few passes
+    for i in range(4):  # the limiter eats some loudness on peaky clips, so close the gap in a few passes
         gain = min(MAX_GAIN, gain + (TARGET - cur))
         tmp = tempfile.mktemp(suffix='.wav')
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', p, '-af', f'volume={gain}dB,alimiter=limit={CEIL:.4f}:attack=3:release=60:level=disabled', '-c:a', 'pcm_s16le', tmp], check=True)
         cur = lufs(tmp)
         if abs(cur - TARGET) < 0.4 or gain >= MAX_GAIN:
             break
-        os.remove(tmp)
+        if i < 3:
+            os.remove(tmp)
     shutil.move(tmp, p)
     print(f'{os.path.basename(p):32s} {before:6.1f} -> {cur:6.1f} LUFS  (+{gain:.1f} dB)')

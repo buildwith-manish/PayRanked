@@ -1,4 +1,657 @@
 {
-  "_note": "PLACEHOLDER written by hand; scripts/vo_layout.py will overwrite it from the recorded clips.",
-  "totalSeconds": 545.0
+ "totalSeconds": 539.6333,
+ "introSeconds": 3.5,
+ "endScreenSeconds": 6.0,
+ "onsetSeconds": 0.1,
+ "sections": [
+  {
+   "id": "coldOpen",
+   "start": 0.0,
+   "seconds": 28.7333
+  },
+  {
+   "id": "intro",
+   "start": 28.7333,
+   "seconds": 3.5
+  },
+  {
+   "id": "method",
+   "start": 32.2333,
+   "seconds": 43.0667
+  },
+  {
+   "id": "countdown",
+   "start": 75.3,
+   "seconds": 288.8
+  },
+  {
+   "id": "twist",
+   "start": 364.1,
+   "seconds": 87.9333
+  },
+  {
+   "id": "takeaway",
+   "start": 452.0333,
+   "seconds": 52.0333
+  },
+  {
+   "id": "outro",
+   "start": 504.0667,
+   "seconds": 35.5667
+  }
+ ],
+ "shots": [
+  {
+   "id": "s01_cold_open_a",
+   "section": "coldOpen",
+   "start": 0.0,
+   "seconds": 4.4333,
+   "speechStart": 0.1,
+   "speechEnd": 4.1265,
+   "words": []
+  },
+  {
+   "id": "s01_cold_open_b",
+   "section": "coldOpen",
+   "start": 4.4333,
+   "seconds": 10.1333,
+   "speechStart": 4.5333,
+   "speechEnd": 14.2585,
+   "words": []
+  },
+  {
+   "id": "s01_cold_open_c",
+   "section": "coldOpen",
+   "start": 14.5667,
+   "seconds": 4.5667,
+   "speechStart": 14.6667,
+   "speechEnd": 18.8161,
+   "words": []
+  },
+  {
+   "id": "s01_cold_open_d",
+   "section": "coldOpen",
+   "start": 19.1333,
+   "seconds": 8.1667,
+   "speechStart": 19.2333,
+   "speechEnd": 26.9681,
+   "words": []
+  },
+  {
+   "id": "s01_cold_open_e",
+   "section": "coldOpen",
+   "start": 27.3,
+   "seconds": 1.4333,
+   "speechStart": 27.4,
+   "speechEnd": 28.4112,
+   "words": []
+  },
+  {
+   "id": "s02_method_a",
+   "section": "method",
+   "start": 32.2333,
+   "seconds": 10.8,
+   "speechStart": 32.3333,
+   "speechEnd": 42.7099,
+   "words": []
+  },
+  {
+   "id": "s02_method_b",
+   "section": "method",
+   "start": 43.0333,
+   "seconds": 12.6333,
+   "speechStart": 43.1333,
+   "speechEnd": 55.3568,
+   "words": []
+  },
+  {
+   "id": "s02_method_c",
+   "section": "method",
+   "start": 55.6667,
+   "seconds": 11.5,
+   "speechStart": 55.7667,
+   "speechEnd": 66.8533,
+   "words": []
+  },
+  {
+   "id": "s02_method_d",
+   "section": "method",
+   "start": 67.1667,
+   "seconds": 8.1333,
+   "speechStart": 67.2667,
+   "speechEnd": 74.9832,
+   "words": []
+  },
+  {
+   "id": "r10_miami_a",
+   "section": "countdown",
+   "start": 75.3,
+   "seconds": 9.2333,
+   "speechStart": 75.4,
+   "speechEnd": 84.2244,
+   "words": []
+  },
+  {
+   "id": "r10_miami_b",
+   "section": "countdown",
+   "start": 84.5333,
+   "seconds": 13.8667,
+   "speechStart": 84.6333,
+   "speechEnd": 98.0804,
+   "words": []
+  },
+  {
+   "id": "r10_miami_c",
+   "section": "countdown",
+   "start": 98.4,
+   "seconds": 3.9,
+   "speechStart": 98.5,
+   "speechEnd": 101.9912,
+   "words": []
+  },
+  {
+   "id": "r09_la_a",
+   "section": "countdown",
+   "start": 102.3,
+   "seconds": 6.0333,
+   "speechStart": 102.4,
+   "speechEnd": 108.0212,
+   "words": []
+  },
+  {
+   "id": "r09_la_b",
+   "section": "countdown",
+   "start": 108.3333,
+   "seconds": 9.8,
+   "speechStart": 108.4333,
+   "speechEnd": 117.8219,
+   "words": []
+  },
+  {
+   "id": "r09_la_c",
+   "section": "countdown",
+   "start": 118.1333,
+   "seconds": 4.5,
+   "speechStart": 118.2333,
+   "speechEnd": 122.3042,
+   "words": []
+  },
+  {
+   "id": "r08_ny_a",
+   "section": "countdown",
+   "start": 122.6333,
+   "seconds": 6.8,
+   "speechStart": 122.7333,
+   "speechEnd": 129.1329,
+   "words": []
+  },
+  {
+   "id": "r08_ny_b",
+   "section": "countdown",
+   "start": 129.4333,
+   "seconds": 9.8667,
+   "speechStart": 129.5333,
+   "speechEnd": 138.9784,
+   "words": []
+  },
+  {
+   "id": "r08_ny_c",
+   "section": "countdown",
+   "start": 139.3,
+   "seconds": 5.2333,
+   "speechStart": 139.4,
+   "speechEnd": 144.2314,
+   "words": []
+  },
+  {
+   "id": "r07_dc_a",
+   "section": "countdown",
+   "start": 144.5333,
+   "seconds": 2.5333,
+   "speechStart": 144.6333,
+   "speechEnd": 146.7451,
+   "words": []
+  },
+  {
+   "id": "r07_dc_b",
+   "section": "countdown",
+   "start": 147.0667,
+   "seconds": 6.0667,
+   "speechStart": 147.1667,
+   "speechEnd": 152.8112,
+   "words": []
+  },
+  {
+   "id": "r07_dc_c",
+   "section": "countdown",
+   "start": 153.1333,
+   "seconds": 4.4667,
+   "speechStart": 153.2333,
+   "speechEnd": 157.2845,
+   "words": []
+  },
+  {
+   "id": "r07_dc_d",
+   "section": "countdown",
+   "start": 157.6,
+   "seconds": 11.8,
+   "speechStart": 157.7,
+   "speechEnd": 169.0922,
+   "words": []
+  },
+  {
+   "id": "r07_dc_e",
+   "section": "countdown",
+   "start": 169.4,
+   "seconds": 3.2333,
+   "speechStart": 169.5,
+   "speechEnd": 172.3333,
+   "words": []
+  },
+  {
+   "id": "r06_chi_a",
+   "section": "countdown",
+   "start": 172.6333,
+   "seconds": 2.0667,
+   "speechStart": 172.7333,
+   "speechEnd": 174.3875,
+   "words": []
+  },
+  {
+   "id": "r06_chi_b",
+   "section": "countdown",
+   "start": 174.7,
+   "seconds": 3.1667,
+   "speechStart": 174.8,
+   "speechEnd": 177.5479,
+   "words": []
+  },
+  {
+   "id": "r06_chi_c",
+   "section": "countdown",
+   "start": 177.8667,
+   "seconds": 8.2667,
+   "speechStart": 177.9667,
+   "speechEnd": 185.83,
+   "words": []
+  },
+  {
+   "id": "r06_chi_d",
+   "section": "countdown",
+   "start": 186.1333,
+   "seconds": 5.5,
+   "speechStart": 186.2333,
+   "speechEnd": 191.3099,
+   "words": []
+  },
+  {
+   "id": "r06_chi_e",
+   "section": "countdown",
+   "start": 191.6333,
+   "seconds": 3.5667,
+   "speechStart": 191.7333,
+   "speechEnd": 194.8887,
+   "words": []
+  },
+  {
+   "id": "r05_phx_a",
+   "section": "countdown",
+   "start": 195.2,
+   "seconds": 2.1333,
+   "speechStart": 195.3,
+   "speechEnd": 197.0056,
+   "words": []
+  },
+  {
+   "id": "r05_phx_b",
+   "section": "countdown",
+   "start": 197.3333,
+   "seconds": 3.1667,
+   "speechStart": 197.4333,
+   "speechEnd": 200.1669,
+   "words": []
+  },
+  {
+   "id": "r05_phx_c",
+   "section": "countdown",
+   "start": 200.5,
+   "seconds": 8.0333,
+   "speechStart": 200.6,
+   "speechEnd": 208.2247,
+   "words": []
+  },
+  {
+   "id": "r05_phx_d",
+   "section": "countdown",
+   "start": 208.5333,
+   "seconds": 3.8333,
+   "speechStart": 208.6333,
+   "speechEnd": 212.0423,
+   "words": []
+  },
+  {
+   "id": "r05_phx_e",
+   "section": "countdown",
+   "start": 212.3667,
+   "seconds": 6.7667,
+   "speechStart": 212.4667,
+   "speechEnd": 218.8034,
+   "words": []
+  },
+  {
+   "id": "s03_break_a",
+   "section": "countdown",
+   "start": 219.1333,
+   "seconds": 14.0667,
+   "speechStart": 219.2333,
+   "speechEnd": 232.8761,
+   "words": []
+  },
+  {
+   "id": "s03_break_b",
+   "section": "countdown",
+   "start": 233.2,
+   "seconds": 13.5667,
+   "speechStart": 233.3,
+   "speechEnd": 246.4614,
+   "words": []
+  },
+  {
+   "id": "r04_dal_a",
+   "section": "countdown",
+   "start": 246.7667,
+   "seconds": 1.6333,
+   "speechStart": 246.8667,
+   "speechEnd": 248.0764,
+   "words": []
+  },
+  {
+   "id": "r04_dal_b",
+   "section": "countdown",
+   "start": 248.4,
+   "seconds": 7.0667,
+   "speechStart": 248.5,
+   "speechEnd": 255.1613,
+   "words": []
+  },
+  {
+   "id": "r04_dal_c",
+   "section": "countdown",
+   "start": 255.4667,
+   "seconds": 6.0667,
+   "speechStart": 255.5667,
+   "speechEnd": 261.2242,
+   "words": []
+  },
+  {
+   "id": "r04_dal_d",
+   "section": "countdown",
+   "start": 261.5333,
+   "seconds": 3.9667,
+   "speechStart": 261.6333,
+   "speechEnd": 265.1928,
+   "words": []
+  },
+  {
+   "id": "r04_dal_e",
+   "section": "countdown",
+   "start": 265.5,
+   "seconds": 5.0667,
+   "speechStart": 265.6,
+   "speechEnd": 270.2476,
+   "words": []
+  },
+  {
+   "id": "r03_phl_a",
+   "section": "countdown",
+   "start": 270.5667,
+   "seconds": 2.1,
+   "speechStart": 270.6667,
+   "speechEnd": 272.3533,
+   "words": []
+  },
+  {
+   "id": "r03_phl_b",
+   "section": "countdown",
+   "start": 272.6667,
+   "seconds": 6.8667,
+   "speechStart": 272.7667,
+   "speechEnd": 279.2329,
+   "words": []
+  },
+  {
+   "id": "r03_phl_c",
+   "section": "countdown",
+   "start": 279.5333,
+   "seconds": 9.3333,
+   "speechStart": 279.6333,
+   "speechEnd": 288.5644,
+   "words": []
+  },
+  {
+   "id": "r03_phl_d",
+   "section": "countdown",
+   "start": 288.8667,
+   "seconds": 6.0667,
+   "speechStart": 288.9667,
+   "speechEnd": 294.6116,
+   "words": []
+  },
+  {
+   "id": "r03_phl_e",
+   "section": "countdown",
+   "start": 294.9333,
+   "seconds": 6.2,
+   "speechStart": 295.0333,
+   "speechEnd": 300.8099,
+   "words": []
+  },
+  {
+   "id": "r02_atl_a",
+   "section": "countdown",
+   "start": 301.1333,
+   "seconds": 2.0,
+   "speechStart": 301.2333,
+   "speechEnd": 302.81,
+   "words": []
+  },
+  {
+   "id": "r02_atl_b",
+   "section": "countdown",
+   "start": 303.1333,
+   "seconds": 6.7,
+   "speechStart": 303.2333,
+   "speechEnd": 309.5303,
+   "words": []
+  },
+  {
+   "id": "r02_atl_c",
+   "section": "countdown",
+   "start": 309.8333,
+   "seconds": 5.9667,
+   "speechStart": 309.9333,
+   "speechEnd": 315.4934,
+   "words": []
+  },
+  {
+   "id": "r02_atl_d",
+   "section": "countdown",
+   "start": 315.8,
+   "seconds": 3.9333,
+   "speechStart": 315.9,
+   "speechEnd": 319.4171,
+   "words": []
+  },
+  {
+   "id": "r02_atl_e",
+   "section": "countdown",
+   "start": 319.7333,
+   "seconds": 4.3667,
+   "speechStart": 319.8333,
+   "speechEnd": 323.7872,
+   "words": []
+  },
+  {
+   "id": "r01_hou_a",
+   "section": "countdown",
+   "start": 324.1,
+   "seconds": 1.9333,
+   "speechStart": 324.2,
+   "speechEnd": 325.7009,
+   "words": []
+  },
+  {
+   "id": "r01_hou_b",
+   "section": "countdown",
+   "start": 326.0333,
+   "seconds": 8.3333,
+   "speechStart": 326.1333,
+   "speechEnd": 334.0564,
+   "words": []
+  },
+  {
+   "id": "r01_hou_c",
+   "section": "countdown",
+   "start": 334.3667,
+   "seconds": 9.0333,
+   "speechStart": 334.4667,
+   "speechEnd": 343.0739,
+   "words": []
+  },
+  {
+   "id": "r01_hou_d",
+   "section": "countdown",
+   "start": 343.4,
+   "seconds": 6.0667,
+   "speechStart": 343.5,
+   "speechEnd": 349.1576,
+   "words": []
+  },
+  {
+   "id": "r01_hou_e",
+   "section": "countdown",
+   "start": 349.4667,
+   "seconds": 5.9667,
+   "speechStart": 349.5667,
+   "speechEnd": 355.1042,
+   "words": []
+  },
+  {
+   "id": "r01_hou_f",
+   "section": "countdown",
+   "start": 355.4333,
+   "seconds": 8.6667,
+   "speechStart": 355.5333,
+   "speechEnd": 363.7742,
+   "words": []
+  },
+  {
+   "id": "s04_twist_a",
+   "section": "twist",
+   "start": 364.1,
+   "seconds": 16.5333,
+   "speechStart": 364.2,
+   "speechEnd": 380.3214,
+   "words": []
+  },
+  {
+   "id": "s04_twist_b",
+   "section": "twist",
+   "start": 380.6333,
+   "seconds": 15.8,
+   "speechStart": 380.7333,
+   "speechEnd": 396.1212,
+   "words": []
+  },
+  {
+   "id": "s04_twist_c",
+   "section": "twist",
+   "start": 396.4333,
+   "seconds": 17.3333,
+   "speechStart": 396.5333,
+   "speechEnd": 413.4437,
+   "words": []
+  },
+  {
+   "id": "s04_twist_d",
+   "section": "twist",
+   "start": 413.7667,
+   "seconds": 9.0333,
+   "speechStart": 413.8667,
+   "speechEnd": 422.4929,
+   "words": []
+  },
+  {
+   "id": "s04_twist_e",
+   "section": "twist",
+   "start": 422.8,
+   "seconds": 16.0667,
+   "speechStart": 422.9,
+   "speechEnd": 438.5354,
+   "words": []
+  },
+  {
+   "id": "s04_twist_f",
+   "section": "twist",
+   "start": 438.8667,
+   "seconds": 13.1667,
+   "speechStart": 438.9667,
+   "speechEnd": 451.7276,
+   "words": []
+  },
+  {
+   "id": "s05_takeaway_a",
+   "section": "takeaway",
+   "start": 452.0333,
+   "seconds": 15.9333,
+   "speechStart": 452.1333,
+   "speechEnd": 467.646,
+   "words": []
+  },
+  {
+   "id": "s05_takeaway_b",
+   "section": "takeaway",
+   "start": 467.9667,
+   "seconds": 12.9667,
+   "speechStart": 468.0667,
+   "speechEnd": 480.6098,
+   "words": []
+  },
+  {
+   "id": "s05_takeaway_c",
+   "section": "takeaway",
+   "start": 480.9333,
+   "seconds": 14.4333,
+   "speechStart": 481.0333,
+   "speechEnd": 495.0515,
+   "words": []
+  },
+  {
+   "id": "s05_takeaway_d",
+   "section": "takeaway",
+   "start": 495.3667,
+   "seconds": 8.7,
+   "speechStart": 495.4667,
+   "speechEnd": 503.7434,
+   "words": []
+  },
+  {
+   "id": "s06_outro_a",
+   "section": "outro",
+   "start": 504.0667,
+   "seconds": 16.1,
+   "speechStart": 504.1667,
+   "speechEnd": 519.8642,
+   "words": []
+  },
+  {
+   "id": "s06_outro_b",
+   "section": "outro",
+   "start": 520.1667,
+   "seconds": 19.4667,
+   "speechStart": 520.2667,
+   "speechEnd": 533.3099,
+   "words": []
+  }
+ ]
 }
