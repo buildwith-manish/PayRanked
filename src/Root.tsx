@@ -8,6 +8,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {Grade} from './components/Grade';
 import {Video2} from './video2/Video2';
+import {StyleFrame} from './video2/StyleFrame';
 import {FPS, H, W} from './theme';
 import {toReal} from './clock';
 import {VIDEO2_FRAMES} from './timeline2';
@@ -22,5 +23,6 @@ const GradedVideo2: React.FC = () => (
 export const Root: React.FC = () => (
   <>
     <Composition id="Video2" component={GradedVideo2} durationInFrames={toReal(VIDEO2_FRAMES)} width={W} height={H} fps={FPS} />
+    <Composition id="StyleFrame" component={StyleFrame} durationInFrames={240} width={W} height={H} fps={FPS} />
   </>
 );
