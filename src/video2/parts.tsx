@@ -61,12 +61,7 @@ export const RankSlam: React.FC<{text: string; at: number; color?: string; size?
   );
 };
 
-/**
- * Rank ladder: ten slots, filled bottom-up as the countdown goes. `revealed` maps rank -> design frame it appears
- * (-1 = already there). Superseded by CountdownNav.tsx (video2 step 6), which merges this with the locator map and
- * the NEXT teaser into one persistent object instead of three things that re-entered every scene. Left here
- * unused rather than deleted, in case another scene wants a plain, non-persistent ladder later.
- */
+/** Rank ladder: ten slots, filled bottom-up as the countdown goes. `revealed` maps rank -> design frame it appears (-1 = already there). */
 export const Ladder: React.FC<{revealed: Record<number, number>; active?: number; x?: number; y?: number}> = ({revealed, active, x = 96, y = 130}) => {
   const f = useDesignFrame();
   return (
