@@ -232,12 +232,12 @@ export const ShortSegment: React.FC<{spec: ShortSpec; cta?: CtaVariant}> = ({spe
             <ShortEndCard variant={cta} />
           </Sequence>
           <Watermark />
-          {/* thumbnail: the last frames of the Short, so it can be picked as the cover in YouTube Studio */}
-          <Sequence from={toReal(sec(spec.seconds + SHORT_END_SECONDS)) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name={`Short ${spec.id} thumbnail`}>
-            <Thumbnail id={spec.id} />
-          </Sequence>
         </AbsoluteFill>
       </Grade>
+      {/* thumbnail: the last frames of the Short (outside the grade, so it matches the exported still), picked as the cover in YouTube Studio */}
+      <Sequence from={toReal(sec(spec.seconds + SHORT_END_SECONDS)) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name={`Short ${spec.id} thumbnail`}>
+        <Thumbnail id={spec.id} />
+      </Sequence>
     </AbsoluteFill>
   );
 };
@@ -316,11 +316,12 @@ const Short1: React.FC<{cta?: CtaVariant}> = ({cta = 'youtube'}) => (
         </Sequence>
         <Short1Audio />
         <Watermark />
-        <Sequence from={toReal(SHORT1_FRAMES) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name="Short 1 thumbnail">
-          <Thumbnail id={1} />
-        </Sequence>
       </AbsoluteFill>
     </Grade>
+    {/* thumbnail: the last frames of the Short, outside the grade */}
+    <Sequence from={toReal(SHORT1_FRAMES) - THUMB_END_FRAMES} durationInFrames={THUMB_END_FRAMES} name="Short 1 thumbnail">
+      <Thumbnail id={1} />
+    </Sequence>
   </AbsoluteFill>
 );
 
