@@ -94,6 +94,9 @@ assert (wage_up, price_up) == (41, 10), (wage_up, price_up)
 # the formula in the takeaway, worked on Miami
 assert abs(50000 * 100 / lvl['Miami'] - bp['Miami']) <= 100
 
+assert sorted(share, key=share.get)[:2] == ['Chicago', 'Washington']  # 'at the other end' of the rent-share list
+assert round(above(serv['Dallas'])) == 0 and round(above(lvl['Dallas'])) == 3  # Dallas: other services at the national average
+assert all(share[n] > share['Washington'] for n in ORDER if n not in ('Washington', 'Chicago'))
 L = []  # (section, id, text)
 
 
@@ -105,15 +108,15 @@ def add(section, cid, text):
 # ------------------------------------------------------------------ 1. COLD OPEN
 add('Cold open', 's01_cold_open_a', 'Two people. Both earn exactly fifty thousand dollars a year.')
 add('Cold open', 's01_cold_open_b', f'In one city, that buys what {usd(bp["Houston"])} would buy at average American prices. In the other? Only {usd(bp["Miami"])}.')
-add('Cold open', 's01_cold_open_c', f'A gap of {usd(gap)}, from nothing but where they live.')
+add('Cold open', 's01_cold_open_c', f'A gap of {usd(gap)}, just from where they live.')
 add('Cold open', 's01_cold_open_d', "I ranked ten big American metro areas by exactly this. And the winner of the countdown stops winning once I add one more number.")
 add('Cold open', 's01_cold_open_e', "Let's start at the bottom.")
 
 # ------------------------------------------------------------------ 2. METHOD
 add('Method', 's02_method_a', 'First, the method. The Bureau of Economic Analysis, or B E A, measures how expensive every metro area is, with the national average set at one hundred.')
 add('Method', 's02_method_b', 'Above one hundred means prices run higher than average. Below, lower. Multiply your salary by one hundred, divide by that number, and you get what your pay is really worth at average American prices.')
-add('Method', 's02_method_c', 'That price level covers everything: rent, goods, and services. All the data is from twenty twenty-four, and these are metro areas, not just city limits.')
-add('Method', 's02_method_d', "Later, I'll add rent from the Census Bureau, and wages from the Bureau of Labor Statistics. That's where it gets interesting.")
+add('Method', 's02_method_c', 'That price level covers everything: rent, goods, and services, each with its own index. All the data is from twenty twenty-four, and these are metro areas, not just city limits.')
+add('Method', 's02_method_d', "Later, I'll add the actual rent in dollars from the Census Bureau, and wages from the Bureau of Labor Statistics. That's where it gets interesting.")
 
 # ------------------------------------------------------------------ 3. COUNTDOWN
 # 3-clip cities (#10 to #8)
@@ -128,7 +131,7 @@ assert above(goods['New York']) == 10
 
 add('#8 New York', 'r08_ny_a', f'Number eight. New York. Your fifty thousand buys what {usd(bp["New York"])} would.')
 add('#8 New York', 'r08_ny_b', f'Everyday goods here cost about {pct(above(goods["New York"]))} more than the national average, the highest of the ten. Median rent: {usd(rent["New York"])} a month.')
-add('#8 New York', 'r08_ny_c', "Number seven is expensive too. But remember it. It comes back at the end.")
+add('#8 New York', 'r08_ny_c', "Number seven is expensive too. But keep an eye on that city. It comes back at the end.")
 
 # 5-clip cities (#7 to #1): name, number, reason, rent, bridge
 add('#7 Washington', 'r07_dc_a', 'Number seven. Washington, D.C.')
@@ -147,17 +150,17 @@ add('#5 Phoenix', 'r05_phx_a', 'Number five. Phoenix.')
 add('#5 Phoenix', 'r05_phx_b', f'{usd(bp["Phoenix"])} of buying power.')
 add('#5 Phoenix', 'r05_phx_c', f'Phoenix has the cheapest goods of all ten, {pct(abs(above(goods["Phoenix"])))} below the national average. But rent prices run {pct(above(rentidx["Phoenix"]))} above it.')
 add('#5 Phoenix', 'r05_phx_d', f'Median rent: {usd(rent["Phoenix"])} a month.')
-add('#5 Phoenix', 'r05_phx_e', "We're past halfway. And before the top four, I need to show you something about rent.")
+add('#5 Phoenix', 'r05_phx_e', "That's half the list. Before the top four, I need to show you something about rent.")
 
 # ------------------------------------------------------------------ 4. PATTERN BREAK (rent against paycheck)
-add('Pattern break', 's03_break_a', f"Halfway point. Forget prices for a moment. Take a year of typical rent, and compare it with the typical paycheck. In Miami, it's {pct(share['Miami'])}. Fifty-two cents of every dollar a typical worker earns, before taxes.")
+add('Pattern break', 's03_break_a', f"Forget prices for a moment. Take a year of typical rent, and compare it with the typical paycheck. In Miami, it's {pct(share['Miami'])}. {w(share['Miami']).capitalize()} cents of every dollar a typical worker earns, before taxes.")
 assert round(share['Miami']) == 52
-add('Pattern break', 's03_break_b', f"Los Angeles, {pct(share['Los Angeles'])}. Phoenix, {w(share['Phoenix'])}. At the other end: Washington, {w(share['Washington'])}. Chicago, {w(share['Chicago'])}. Rent isn't just a price. It's a bite out of the paycheck. And it's about to matter.")
+add('Pattern break', 's03_break_b', f"Los Angeles, {pct(share['Los Angeles'])}. Phoenix, {w(share['Phoenix'])}. At the other end: Washington, {w(share['Washington'])}. Chicago, {w(share['Chicago'])}. Rent isn't just a price. It's a bite out of the paycheck.")
 
 # ------------------------------------------------------------------ 5. COUNTDOWN, TOP FOUR
 add('#4 Dallas', 'r04_dal_a', 'Number four. Dallas.')
 add('#4 Dallas', 'r04_dal_b', f'{usd(bp["Dallas"])} of buying power. Prices are about {pct(above(lvl["Dallas"]))} above average.')
-add('#4 Dallas', 'r04_dal_c', f'Rent prices are {pct(above(rentidx["Dallas"]))} above average, but goods and services sit close to the national level.')
+add('#4 Dallas', 'r04_dal_c', f'Rent prices are {pct(above(rentidx["Dallas"]))} above average, but other services sit right at the national average.')
 add('#4 Dallas', 'r04_dal_d', f'Median rent: {usd(rent["Dallas"])} a month.')
 add('#4 Dallas', 'r04_dal_e', 'Now the top three. None of them is even three percent above the national average.')
 
@@ -178,12 +181,13 @@ add('#1 Houston', 'r01_hou_a', 'Number one. Houston.')
 add('#1 Houston', 'r01_hou_b', f'{usd(bp["Houston"])} of buying power. A price level of {dec1(lvl["Houston"])}, the only one below one hundred.')
 add('#1 Houston', 'r01_hou_c', f'Rent prices are only {dec1(rentidx["Houston"] - 100)} percent above average, and other services cost about {pct(abs(above(serv["Houston"])))} less than average, the cheapest of the ten.')
 add('#1 Houston', 'r01_hou_d', f'Median rent: {usd(rent["Houston"])} a month. Exactly the same as Chicago.')
-add('#1 Houston', 'r01_hou_e', f"Houston wins. Next to Miami, your salary is worth {usd(gap)} more. But that's only half the story. So far, I've treated everyone as earning fifty thousand dollars. What happens when I use what people actually earn?")
+add('#1 Houston', 'r01_hou_e', f"Houston wins. Next to Miami, your salary is worth {usd(gap)} more.")
+add('#1 Houston', 'r01_hou_f', "But that's only half the story. So far, I've treated everyone as earning fifty thousand dollars. What happens when I use what people actually earn?")
 
 # ------------------------------------------------------------------ 6. THE TWIST
 add('Twist', 's04_twist_a', "Wages differ from city to city. So I took each city's median wage from the Bureau of Labor Statistics, and divided it by the price level. That's my own calculation, not an official statistic. It asks one thing: what is a typical paycheck worth after prices?")
 add('Twist', 's04_twist_b', f'Houston first. The median wage is {usd(wage["Houston"])}. After prices, that is worth {usd(wap["Houston"])}. Cheap city, modest pay. Houston drops from number one to number {w(twist["Houston"])}.')
-add('Twist', 's04_twist_c', f'Now remember Washington. Median wage: {usd(wage["Washington"])}. That is {pct(wage_up)} more than Houston, while prices are only {pct(price_up)} higher. After prices: {usd(wap["Washington"])}. The new number one.')
+add('Twist', 's04_twist_c', f"Now remember Washington. Median wage: {usd(wage['Washington'])}. That is {pct(wage_up)} more than Houston, while prices are only {pct(price_up)} higher than Houston's. After prices: {usd(wap['Washington'])}. The new number one.")
 add('Twist', 's04_twist_d', f'New York climbs to number two, at {usd(wap["New York"])}. Philadelphia is third, at {usd(wap["Philadelphia"])}.')
 add('Twist', 's04_twist_e', f'And Miami? Last in the first ranking. Last again. The highest prices, the lowest median wage, {usd(wage["Miami"])}, and a year of rent that equals {pct(share["Miami"])} of it. After prices: {usd(wap["Miami"])}.')
 add('Twist', 's04_twist_f', 'So cheap is not automatically better. What matters is the gap between what you earn and what things cost. Houston has the lowest prices. On this measure, Washington is where a typical paycheck goes the furthest.')
@@ -191,12 +195,12 @@ add('Twist', 's04_twist_f', 'So cheap is not automatically better. What matters 
 # ------------------------------------------------------------------ 7. TAKEAWAY
 add('Takeaway', 's05_takeaway_a', f"So how do you use this? Rule one: don't compare salaries. Compare what they buy. Multiply your salary by one hundred, and divide by your city's price level. Fifty thousand dollars in Miami comes out at {usd(bp['Miami'])}.")
 add('Takeaway', 's05_takeaway_b', "Rule two: put rent next to your own pay. In five of these ten cities, a year of typical rent takes more than forty percent of the typical wage. When it does, prices are only part of the problem.")
-add('Takeaway', 's05_takeaway_c', f"Rule three: judge a job offer in another city the same way. Washington's median wage is {pct(wage_up)} above Houston's, while its prices are {pct(price_up)} higher. Your own offer is the number that counts.")
+add('Takeaway', 's05_takeaway_c', f"Rule three: judge a job offer in another city the same way. Washington's median wage is {pct(wage_up)} above Houston's, while its prices are only {pct(price_up)} higher than Houston's. Then run your own offer through the formula.")
 add('Takeaway', 's05_takeaway_d', "These are medians for each metro area, in twenty twenty-four, so your own situation will differ. The formula and every source are in the description.")
 
 # ------------------------------------------------------------------ 8. OUTRO
 add('Outro', 's06_outro_a', f'Quick recap. The cheapest prices: Houston, with {usd(bp["Houston"])} of buying power. The best paycheck after prices: Washington, at {usd(wap["Washington"])}. The hardest on your wallet: Miami, last in both.')
-add('Outro', 's06_outro_b', "Which city surprised you most? Tell me in the comments. This is general information, not financial advice. New price data is due in December. If it covers metro areas, I'll update this ranking, so subscribe to catch it.")
+add('Outro', 's06_outro_b', "Which city surprised you most? Tell me in the comments. This is general information, not financial advice. New price data is due in December. If it covers metro areas, I may update this ranking, so subscribe to catch it.")
 
 # ------------------------------------------------------------------ write files
 os.makedirs(os.path.join(ROOT, 'scripts'), exist_ok=True)
