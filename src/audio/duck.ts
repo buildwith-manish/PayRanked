@@ -8,7 +8,7 @@
 import {interpolate} from 'remotion';
 import voEnvelope from './vo-envelope.json';
 import {AUDIO} from './config';
-import {HERO_BEATS} from './cues';
+import {HERO_BEATS_V2 as HERO_BEATS} from '../video2/sfx2';
 import {VIDEO2_FRAMES} from '../timeline2';
 
 const frames = voEnvelope.frames as number[];

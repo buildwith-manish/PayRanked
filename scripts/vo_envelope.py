@@ -41,16 +41,28 @@ else:
     # Run `node scripts/export-timing.mjs` first if the timeline changed.
     src = 'voiceover-manifest.json'
     manifest = json.load(open(os.path.join(ROOT, 'src', 'audio', 'voiceover-manifest.json')))
-    timing = json.load(open(os.path.join(ROOT, 'scripts', 'timing.json')))
-    starts = {k: v['start'] for k, v in timing['shots'].items()}
-    starts['shot4'] = starts['countdown']
-    x = np.zeros(int((timing['total'] + 5) * SR), dtype=np.float32)
-    for c in manifest:
-        y = decode(os.path.join(ROOT, 'public', c['file']))
-        a = int(round((starts[c['shot']] + c['at'] - c['lead']) * SR))
-        a = max(0, a)
-        b = min(len(x), a + len(y))
-        x[a:b] += y[: b - a]
+    timing_path = os.path.join(ROOT, 'scripts', 'timing.json')
+    if os.path.exists(timing_path):
+        # Video 1 layout: clips are keyed by shot
+        timing = json.load(open(timing_path))
+        starts = {k: v['start'] for k, v in timing['shots'].items()}
+        starts['shot4'] = starts['countdown']
+        x = np.zeros(int((timing['total'] + 5) * SR), dtype=np.float32)
+        for c in manifest:
+            y = decode(os.path.join(ROOT, 'public', c['file']))
+            a = int(round((starts[c['shot']] + c['at'] - c['lead']) * SR))
+            a = max(0, a)
+            b = min(len(x), a + len(y))
+            x[a:b] += y[: b - a]
+    else:
+        # Video 2 layout: every clip has its own start on the 30 fps design clock (`startFrame`), see src/audio/Sfx.tsx
+        total = json.load(open(os.path.join(ROOT, 'src', 'audio', 'vo-layout.json')))['totalSeconds']
+        x = np.zeros(int((total + 5) * SR), dtype=np.float32)
+        for c in manifest:
+            y = decode(os.path.join(ROOT, 'public', c['file']))
+            a = max(0, int(round(c['startFrame'] / FPS * SR)))
+            b = min(len(x), a + len(y))
+            x[a:b] += y[: b - a]
 hop = SR // FPS
 n = len(x) // hop
 rms = np.sqrt(np.mean(x[: n * hop].reshape(n, hop) ** 2, axis=1) + 1e-12)

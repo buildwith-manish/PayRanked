@@ -5,7 +5,8 @@ import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
 import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
 import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source} from './parts';
-import {END_SCREEN_SECONDS, METROS, Metro, byRank, cityPrefix, cue, d, group, money, shownName} from './layout';
+import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
+import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
 
 const Stack: React.FC<{dollars: number; at: number; color: string; left: number; top: number; ref10?: boolean; scale?: number}> = ({dollars, at, color, left, top, ref10 = true, scale = 1}) => (
   <div style={{position: 'absolute', left, top, transform: `scale(${scale})`, transformOrigin: '0% 0%'}}>
@@ -16,16 +17,10 @@ const Stack: React.FC<{dollars: number; at: number; color: string; left: number;
 /* ------------------------------------------------------------------ cold open */
 export const ColdOpen: React.FC = () => {
   const f = useDesignFrame();
-  const {rel} = group('s01_');
+  const {g, tOther, tOnly, tFirst, tGap, tWinner, tStops, tTitle} = coldBeats();
+  const rel = g.rel;
   const hou = byRank(1), mia = byRank(10);
   const gap = hou.buyingPower50k - mia.buyingPower50k;
-  const g = group('s01_');
-  const tOther = cue(g, 'other', rel[1] + 6, {from: 1});
-  const tOnly = cue(g, 'only', rel[1] + 80, {from: 1});
-  const tFirst = cue(g, 'fifty', rel[1] + 20, {from: 1});
-  const tGap = cue(g, ['gap', 'six'], rel[2], {from: 2});
-  const tWinner = cue(g, 'winner', rel[3] + 30, {from: 3});
-  const tStops = cue(g, 'stops', rel[3] + 60, {from: 3});
   const split = tween(f, tOther, 30, glide);
   const crack = tween(f, tStops, 14, slam);
   const big = TYPE.title * 0.72;
@@ -51,7 +46,7 @@ export const ColdOpen: React.FC = () => {
           <Label color={C.text} size={32}>{crack > 0.5 ? 'stops winning' : '10 metros ranked'}</Label>
         </div>
       </Enter>
-      <Enter at={rel[4] + 4} style={{left: 0, top: 0, width: 1920, height: 1080, background: 'rgba(5,14,29,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      <Enter at={tTitle} style={{left: 0, top: 0, width: 1920, height: 1080, background: 'rgba(5,14,29,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.hero * 0.6, color: C.text}}>Let's start at the bottom.</div>
       </Enter>
     </>
@@ -61,14 +56,8 @@ export const ColdOpen: React.FC = () => {
 /* ------------------------------------------------------------------ method */
 export const Method: React.FC = () => {
   const f = useDesignFrame();
-  const {rel} = group('s02_');
-  const g = group('s02_');
-  const tDial = cue(g, ['hundred', 'average'], rel[0] + 60);
-  const tAbove = cue(g, 'above', rel[1] + 30, {from: 1});
-  const tEq = cue(g, 'multiply', rel[1] + 150, {from: 1});
-  const tRent = cue(g, 'rent', rel[2] + 6, {from: 2});
-  const tGoods = cue(g, 'goods', tRent + 8, {from: 2});
-  const tServ = cue(g, 'services', tGoods + 8, {from: 2});
+  const {g, tDial, tAbove, tEq, tRent, tGoods, tServ, tSources} = methodBeats();
+  const rel = g.rel;
   const eq = tween(f, tEq, 20, glide);
   return (
     <>
@@ -93,7 +82,7 @@ export const Method: React.FC = () => {
         </div>
       </div>
       <Enter at={rel[2] + 60} style={{left: 160, top: 900}}><Label>2024 data · metro areas, not just city limits</Label></Enter>
-      <Enter at={rel[3] + 10} style={{left: 1200, top: 900}}><Source text="BEA" /><Source text="CENSUS rent" /><Source text="BLS wages" /></Enter>
+      <Enter at={tSources} style={{left: 1200, top: 900}}><Source text="BEA" /><Source text="CENSUS rent" /><Source text="BLS wages" /></Enter>
     </>
   );
 };
@@ -102,20 +91,9 @@ export const Method: React.FC = () => {
 export const CityScene: React.FC<{rank: number}> = ({rank}) => {
   const f = useDesignFrame();
   const m = byRank(rank);
-  const g = group(cityPrefix(rank));
-  const n = g.list.length;
-  const rel = g.rel;
-  const power = m.buyingPower50k;
-  // every beat is cued to the word it illustrates (scripts/vo_words.py); the clip-start times are only the fallback
-  const tPower = n >= 5 ? g.speech[1] : cue(g, 'buys', rel[0] + 60);
-  const tDial = cue(g, ['price', 'prices'], n >= 5 ? rel[1] + 60 : rel[1], {from: 1});
-  const tRentBar = cue(g, 'rent', tDial + 12, {from: 1});
-  const tGoodsBar = cue(g, 'goods', tRentBar + 10, {from: 1});
-  const tServBar = cue(g, ['services', 'service'], tGoodsBar + 10, {from: 1});
+  const {tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember} = cityBeats(rank);
   const tBars = tDial;
-  const tRent = cue(g, 'median', rel[n >= 5 ? 3 : 1] + 120, {from: 1});
-  const tNext = cue(g, ['next', 'half'], rel[n - 1], {from: n - 1});
-  const tWin = rank === 1 ? cue(g, 'wins', rel[4], {from: 4}) : -1;
+  const power = m.buyingPower50k;
   const revealed: Record<number, number> = {};
   for (let r = 10; r > rank; r--) revealed[r] = -1;
   revealed[rank] = 6;
@@ -148,7 +126,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
         <Pill text={`Median rent ${money(m.census.medianGrossRent)}/mo`} color={ROLE.rent} />
       </Enter>
       {rank === 7 && (
-        <Enter at={cue(g, 'remember', rel[3] + 40, {from: 3})} style={{left: 500, top: 960}}>
+        <Enter at={tRemember} style={{left: 500, top: 960}}>
           <Pill text={`Median wage ${money(m.wage.medianAnnual)} — remember this`} color={ROLE.wage} size={28} />
         </Enter>
       )}
@@ -169,10 +147,8 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
 /* ------------------------------------------------------------------ rent vs paycheck */
 export const RentBreak: React.FC = () => {
   const f = useDesignFrame();
-  const {rel} = group('s03_');
-  const g = group('s03_');
-  const tMiami = cue(g, 'miami', rel[0] + 40);
-  const tLA = cue(g, 'angeles', rel[1], {from: 1});
+  const {g, tMiami, tLA, tNote} = breakBeats();
+  const rel = g.rel;
   const rows = [...METROS].sort((a, b) => b.rentShareOfWagePct - a.rentShareOfWagePct);
   return (
     <>
@@ -193,7 +169,7 @@ export const RentBreak: React.FC = () => {
           </div>
         );
       })}
-      <Enter at={rel[1] + 40} style={{left: 1010, top: 1030}}><Label size={30}>white tick = 40% of the paycheck</Label></Enter>
+      <Enter at={tNote} style={{left: 1010, top: 1030}}><Label size={30}>white tick = 40% of the paycheck</Label></Enter>
     </>
   );
 };
@@ -201,13 +177,9 @@ export const RentBreak: React.FC = () => {
 /* ------------------------------------------------------------------ the twist */
 export const Twist: React.FC = () => {
   const f = useDesignFrame();
-  const g = group('s04_');
+  const {g, tBadge, tHou, tDC, tNY, tMia, tPill} = twistBeats();
   const rel = g.rel;
   const rowH = 80, top0 = 190;
-  const tHou = cue(g, 'houston', rel[1], {from: 1});
-  const tDC = cue(g, 'washington', rel[2], {from: 2});
-  const tNY = cue(g, ['new', 'york'], rel[3], {from: 3});
-  const tMia = cue(g, 'miami', rel[4], {from: 4});
   const stage = f >= tMia ? 4 : f >= tNY ? 3 : f >= tDC ? 2 : f >= tHou ? 1 : 0;
   const hou = byRank(1), dc = byRank(7), ny = byRank(8), phl = byRank(3), mia = byRank(10);
   const featured: Metro[] = stage === 1 ? [hou] : stage === 2 ? [dc] : stage === 3 ? [ny, phl] : stage >= 4 ? [mia] : [];
@@ -219,7 +191,7 @@ export const Twist: React.FC = () => {
           {f >= tHou ? 'Paycheck after prices' : 'Same ranking…'}
         </div>
       </Enter>
-      <Enter at={rel[0] + 60} style={{left: 960, top: 70}}><Pill text="OUR OWN CALCULATION · wage ÷ price level" color={ROLE.wage} size={28} /></Enter>
+      <Enter at={tBadge} style={{left: 960, top: 70}}><Pill text="OUR OWN CALCULATION · wage ÷ price level" color={ROLE.wage} size={28} /></Enter>
       <Enter at={rel[1] + 60} style={{left: 1280, top: 830, width: 540}}><Label size={24}>Atlanta/Chicago and Dallas/Phoenix are within about $20 of each other: treat each pair as a tie.</Label></Enter>
       {METROS.map((m) => {
         const stag = (m.rank - 1) * 6;
@@ -251,7 +223,7 @@ export const Twist: React.FC = () => {
           </div>
         </Enter>
       ))}
-      <Enter at={rel[5] + 20} style={{left: 1180, top: 900}}>
+      <Enter at={tPill} style={{left: 1180, top: 900}}>
         <Pill text="Cheapest isn't automatically best" color="#FFD25A" size={34} />
       </Enter>
     </>

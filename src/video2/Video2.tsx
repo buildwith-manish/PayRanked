@@ -4,7 +4,8 @@ import {Background} from '../components/Background';
 import {Watermark} from '../components/Watermark';
 import {C} from '../theme';
 import {toReal} from '../clock';
-import {MasterAudio} from '../audio/Sfx';
+import {MasterAudio, SfxTrack} from '../audio/Sfx';
+import {VIDEO2_CUES} from './sfx2';
 import {cityPrefix, cue, d, group, section} from './layout';
 import {SceneCamera, SceneCameraProps} from './camera';
 import {ROLE} from './system';
@@ -46,6 +47,7 @@ export const Video2: React.FC = () => {
   return (
     <AbsoluteFill style={{backgroundColor: C.navy3}}>
       <MasterAudio />
+      <SfxTrack cues={VIDEO2_CUES} offset={0} />
       <Background />
       {parts.map((p) => (
         <Seq key={p.name} from={p.g.from} frames={p.g.frames} name={p.name}>
