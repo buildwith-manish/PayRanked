@@ -1,5 +1,5 @@
 {
-  "_note": "Source: metro-verified-data-and-todo.md (prepared 14 Nov 2026). Inputs are VERIFIED unless a tax status says otherwise. buyingPower50k is the file's figure (re-derived here from allItems and matched within $100). wageAfterPrices and rentShareOfWagePct are derived (wage / (allItems/100); 12 x rent / wage), not official figures. Rank = countdown order by buying power of $50,000. Show 'typical resident = single filer in the principal city, wages only' wherever take-home is used.",
+  "_note": "Source: metro-verified-data-and-todo.md (prepared 14 Nov 2026). Inputs are VERIFIED unless a tax status says otherwise. buyingPower50k is the file's figure (re-derived here from allItems and matched within $100). wageAfterPrices and rentShareOfWagePct are derived (wage / (allItems/100); 12 x rent / wage), not official figures. Rank = countdown order by buying power of $50,000. Show 'typical resident = single filer in the principal city, wages only' wherever take-home is used. Update 14 Nov 2026: PA, AZ, NY State and CA SDI re-checked against official pages; LA take-home now includes $550 SDI.",
   "dataYear": 2024,
   "taxAssumptions": "single filer, 2024 standard deduction $14,600, wages only, federal $4,016 (formula; $4,019 by IRS table), FICA $3,825",
   "sources": {
@@ -108,7 +108,7 @@
         "state": 1535,
         "local": 1875,
         "takeHome": 38749,
-        "status": "city rate verified; PA 3.07% not re-checked"
+        "status": "verified: PA 3.07% (PA Revenue current rates page, not year-specific) and city 3.75% for 2024 (phila.gov)"
       },
       "twistRank": 3
     },
@@ -176,7 +176,7 @@
         "state": 885,
         "local": 0,
         "takeHome": 41274,
-        "status": "arithmetic ok; AZ 2.5% rule not re-checked"
+        "status": "verified: AZ 2.5% flat and $14,600 standard deduction (2024 Form 140 booklet)"
       },
       "twistRank": 8
     },
@@ -278,7 +278,7 @@
         "state": 2145,
         "local": 1508,
         "takeHome": 38506,
-        "status": "NYC verified; NY State top brackets from memory"
+        "status": "verified: NYC rates; NYS $8,000 deduction and no household credit at $50,000 (IT-201 instructions); NYS single schedule ($600 + 5.5% over $13,900) gives $2,145"
       },
       "twistRank": 2
     },
@@ -311,8 +311,9 @@
         "fica": 3825,
         "state": 1096,
         "local": 0,
-        "takeHome": 41063,
-        "status": "rates verified; excludes state disability insurance"
+        "takeHome": 40513,
+        "status": "verified: CA income tax (FTB) plus SDI 1.1% with no wage cap in 2024 (EDD) = $550",
+        "stateDisabilityInsurance": 550
       },
       "twistRank": 9
     },
