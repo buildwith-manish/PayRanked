@@ -27,164 +27,12 @@ export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS
 export type CtaVariant = 'youtube' | 'social' | 'instagram';
 /** 'social' is now Facebook only (link in the pinned first comment). 'instagram' is its own version: comment links are not tappable on
  *  Instagram, so the link lives in the bio and the card says so. */
-export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'Related video', social: 'link in comments', instagram: 'link in bio'};
 
-/**
- * The end card, shared by every Short (1-7), so each one ends the same way. Design frames (30 fps) local to the card
- * (SHORT1_CTA_SECONDS = 4 s = 120 frames). It shows a small preview of the long video, then says where to find it:
- *   0-10   background fades in
- *   6-30   a video-style card slides up: header, then the countdown rows #10-#6 fill one after another (numbers from src/data)
- *   34-52  the #1 row lights up as a locked "???" (the Shorts never give away the winner) and a progress line sweeps the card
- *   44-72  headline: "Full", "ranking", "+" land with an overshoot, "#1" slams in larger (flash, hit), a light sweeps across once
- *   64-90  the button: YouTube = a "Related video" button that rises, a touch point glides in and taps it at 86 (rings, click);
- *          social (Facebook) = a "link in comments" bubble; instagram = a "link in bio" bubble. An arrow bobs toward where the real button / the comments are.
- */
-const CTA_T = {card: 6, rows: 12, rowStep: 5, mystery: 38, title: 44, hero: 56, pill: 64, tap: 86, pulse: 90};
-// Sound cues are local to the card. The offset is far past the voice-over envelope, so the voice ducking never touches them.
-const CTA_CUES: Cue[] = [
-  {sfx: 'whoosh_s', at: CTA_T.card + 2, gain: 0.25, hero: true},
-  {sfx: 'tick_0', at: CTA_T.rows + 4, gain: 0.2, hero: true},
-  {sfx: 'tick_1', at: CTA_T.rows + 9, gain: 0.2, hero: true},
-  {sfx: 'tick_2', at: CTA_T.rows + 14, gain: 0.2, hero: true},
-  {sfx: 'tick_0', at: CTA_T.rows + 19, gain: 0.2, hero: true},
-  {sfx: 'tick_1', at: CTA_T.rows + 24, gain: 0.2, hero: true},
-  {sfx: 'hit_med', at: CTA_T.hero, gain: 0.4, hero: true},
-  {sfx: 'pop', at: CTA_T.pill + 6, gain: 0.35, hero: true},
-  {sfx: 'click', at: CTA_T.tap, gain: 0.4, hero: true},
-  {sfx: 'ding_hi', at: CTA_T.tap + 3, gain: 0.25, hero: true},
-];
-
+/** The end card is shared by every Short (1-7) and is 4 s (SHORT1_CTA_SECONDS). Each platform has its own tap demo: YouTube (the Related video
+ *  button), Facebook (comment -> pinned link -> video) and Instagram (bio link -> link page). Design frames (30 fps) are local to the card. */
 const mmss = (frames: number) => {
   const s = Math.round(frames / 30);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
-
-/** The long video's countdown, #10 to #6, as five rows. #1 stays locked. */
-const PREVIEW_ROWS = COUNTDOWN.filter((c) => c.rank >= 6 && c.rank <= 10).map((c) => ({label: c.label, name: c.names.join(' · '), extra: byName(c.names[0]).display - 100000, value: fmtUSD(byName(c.names[0]).display)}));
-
-const SocialEndCard: React.FC<{variant: CtaVariant}> = ({variant}) => {
-  const f = useDesignFrame();
-  const fade = ramp(f, 0, 10);
-  const card = tween(f, CTA_T.card, 22, snap);
-  const bob = 5 * Math.sin(f / 14);
-  const mystery = tween(f, CTA_T.mystery, 12, snap);
-  const lit = 0.5 + 0.5 * Math.sin(f / 5);
-  const sweep = ramp(f, CTA_T.rows, CTA_T.title + 20); // the progress line of the card
-  const pulse = Math.sin(Math.PI * ramp(f, CTA_T.pulse, CTA_T.pulse + 14));
-  const pillIn = tween(f, CTA_T.pill, 18, slam);
-  const tapP = ramp(f, CTA_T.tap, CTA_T.tap + 10);
-  const press = 1 - 0.07 * Math.sin(Math.PI * tapP);
-  const shine = ramp(f, CTA_T.hero + 8, CTA_T.hero + 30);
-  const CW = [{t: 'Full'}, {t: 'ranking'}, {t: '+'}, {t: '#1', hero: true}];
-  const rows = PREVIEW_ROWS;
-  const maxExtra = 16000;
-  return (
-    <AbsoluteFill style={{background: `linear-gradient(160deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, opacity: fade}}>
-      {/* soft mint glow behind the card */}
-      <div style={{position: 'absolute', left: 140, right: 140, top: 330, height: 520, borderRadius: 260, background: `${C.mint}22`, filter: 'blur(90px)', opacity: card}} />
-
-      {/* the preview card */}
-      <div style={{position: 'absolute', left: 80, right: 80, top: 330, opacity: ramp(f, CTA_T.card, CTA_T.card + 8), transform: `translateY(${(1 - card) * 90 + bob}px) scale(${0.94 + 0.06 * card})`}}>
-        <Glass radius={34} tint={C.mint} strength={1.1} glow={20} style={{padding: '30px 36px 26px'}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
-            <div style={{width: 0, height: 0, borderTop: '14px solid transparent', borderBottom: '14px solid transparent', borderLeft: `24px solid ${C.mint}`}} />
-            <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 36, color: C.text}}>Where does $100,000 go the furthest?</div>
-          </div>
-          <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
-            {rows.map((r, i) => {
-              const p = tween(f, CTA_T.rows + i * CTA_T.rowStep, 18, glide);
-              return (
-                <div key={r.label} style={{display: 'flex', alignItems: 'center', gap: 16, opacity: ramp(f, CTA_T.rows + i * CTA_T.rowStep, CTA_T.rows + i * CTA_T.rowStep + 6)}}>
-                  <div style={{width: 76, fontFamily: F.display, fontWeight: 700, fontSize: 34, color: C.mint, ...tabular}}>{r.label}</div>
-                  <div style={{width: 250, fontFamily: F.body, fontWeight: 600, fontSize: 30, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden'}}>{r.name}</div>
-                  <div style={{flex: 1, height: 22, borderRadius: 11, background: 'rgba(232,238,247,0.10)', position: 'relative'}}>
-                    <div style={{position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min(1, r.extra / maxExtra) * 100 * p}%`, borderRadius: 11, background: `linear-gradient(90deg, ${C.emerald}, ${C.mint})`}} />
-                  </div>
-                  <div style={{width: 130, textAlign: 'right', fontFamily: F.body, fontWeight: 600, fontSize: 30, color: C.muted, ...tabular}}>{r.value}</div>
-                </div>
-              );
-            })}
-            {/* #1 stays locked: the Shorts never give the winner away */}
-            <div style={{display: 'flex', alignItems: 'center', gap: 16, opacity: ramp(f, CTA_T.mystery, CTA_T.mystery + 6), transform: `scale(${0.9 + 0.1 * mystery})`, transformOrigin: '0% 50%'}}>
-              <div style={{width: 76, fontFamily: F.display, fontWeight: 700, fontSize: 34, color: C.amber, ...tabular}}>#1</div>
-              <div style={{flex: 1, height: 52, borderRadius: 14, border: `3px solid ${C.amber}`, background: `${C.amber}${lit > 0.5 ? '33' : '1F'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 32, letterSpacing: '0.3em', color: C.amber, boxShadow: `0 0 ${16 + 16 * lit}px ${C.amber}66`}}>? ? ?</div>
-            </div>
-          </div>
-          {/* video progress line */}
-          <div style={{marginTop: 22, display: 'flex', alignItems: 'center', gap: 16}}>
-            <div style={{flex: 1, height: 8, borderRadius: 4, background: 'rgba(232,238,247,0.14)', position: 'relative'}}>
-              <div style={{position: 'absolute', left: 0, top: 0, bottom: 0, width: `${sweep * 38}%`, borderRadius: 4, background: C.mint}} />
-              <div style={{position: 'absolute', top: -6, left: `${sweep * 38}%`, width: 20, height: 20, marginLeft: -10, borderRadius: 10, background: C.text}} />
-            </div>
-            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 26, color: C.muted, ...tabular}}>{mmss(sweep * 0.38 * VIDEO_FRAMES)} / {mmss(VIDEO_FRAMES)}</div>
-          </div>
-        </Glass>
-      </div>
-
-      {/* the call to action, under the card */}
-      <Flash at={CTA_T.hero} duration={8} peak={0.22} />
-      <div style={{position: 'absolute', left: 40, right: 40, top: 950, textAlign: 'center'}}>
-        {/* headline: the words land one by one with an overshoot, "#1" slams in larger, then a light sweeps across it once */}
-        <div style={{position: 'relative', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: 26, fontFamily: F.display, fontWeight: 700, fontSize: 104, lineHeight: 1.12, color: C.text, padding: '10px 0'}}>
-          {CW.map((w, i) => {
-            const at = CTA_T.title + i * 4 + (w.hero ? 4 : 0);
-            const p = tween(f, at, w.hero ? 16 : 14, slam);
-            return (
-              <span key={i} style={{display: 'inline-block', opacity: ramp(f, at, at + 4), color: w.hero ? C.mint : C.text, fontSize: w.hero ? 150 : 104, transform: `translateY(${(1 - p) * 40}px) scale(${1 + (1 - p) * (w.hero ? 1.1 : 0.4)})`, filter: p < 0.9 ? `blur(${(1 - p) * 7}px)` : undefined, textShadow: w.hero ? `0 0 ${24 + 30 * pulse}px ${C.mint}88` : undefined}}>
-                {w.t}
-              </span>
-            );
-          })}
-          <div style={{position: 'absolute', top: 0, bottom: 0, left: `${-20 + 140 * shine}%`, width: 90, transform: 'skewX(-20deg)', background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.28), rgba(255,255,255,0))', opacity: shine > 0 && shine < 1 ? 1 : 0, pointerEvents: 'none'}} />
-        </div>
-
-        {variant === 'youtube' ? (
-          <>
-            {/* a button that looks like YouTube's "Related video" button; a touch point glides in, taps it and rings spread out */}
-            <div style={{position: 'relative', margin: '34px auto 0', width: 560, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * press})`}}>
-              {[0, 5].map((d) => {
-                const r = ramp(f, CTA_T.tap + d, CTA_T.tap + d + 18);
-                return <div key={d} style={{position: 'absolute', left: -r * 40, right: -r * 40, top: -r * 40, bottom: -r * 40, borderRadius: 999, border: `5px solid ${C.mint}`, opacity: r > 0 && r < 1 ? 0.7 * (1 - r) : 0}} />;
-              })}
-              <div style={{position: 'absolute', inset: 0, borderRadius: 999, background: `linear-gradient(90deg, ${C.emerald}, ${C.mint})`, boxShadow: `0 0 ${22 + 34 * pulse}px ${C.mint}${pulse > 0.2 ? 'bb' : '77'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22}}>
-                <div style={{width: 0, height: 0, borderTop: '20px solid transparent', borderBottom: '20px solid transparent', borderLeft: `34px solid ${C.navy3}`}} />
-                <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 56, color: C.navy3}}>{CTA_LINE.youtube}</div>
-              </div>
-              {/* the touch point */}
-              <div style={{position: 'absolute', left: 330 + (1 - ramp(f, CTA_T.pill + 6, CTA_T.tap, glide)) * 150, top: 56 + (1 - ramp(f, CTA_T.pill + 6, CTA_T.tap, glide)) * 130, width: 64, height: 64, marginLeft: -32, marginTop: -32, borderRadius: 32, background: 'rgba(255,255,255,0.55)', border: '4px solid rgba(255,255,255,0.9)', opacity: ramp(f, CTA_T.pill + 6, CTA_T.pill + 14) * (1 - ramp(f, CTA_T.tap + 12, CTA_T.tap + 20)), transform: `scale(${1 - 0.25 * Math.sin(Math.PI * tapP)})`}} />
-            </div>
-            <div style={{marginTop: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22, fontFamily: F.body, fontWeight: 600, fontSize: 46, color: C.text, opacity: ramp(f, CTA_T.pill + 12, CTA_T.pill + 24)}}>
-              {/* the real button sits in the Shorts player, bottom left: the arrow bobs toward it */}
-              <div style={{width: 30, height: 30, borderLeft: `9px solid ${C.mint}`, borderBottom: `9px solid ${C.mint}`, borderRadius: 3, transform: `translate(${-6 * Math.sin(f / 5)}px, ${6 * Math.sin(f / 5)}px) rotate(0deg)`}} />
-              <span>tap the button below</span>
-            </div>
-          </>
-        ) : variant === 'instagram' ? (
-          <>
-            {/* Instagram: the link lives in the bio, so the bubble says "link in bio" and the arrow points up at the profile, not down at the comments */}
-            <div style={{position: 'relative', margin: '34px auto 0', width: 700, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * (1 + 0.04 * pulse)})`}}>
-              <div style={{position: 'absolute', inset: 0, borderRadius: 40, border: `5px solid ${C.mint}`, background: `${C.mint}1F`, boxShadow: `0 0 ${22 + 30 * pulse}px ${C.mint}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.mint}}>{CTA_LINE.instagram}</div>
-              <div style={{position: 'absolute', left: 64, top: -20, width: 36, height: 36, borderLeft: `5px solid ${C.mint}`, borderTop: `5px solid ${C.mint}`, background: C.navy2, transform: 'rotate(45deg) skew(8deg, 8deg)'}} />
-            </div>
-            <div style={{marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22, fontFamily: F.body, fontWeight: 600, fontSize: 46, color: C.text, opacity: ramp(f, CTA_T.pill + 14, CTA_T.pill + 26)}}>
-              <div style={{width: 30, height: 30, borderLeft: `9px solid ${C.mint}`, borderTop: `9px solid ${C.mint}`, borderRadius: 3, transform: `translateY(${-6 * Math.sin(f / 5)}px) rotate(45deg)`}} />
-              <span>tap my profile</span>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Facebook: a comment bubble that says where the link is, with a chevron pointing down at the comments */}
-            <div style={{position: 'relative', margin: '34px auto 0', width: 700, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * (1 + 0.04 * pulse)})`}}>
-              <div style={{position: 'absolute', inset: 0, borderRadius: 40, border: `5px solid ${C.mint}`, background: `${C.mint}1F`, boxShadow: `0 0 ${22 + 30 * pulse}px ${C.mint}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.mint}}>{CTA_LINE.social}</div>
-              <div style={{position: 'absolute', left: 64, bottom: -20, width: 36, height: 36, borderRight: `5px solid ${C.mint}`, borderBottom: `5px solid ${C.mint}`, background: C.navy2, transform: 'rotate(45deg) skew(8deg, 8deg)'}} />
-            </div>
-            <div style={{margin: '56px auto 0', width: 40, height: 40, borderRight: `10px solid ${C.mint}`, borderBottom: `10px solid ${C.mint}`, borderRadius: 3, opacity: ramp(f, CTA_T.pill + 14, CTA_T.pill + 26), transform: `translateY(${8 * Math.sin(f / 5)}px) rotate(45deg)`}} />
-          </>
-        )}
-      </div>
-      <SfxTrack cues={CTA_CUES} offset={10_000_000} />
-    </AbsoluteFill>
-  );
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -437,16 +285,149 @@ const FacebookEndCard: React.FC = () => {
   );
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Instagram end card: a demo of the link in the bio. Instagram comments are not tappable, so the link lives in the bio. The card shows
+// the profile (avatar, @handle, name, Follow / Message, bio, the link) with NO post / follower counts; a touch point taps the bio link and
+// the link page opens like an in-app browser (that page is the PayRanked link page: brand film, "Data-backed finance", Subscribe on
+// YouTube, then "Latest video"); a swipe scrolls it down to the newest long video. About 3 s of demo inside the 4 s card.
+// ---------------------------------------------------------------------------------------------------------------------
+export const IG_HANDLE = 'payranked.official';
+export const IG_NAME = 'PayRanked';
+export const IG_BIO = 'Visualizing US incomes, career pay gaps, and wealth-building data backed by official numbers.';
+/** What the bio link looks like. Cosmetic: the real link is whatever is in your Instagram bio. Edit it to match. */
+export const IG_LINK_TEXT = 'payranked.com/links';
+const IG_TAGLINE = 'Visualizing US incomes, career pay gaps, and wealth-building data backed by official numbers.';
+
+const IG_T = {head: 4, hero: 20, panel: 22, ui: 28, link: 34, finger: 36, push: 38, tap: 48, open: 51, openEnd: 64, scroll: 72, scrollEnd: 92, end: 120};
+const IG_CUES: Cue[] = [
+  {sfx: 'hit_big', at: IG_T.hero, gain: 0.35, hero: true}, // the low thud on the "#1" slam
+  {sfx: 'whoosh_s', at: IG_T.panel + 2, gain: 0.22, hero: true},
+  {sfx: 'pop', at: IG_T.link + 2, gain: 0.28, hero: true},
+  {sfx: 'tap_0', at: IG_T.tap, gain: 0.4, hero: true}, // the tap on the bio link
+  {sfx: 'click', at: IG_T.tap, gain: 0.25, hero: true},
+  {sfx: 'whoosh_m', at: IG_T.open, gain: 0.3, hero: true}, // the page opening
+  {sfx: 'pop', at: IG_T.openEnd + 2, gain: 0.25, hero: true},
+  {sfx: 'swish', at: IG_T.scroll, gain: 0.25, hero: true}, // the swipe
+  {sfx: 'shimmer', at: IG_T.scrollEnd + 2, gain: 0.22, hero: true},
+];
+const IGC = {bg: '#0c1014', btn: '#25292e', text: '#f5f5f5', muted: '#a8a8a8', link: '#e0f1ff', follow: '#0095f6'};
+const IG_PH0 = 500; // profile
+const IG_PH1 = 820; // link page open
+const IG_BAR_H = 76; // the in-app browser's top bar
+const IG_LINK = {l: 40, t: 396, w: 440, h: 52}; // the bio link, panel coordinates
+const IG_SCROLL = 760; // how far the page scrolls to put the newest video in view
+
+const InstagramEndCard: React.FC = () => {
+  const f = useDesignFrame();
+  const fade = ramp(f, 0, 8);
+  const panelIn = tween(f, IG_T.panel, 22, settle);
+  const uiIn = ramp(f, IG_T.ui, IG_T.ui + 8);
+  const linkIn = tween(f, IG_T.link, 16, settle);
+  const finger = ramp(f, IG_T.finger, IG_T.tap, glide);
+  const tapP = ramp(f, IG_T.tap, IG_T.tap + 8);
+  const tapS = Math.sin(Math.PI * tapP);
+  const open = ramp(f, IG_T.open, IG_T.openEnd, glide); // the link grows into the page
+  const s1 = uiIn * (1 - ramp(f, IG_T.tap + 2, IG_T.tap + 8)); // the profile: gone as the page opens
+  const sc = ramp(f, IG_T.scroll, IG_T.scrollEnd, glide);
+  const land = f - IG_T.openEnd;
+  const bounce = land >= 0 ? 0.015 * Math.exp(-land / 5) * Math.sin(land * 1.15) : 0;
+  const panelH = IG_PH0 + (IG_PH1 - IG_PH0) * open;
+  const wake = ramp(f, IG_T.link + 6, IG_T.link + 20) * (1 - ramp(f, IG_T.tap, IG_T.tap + 6)) * (0.5 + 0.5 * Math.sin(f / 6));
+  const linkPressed = tapS > 0.05 && f < IG_T.open;
+  const pulse = 0.5 + 0.5 * Math.sin(f / 5);
+  const cam = 1 + 0.08 * ramp(f, IG_T.push, IG_T.tap, glide) - 0.08 * ramp(f, IG_T.open, IG_T.openEnd, glide) + 0.02 * ramp(f, IG_T.scrollEnd, IG_T.end);
+  const W = PANEL_W - 80; // content width on the page
+  const swipeVis = ramp(f, IG_T.scroll - 4, IG_T.scroll) * (1 - ramp(f, IG_T.scrollEnd - 2, IG_T.scrollEnd + 4));
+  return (
+    <AbsoluteFill style={{background: `linear-gradient(160deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, opacity: fade}}>
+      <div style={{position: 'absolute', inset: 0, transform: `scale(${cam})`, transformOrigin: `540px ${640 + 300}px`}}>
+        <div style={{position: 'absolute', left: 40, right: 40, top: 200, textAlign: 'center'}}>
+          <Headline start={IG_T.head} />
+        </div>
+
+        <div style={{position: 'absolute', left: (1080 - PANEL_W) / 2, top: 640, width: PANEL_W, height: panelH, borderRadius: 40, background: IGC.bg, border: '2px solid rgba(232,238,247,0.14)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', opacity: ramp(f, IG_T.panel, IG_T.panel + 6), transform: `translateY(${(1 - panelIn) * 120}px) scale(${0.92 + 0.08 * panelIn})`, overflow: 'hidden'}}>
+          {/* stage 1: the profile. No post / follower / following counts. */}
+          <div style={{position: 'absolute', inset: 0, opacity: s1}}>
+            <Img src={staticFile('profile.png')} style={{position: 'absolute', left: 40, top: 36, width: 120, height: 120, borderRadius: 60, objectFit: 'cover'}} />
+            <div style={{position: 'absolute', left: 190, top: 44, fontFamily: F.body, fontWeight: 700, fontSize: 42, color: IGC.text}}>{IG_HANDLE}</div>
+            <div style={{position: 'absolute', left: 190, top: 100, fontFamily: F.body, fontWeight: 500, fontSize: 30, color: IGC.muted}}>{IG_NAME}</div>
+            <div style={{position: 'absolute', left: 40, top: 190, width: 392, height: 76, borderRadius: 18, background: IGC.follow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.body, fontWeight: 700, fontSize: 32, color: '#fff'}}>Follow</div>
+            <div style={{position: 'absolute', left: 448, top: 190, width: 392, height: 76, borderRadius: 18, background: IGC.btn, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.body, fontWeight: 700, fontSize: 32, color: IGC.text}}>Message</div>
+            <div style={{position: 'absolute', left: 40, top: 296, width: 800, fontFamily: F.body, fontWeight: 500, fontSize: 30, lineHeight: '42px', color: IGC.text}}>{IG_BIO}</div>
+            {/* the bio link: icon + text, lights up softly before the tap */}
+            <div style={{position: 'absolute', left: IG_LINK.l - 12, top: IG_LINK.t, width: IG_LINK.w, height: IG_LINK.h, borderRadius: 14, background: linkPressed ? 'rgba(224,241,255,0.2)' : `rgba(224,241,255,${0.1 * wake})`, display: 'flex', alignItems: 'center', gap: 14, padding: '0 12px', opacity: linkIn, transform: `translateY(${(1 - linkIn) * 30}px) scale(${1 - 0.05 * tapS})`}}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={IGC.link} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+              <span style={{fontFamily: F.body, fontWeight: 600, fontSize: 32, color: IGC.link, whiteSpace: 'nowrap'}}>{IG_LINK_TEXT}</span>
+            </div>
+          </div>
+
+          {/* stage 2: ONE element, the link, that grows into the in-app browser showing the PayRanked link page */}
+          <div style={{position: 'absolute', left: IG_LINK.l * (1 - open), top: IG_LINK.t * (1 - open), width: IG_LINK.w + (PANEL_W - IG_LINK.w) * open, height: IG_LINK.h + (IG_PH1 - IG_LINK.h) * open, borderRadius: 14 * (1 - open), overflow: 'hidden', background: '#060d18', opacity: ramp(f, IG_T.open, IG_T.open + 2), transform: `scale(${1 + bounce})`, transformOrigin: '50% 30%'}}>
+            <div style={{position: 'absolute', left: 0, top: 0, width: PANEL_W, height: IG_PH1, opacity: ramp(open, 0.5, 0.9)}}>
+              {/* the page itself */}
+              <div style={{position: 'absolute', left: 0, right: 0, top: IG_BAR_H, bottom: 0, overflow: 'hidden', background: 'radial-gradient(circle at 0% 0%, rgba(20,57,106,0.75), transparent 55%), radial-gradient(circle at 100% 100%, rgba(15,168,106,0.35), transparent 55%), #060d18'}}>
+                <div style={{position: 'absolute', left: 40, top: 28, width: W, transform: `translateY(${-IG_SCROLL * sc}px)`}}>
+                  <div style={{position: 'relative', width: W, height: 450, borderRadius: 24, overflow: 'hidden', border: '2px solid rgba(255,255,255,0.08)'}}>
+                    <Img src={staticFile('linkpage-poster.jpg')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                  </div>
+                  <div style={{display: 'flex', justifyContent: 'center', marginTop: 28}}>
+                    <div style={{display: 'inline-flex', alignItems: 'center', gap: 14, height: 46, padding: '0 26px', borderRadius: 999, border: '2px solid rgba(61,240,168,0.4)', background: 'rgba(61,240,168,0.07)', fontFamily: F.body, fontWeight: 600, fontSize: 22, color: C.mint}}>
+                      <span style={{position: 'relative', width: 12, height: 12, borderRadius: 6, background: C.mint, boxShadow: `0 0 ${6 + 14 * pulse}px ${C.mint}`}} />
+                      Data-backed finance
+                    </div>
+                  </div>
+                  <div style={{width: 640, margin: '22px auto 0', textAlign: 'center', fontFamily: F.body, fontWeight: 500, fontSize: 26, lineHeight: '38px', color: C.muted}}>{IG_TAGLINE}</div>
+                  <div style={{marginTop: 34, height: 92, borderRadius: 24, background: C.mint, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, fontFamily: F.body, fontWeight: 700, fontSize: 31, color: '#03150d', boxShadow: '0 16px 40px -14px rgba(61,240,168,0.6)'}}>
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2C.5 9.1.5 12 .5 12s0 2.9.5 4.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.8.5-4.8s0-2.9-.5-4.8zM9.8 15.1V8.9l5.4 3.1-5.4 3.1z" /></svg>
+                    Subscribe on YouTube
+                  </div>
+                  <div style={{marginTop: 44, fontFamily: F.display, fontWeight: 600, fontSize: 34, color: C.text}}>Latest video</div>
+                  {/* the newest long video, as the page lists it */}
+                  <div style={{position: 'relative', marginTop: 20, width: W, height: 590, borderRadius: 28, overflow: 'hidden', background: '#0c1626', border: '2px solid rgba(255,255,255,0.08)'}}>
+                    <div style={{position: 'relative', width: W, height: 450}}>
+                      <Img src={staticFile('thumbnail.jpg')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                      <div style={{position: 'absolute', left: 20, top: 20, padding: '6px 18px', borderRadius: 999, background: C.mint, fontFamily: F.body, fontWeight: 700, fontSize: 22, color: '#03150d'}}>Newest</div>
+                      <div style={{position: 'absolute', left: 20, bottom: 20, width: 84, height: 84, borderRadius: 42, background: 'rgba(6,13,24,0.72)', border: '2px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <div style={{width: 0, height: 0, marginLeft: 6, borderTop: '17px solid transparent', borderBottom: '17px solid transparent', borderLeft: '28px solid #fff'}} />
+                      </div>
+                    </div>
+                    <div style={{padding: '22px 28px', fontFamily: F.display, fontWeight: 600, fontSize: 32, lineHeight: '42px', color: C.text}}>{LONG_VIDEO_TITLE}</div>
+                  </div>
+                </div>
+              </div>
+              {/* the in-app browser's top bar: close, and the address */}
+              <div style={{position: 'absolute', left: 0, top: 0, width: PANEL_W, height: IG_BAR_H, background: IGC.bg, borderBottom: '2px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <svg style={{position: 'absolute', left: 30, top: 22}} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={IGC.text} strokeWidth="2.4" strokeLinecap="round"><path d="M5 5l14 14M19 5L5 19" /></svg>
+                <span style={{fontFamily: F.body, fontWeight: 600, fontSize: 28, color: IGC.text}}>{IG_LINK_TEXT}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* tap rings and the touch points: the tap on the link, then the swipe that scrolls the page */}
+          {[0, 5].map((d) => {
+            const r = ramp(f, IG_T.tap + d, IG_T.tap + d + 16);
+            return <div key={d} style={{position: 'absolute', left: IG_LINK.l - 12 - r * 30, top: IG_LINK.t - r * 30, width: IG_LINK.w + r * 60, height: IG_LINK.h + r * 60, borderRadius: 999, border: `4px solid ${C.mint}`, opacity: r > 0 && r < 1 ? 0.8 * (1 - r) * (1 - ramp(f, IG_T.open, IG_T.open + 3)) : 0}} />;
+          })}
+          <div style={{position: 'absolute', left: IG_LINK.l + 200 + (1 - finger) * 300, top: IG_LINK.t + IG_LINK.h / 2 + (1 - finger) * 200, width: 68, height: 68, marginLeft: -34, marginTop: -34, borderRadius: 34, background: 'rgba(255,255,255,0.5)', border: '4px solid rgba(255,255,255,0.92)', boxShadow: `0 ${16 - 10 * tapS}px ${30 - 18 * tapS}px rgba(0,0,0,${0.5 + 0.2 * tapS})`, opacity: ramp(f, IG_T.finger, IG_T.finger + 6) * (1 - ramp(f, IG_T.tap + 2, IG_T.tap + 5)), transform: `scale(${1 - 0.28 * tapS})`}} />
+          <div style={{position: 'absolute', left: PANEL_W * 0.5, top: 640 - 330 * sc, width: 68, height: 68, marginLeft: -34, marginTop: -34, borderRadius: 34, background: 'rgba(255,255,255,0.5)', border: '4px solid rgba(255,255,255,0.92)', boxShadow: '0 6px 12px rgba(0,0,0,0.7)', opacity: swipeVis, transform: 'scale(0.78)'}} />
+        </div>
+      </div>
+      <Flash at={IG_T.hero} duration={8} peak={0.2} />
+      <SfxTrack cues={IG_CUES} offset={10_000_000} />
+    </AbsoluteFill>
+  );
+};
+
 /** Shorts loop: the last frames fade to the navy the Short starts on, so the card cuts cleanly back to the first frame. */
 const LoopFade: React.FC = () => {
   const f = useDesignFrame();
   return <AbsoluteFill style={{background: C.navy3, opacity: ramp(f, 110, 119), pointerEvents: 'none'}} />;
 };
 
-/** The end card of every Short: the YouTube demo, the Facebook comment-and-link demo, or the "link in bio" card for Instagram. */
+/** The end card of every Short: the YouTube demo, the Facebook comment-and-link demo, or the Instagram bio-link demo. */
 export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'youtube'}) => (
   <AbsoluteFill>
-    {variant === 'youtube' ? <YouTubeEndCard /> : variant === 'social' ? <FacebookEndCard /> : <SocialEndCard variant={variant} />}
+    {variant === 'youtube' ? <YouTubeEndCard /> : variant === 'social' ? <FacebookEndCard /> : <InstagramEndCard />}
     <LoopFade />
   </AbsoluteFill>
 );

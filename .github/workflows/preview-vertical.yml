@@ -25,8 +25,8 @@ jobs:
           - {comp: Short7-Vertical, seconds: '0.4 0.9 1.3 1.6 1.9 2.4 3.2 8 11 12.5 14 18 21 24 24.3 25.2 25.9'}
           - {comp: Short1-Vertical-Social, seconds: '34.9 35.6 35.95 36.4 36.7 37.0 37.5 38.1'}
           - {comp: Short3-Vertical-Social, seconds: '40.5 41.2 41.55 42 42.3 42.6 43.1 43.9'}
-          - {comp: Short1-Vertical-Instagram, seconds: '34.7 36.7 38.1'}
-          - {comp: Short3-Vertical-Instagram, seconds: '41 42.5 43.9'}
+          - {comp: Short1-Vertical-Instagram, seconds: '34.9 35.6 36.0 36.3 36.6 37.0 37.5 38.1'}
+          - {comp: Short3-Vertical-Instagram, seconds: '40.5 41.2 41.6 41.9 42.2 42.6 43.1 43.9'}
     steps:
       - uses: actions/checkout@v4
         with: {ref: '${{ inputs.ref }}'}

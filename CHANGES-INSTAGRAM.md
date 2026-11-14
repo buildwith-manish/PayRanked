@@ -6,7 +6,7 @@ Every Short now has three versions. Only the end card differs; picture, voice, m
 |---|---|---|---|
 | YouTube | `ShortN-Vertical` | Related video button demo | Related video button + pinned comment |
 | Facebook | `ShortN-Vertical-Social` | tap demo: comment bar -> pinned comment with the link -> long video opens | pinned first comment with the Facebook long-video link |
-| Instagram | `ShortN-Vertical-Instagram` | link in bio (arrow up, "tap my profile") | link in bio; pinned comment says "full video, link in bio" |
+| Instagram | `ShortN-Vertical-Instagram` | tap demo: profile + bio link -> link page opens and scrolls to the latest video | link in bio (your PayRanked link page); pinned comment says "full video, link in bio" |
 
 - `CtaVariant` is now `'youtube' | 'social' | 'instagram'` (`src/shots/Short1.tsx`). `social` keeps meaning Facebook so existing ids do not change.
 - `Render Short N` workflows: the `variant` input has a new `instagram` option; files are named `shortN-vertical-instagram.mp4`.
@@ -40,4 +40,14 @@ Same idea as the YouTube card, for how Facebook really works (no Related video b
 Timeline `FB_T` (design frames, 4 s card); sound cues `FB_CUES`; camera pushes in on each tap. `FB_LINK_TEXT` is cosmetic: edit it to match your real comment.
 Checked: typecheck, and the card rendered as a frame sequence and looked at stage by stage (bar tap, comments open, link tap, video open, hold).
 Not checked: a full render with sound, Shorts 2-7 (same component). Needs the real pinned comment on every Reel, or the demo promises something that is not there.
-The Instagram card (`link in bio`) is still the static version.
+
+## Instagram end card: bio link -> link page (`InstagramEndCard`, `src/shots/Short1.tsx`)
+Instagram comments are not tappable, so the card shows the real path: the link in the bio.
+1. The profile in Instagram dark mode: avatar, `payranked.official`, `PayRanked`, Follow / Message, the bio and the bio link. **No post / follower / following counts.**
+2. A touch point taps the bio link (rings, press, click); the link grows into an in-app browser (close button + address bar).
+3. It shows your actual link page (`PayRanked_link_page_preview.html`): brand film poster, "Data-backed finance", tagline, mint "Subscribe on YouTube", then a swipe scrolls to "Latest video" with the newest long video (thumbnail, "Newest" tag, title).
+- `public/linkpage-poster.jpg` is the page's own poster image, extracted from that file (the og:image).
+- `IG_HANDLE`, `IG_NAME`, `IG_BIO`, `IG_LINK_TEXT` are at the top of the Instagram section. **`IG_LINK_TEXT` (`payranked.com/links`) is a placeholder**: set it to the exact link text your bio shows.
+- The page lists videos live from your channel; the card can only show the one video it knows (the long video). It never shows invented videos.
+- Removed the old static end card (`SocialEndCard`, `CTA_T`, `CTA_CUES`, `PREVIEW_ROWS`, `CTA_LINE`): nothing used it any more.
+- Checked: typecheck, and the card rendered as a frame sequence and looked at stage by stage (profile, tap, page opening, scroll, hold). Not checked: a full render with sound; Shorts 2-7 (same component).
