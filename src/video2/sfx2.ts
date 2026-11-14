@@ -76,6 +76,7 @@ for (let rank = 10; rank >= 1; rank--) {
   add('chip_1', o + b.tGoodsBar, 0.45);
   add('chip_2', o + b.tServBar, 0.45);
   add('pop', o + b.tRent, 0.4);
+  add('pop', o + b.tPin + 2, 0.28); // the locator pin drops
   if (b.tRemember >= 0) add('ding_hi', o + b.tRemember, 0.5);
   if (b.tWin >= 0) add('ding', o + b.tWin, 0.6);
   // the teaser steps up one blip per city: #10 -> blip_0 ... #2 -> blip_8

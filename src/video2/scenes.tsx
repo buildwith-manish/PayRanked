@@ -4,7 +4,7 @@ import {C} from '../theme';
 import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
 import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
-import {MetroMap} from './MetroMap';
+import {LocatorMap, MetroMap} from './MetroMap';
 import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, RankSlam, Source} from './parts';
 import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
 import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
@@ -93,7 +93,7 @@ export const Method: React.FC = () => {
 export const CityScene: React.FC<{rank: number}> = ({rank}) => {
   const f = useDesignFrame();
   const m = byRank(rank);
-  const {tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember} = cityBeats(rank);
+  const {tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember, tPin} = cityBeats(rank);
   const tBars = tDial;
   const power = m.buyingPower50k;
   const revealed: Record<number, number> = {};
@@ -137,6 +137,9 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
           <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color="#FFD25A" size={30} />
         </Enter>
       )}
+      <Enter at={8} style={{left: 1580, top: 175}}>
+        <LocatorMap name={m.name} at={tPin} done={METROS.filter((q) => q.rank > rank).map((q) => q.name)} next={rank > 1 ? byRank(rank - 1).name : undefined} nextAt={tNext} />
+      </Enter>
       <Enter at={tNext} style={{left: 1000, top: 972}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 40, color: ROLE.buying, opacity: 0.6 + 0.4 * Math.sin(f / 6)}}>
           {rank > 1 ? `NEXT  →  #${rank - 1}  ?` : 'BUT THERE IS A TWIST  →'}

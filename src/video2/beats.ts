@@ -48,7 +48,9 @@ export const cityBeats = (rank: number) => {
   const tNext = cue(g, ['next', 'half'], rel[n - 1], {from: n - 1});
   const tWin = rank === 1 ? cue(g, 'wins', rel[4], {from: 4}) : -1;
   const tRemember = rank === 7 ? cue(g, 'remember', rel[3] + 40, {from: 3}) : -1;
-  return {g, n, tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember};
+  // the locator map pin drops just after the city name appears (frame 10)
+  const tPin = 16;
+  return {g, n, tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember, tPin};
 };
 
 export const breakBeats = () => {
