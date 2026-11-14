@@ -76,8 +76,12 @@ const loc = (name: string) => projection(LONLAT[name]) as [number, number];
  * Small flat US map for one countdown shot: this city's pin drops in at `at` and keeps pulsing; cities already revealed stay as faint dots;
  * the NEXT city shows only as an unlabeled pulsing ring from `nextAt` (a hint, never a name). Geography only: no values, so no spoilers beyond the teaser.
  */
-export const LocatorMap: React.FC<{name: string; at: number; done: string[]; next?: string; nextAt: number; width?: number}> = ({name, at, done, next, nextAt, width = 240}) => {
-  const f = useDesignFrame();
+export const LocatorMap: React.FC<{name: string; at: number; done: string[]; next?: string; nextAt: number; width?: number; frame?: number}> = ({name, at, done, next, nextAt, width = 240, frame}) => {
+  // `frame` lets a persistent parent (CountdownNav) drive this with a scene-local frame it computed itself,
+  // instead of this component reading the design clock directly (which would be the *global* frame if this
+  // were ever rendered outside its own <Sequence>).
+  const own = useDesignFrame();
+  const f = frame ?? own;
   const h = (width * BH) / BW;
   const k = BW / width; // user units per px
   const drop = tween(f, at, 16, slam);

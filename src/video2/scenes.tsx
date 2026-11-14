@@ -4,8 +4,8 @@ import {C} from '../theme';
 import {glide, slam, tween} from '../motion';
 import {CoinStack} from '../components/CoinStack';
 import {FONT, ROLE, ROLE_LABEL, TYPE, coinsFor} from './system';
-import {LocatorMap, MetroMap} from './MetroMap';
-import {Dial, Enter, CountMoney, IndexBar, Label, Ladder, Pill, Meta, RankSlam, Source, Tag} from './parts';
+import {MetroMap} from './MetroMap';
+import {Dial, Enter, CountMoney, IndexBar, Label, Pill, Meta, RankSlam, Source, Tag} from './parts';
 import {END_SCREEN_SECONDS, METROS, Metro, byRank, d, group, money, shownName} from './layout';
 import {breakBeats, cityBeats, coldBeats, methodBeats, twistBeats} from './beats';
 
@@ -96,37 +96,43 @@ export const Method: React.FC = () => {
 export const CityScene: React.FC<{rank: number}> = ({rank}) => {
   const f = useDesignFrame();
   const m = byRank(rank);
-  const {tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tNext, tWin, tRemember, tPin} = cityBeats(rank);
+  const {tPower, tDial, tRentBar, tGoodsBar, tServBar, tRent, tWin, tRemember} = cityBeats(rank);
   const tBars = tDial;
   const power = m.buyingPower50k;
-  const revealed: Record<number, number> = {};
-  for (let r = 10; r > rank; r--) revealed[r] = -1;
-  revealed[rank] = 6;
   const diff = power - 50000;
   const good = diff >= 0;
   const atAvg = diff === 0;
+  // One hero per beat: once the next beat's elements start entering, the previous beat's elements quiet down
+  // (shrink a little, nudge toward the corner, dim slightly) instead of all three staying full-size at once.
+  // The ladder/locator/NEXT teaser have moved out of this scene entirely — they're now the persistent
+  // CountdownNav Video2 renders once for the whole countdown (see Video2.tsx), so they don't re-enter here.
+  const recede1 = tween(f, tDial, 20, glide);
+  const recede2 = tween(f, tRentBar, 20, glide);
   return (
     <>
-      <Ladder revealed={revealed} active={rank} />
-      <div style={{position: 'absolute', left: 500, top: 100}}><RankSlam text={`#${rank}`} at={0} /></div>
-      <Enter at={10} style={{left: 500, top: 300}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: shownName(m).length > 10 ? 56 : TYPE.title, color: C.text, whiteSpace: 'nowrap'}}>{shownName(m)}</div></Enter>
-      <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={625} top={450} />
-      <Enter at={tPower} style={{left: 1000, top: 110}}><Meta size={30}>Buying power of $50,000</Meta></Enter>
-      <div style={{position: 'absolute', left: 1000, top: 160}}>
-        <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
+      <div style={{position: 'absolute', inset: 0, transform: `scale(${1 - 0.4 * recede1}) translate(${-recede1 * 70}px, ${-recede1 * 36}px)`, transformOrigin: '0% 0%', opacity: 1 - 0.16 * recede1}}>
+        <div style={{position: 'absolute', left: 500, top: 100}}><RankSlam text={`#${rank}`} at={0} /></div>
+        <Enter at={10} style={{left: 500, top: 300}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: shownName(m).length > 10 ? 56 : TYPE.title, color: C.text, whiteSpace: 'nowrap'}}>{shownName(m)}</div></Enter>
+        <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={625} top={450} />
+        <Enter at={tPower} style={{left: 1000, top: 110}}><Meta size={30}>Buying power of $50,000</Meta></Enter>
+        <div style={{position: 'absolute', left: 1000, top: 160}}>
+          <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
+        </div>
+        <Enter at={tPower + 24} style={{left: 1000, top: 285}}>
+          {atAvg ? (
+            <Label color={C.text}>RIGHT AT THE AVERAGE</Label>
+          ) : (
+            <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
+          )}
+        </Enter>
       </div>
-      <Enter at={tPower + 24} style={{left: 1000, top: 285}}>
-        {atAvg ? (
-          <Label color={C.text}>RIGHT AT THE AVERAGE</Label>
-        ) : (
-          <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
-        )}
-      </Enter>
-      <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} hideValue /></div>
-      <Enter at={tBars + 10} style={{left: 1390, top: 410}}>
-        <Meta size={30}>Price level</Meta>
-        <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 72, color: m.bea.allItems > 100 ? ROLE.rent : ROLE.buying}}>{m.bea.allItems.toFixed(1)}</div>
-      </Enter>
+      <div style={{position: 'absolute', inset: 0, transform: `scale(${1 - 0.28 * recede2}) translate(${-recede2 * 36}px, ${-recede2 * 24}px)`, transformOrigin: '0% 0%', opacity: 1 - 0.12 * recede2}}>
+        <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} hideValue /></div>
+        <Enter at={tBars + 10} style={{left: 1390, top: 410}}>
+          <Meta size={30}>Price level</Meta>
+          <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 72, color: m.bea.allItems > 100 ? ROLE.rent : ROLE.buying}}>{m.bea.allItems.toFixed(1)}</div>
+        </Enter>
+      </div>
       <div style={{position: 'absolute', left: 1000, top: 650, display: 'flex', flexDirection: 'column', gap: 20}}>
         <IndexBar label={ROLE_LABEL.rent} value={m.bea.rents} color={ROLE.rent} at={tRentBar} />
         <IndexBar label={ROLE_LABEL.goods} value={m.bea.goods} color={ROLE.goods} at={tGoodsBar} />
@@ -145,14 +151,6 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
           <Tag text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color={C.text} size={30} />
         </Enter>
       )}
-      <Enter at={8} style={{left: 1556, top: 160}}>
-        <LocatorMap name={m.name} at={tPin} done={METROS.filter((q) => q.rank > rank).map((q) => q.name)} next={rank > 1 ? byRank(rank - 1).name : undefined} nextAt={tNext} />
-      </Enter>
-      <Enter at={tNext} style={{left: 1000, top: 972}}>
-        <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 40, color: ROLE.buying, opacity: 0.6 + 0.4 * Math.sin(f / 6)}}>
-          {rank > 1 ? `NEXT  →  #${rank - 1}  ?` : 'BUT THERE IS A TWIST  →'}
-        </div>
-      </Enter>
     </>
   );
 };
