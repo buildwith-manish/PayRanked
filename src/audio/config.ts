@@ -5,11 +5,10 @@
 export const AUDIO = {
   /**
    * Set false while a track is not in public/ yet, so the render does not stop on the missing file.
-   * public/vo.wav is not in the repo yet, so this is off. Record it against review/VO-CUES.md, drop it in public/,
-   * run `npm run vo-envelope`, then set this to true.
+   * Voice clips come from voiceover-manifest.json, so an empty manifest plays nothing.
    */
-  vo: true,
-  music: true,
+  vo: true, // plays whatever is listed in voiceover-manifest.json (empty until the clips are recorded)
+  music: false, // off until public/music.mp3 is generated for Video 2 (npm run music)
   sfx: true,
 
   voLevel: 0.9, // clips in public/voiceover are levelled to -15 LUFS (scripts/normalize_vo.py); 0.9 leaves headroom for music + SFX

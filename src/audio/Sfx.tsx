@@ -4,9 +4,12 @@ import {AUDIO} from './config';
 import {Cue} from './cues';
 import {musicGain, sfxDuck} from './duck';
 import manifest from './manifest.json';
-import voManifest from './voiceover-manifest.json';
+import voManifestRaw from './voiceover-manifest.json';
+
+/** Video 2 voice clips: `startFrame` is the master-timeline frame (30 fps design clock) of the clip's file start. */
+type VoClip = {id: string; file: string; startFrame: number; duration: number};
+const voManifest = voManifestRaw as VoClip[];
 import {DESIGN_FPS, FPS, K, toReal} from '../clock';
-import {START} from '../timeline';
 
 export const SfxTrack: React.FC<{cues: Cue[]; offset: number}> = ({cues, offset}) => {
   if (!AUDIO.sfx) return null;
@@ -38,10 +41,8 @@ export const MasterAudio: React.FC<{offset?: number}> = ({offset = 0}) => {
   return (
     <>
       {/* Voice-over: individual clips at exact visual beats */}
-      {AUDIO.vo && voManifest.map((clip: any) => {
-        // `at` = seconds after the shot's start at which the first WORD is heard; `lead` = silence at the head of the file.
-        // Anchoring to START[shot] means the voice follows the picture whenever a shot is made longer or shorter.
-        const fromFrame = Math.max(0, toReal(Math.round((START[clip.shot as keyof typeof START] + (clip.at - clip.lead) * DESIGN_FPS))));
+      {AUDIO.vo && voManifest.map((clip) => {
+        const fromFrame = Math.max(0, toReal(clip.startFrame - offset));
         const durFrames = toReal(Math.round(clip.duration * DESIGN_FPS)) + 10; // +10 frames buffer
         return (
           <Sequence key={clip.id} from={fromFrame} durationInFrames={durFrames} layout="none" name={`vo ${clip.id}`}>

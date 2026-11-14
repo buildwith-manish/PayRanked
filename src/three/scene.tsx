@@ -3,7 +3,8 @@ import {useThree} from '@react-three/fiber';
 import * as THREE from 'three';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 import {H, W} from '../theme';
-import {FLOOR} from './geometry';
+/** Default z of the floor the scene stands on. Video 2's skyline passes its own `floorZ`. */
+export const FLOOR = -120;
 
 /**
  * Light and exposure knobs for the map scene. If a frame looks too dark or too hot after your first render, change these
