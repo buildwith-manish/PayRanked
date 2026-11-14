@@ -109,9 +109,9 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={560} top={450} />
       <Enter at={tPower} style={{left: 1000, top: 110}}><Label>BUYING POWER OF $50,000</Label></Enter>
       <div style={{position: 'absolute', left: 1000, top: 160}}>
-        <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} />
+        <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
       </div>
-      <Enter at={tPower + 24} style={{left: 1000, top: 305}}>
+      <Enter at={tPower + 24} style={{left: 1000, top: 285}}>
         <Label color={good ? ROLE.buying : ROLE.loss}>{good ? '+' : '−'}{money(Math.abs(diff))} vs $50,000</Label>
       </Enter>
       <div style={{position: 'absolute', left: 1000, top: 380}}><Dial value={m.bea.allItems} at={tBars} width={340} /></div>
@@ -137,7 +137,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
           <Pill text={`${money(power - byRank(10).buyingPower50k)} more than Miami`} color="#FFD25A" size={30} />
         </Enter>
       )}
-      <Enter at={8} style={{left: 1580, top: 175}}>
+      <Enter at={8} style={{left: 1556, top: 160}}>
         <LocatorMap name={m.name} at={tPin} done={METROS.filter((q) => q.rank > rank).map((q) => q.name)} next={rank > 1 ? byRank(rank - 1).name : undefined} nextAt={tNext} />
       </Enter>
       <Enter at={tNext} style={{left: 1000, top: 972}}>

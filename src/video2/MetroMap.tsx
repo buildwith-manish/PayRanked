@@ -30,7 +30,7 @@ export const MetroMap: React.FC<{at: number; out: number}> = ({at, out}) => {
   const rise = tween(f, at, 30, glide);
   const drift = (f - at) * 0.05; // slow push across the shot so it never sits still
   return (
-    <div style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080, opacity: inP, background: 'rgba(5,14,29,0.9)'}}>
+    <div style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080, opacity: inP, background: 'rgba(5,14,29,0.97)'}}>
       <div style={{position: 'absolute', left: 160, top: 70, fontFamily: FONT.num, fontWeight: 700, fontSize: 60, color: ROLE.buying}}>10 METRO AREAS</div>
       <div style={{position: 'absolute', left: 160, top: 150, fontFamily: FONT.text, fontWeight: 600, fontSize: 34, color: C.muted}}>not just city limits</div>
       <div style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080, perspective: 2200, perspectiveOrigin: '50% 30%'}}>
@@ -76,7 +76,7 @@ const loc = (name: string) => projection(LONLAT[name]) as [number, number];
  * Small flat US map for one countdown shot: this city's pin drops in at `at` and keeps pulsing; cities already revealed stay as faint dots;
  * the NEXT city shows only as an unlabeled pulsing ring from `nextAt` (a hint, never a name). Geography only: no values, so no spoilers beyond the teaser.
  */
-export const LocatorMap: React.FC<{name: string; at: number; done: string[]; next?: string; nextAt: number; width?: number}> = ({name, at, done, next, nextAt, width = 220}) => {
+export const LocatorMap: React.FC<{name: string; at: number; done: string[]; next?: string; nextAt: number; width?: number}> = ({name, at, done, next, nextAt, width = 240}) => {
   const f = useDesignFrame();
   const h = (width * BH) / BW;
   const k = BW / width; // user units per px
