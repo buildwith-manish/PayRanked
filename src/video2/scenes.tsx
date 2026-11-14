@@ -175,6 +175,19 @@ export const RentBreak: React.FC = () => {
 };
 
 /* ------------------------------------------------------------------ the twist */
+/** Rank change chip: slams in, green up-arrow for a climb, red down-arrow for a drop. */
+const RankChip: React.FC<{from: number; to: number; at: number}> = ({from, to, at}) => {
+  const f = useDesignFrame();
+  const p = tween(f, at, 14, slam);
+  const up = to < from, same = to === from;
+  const col = same ? C.muted : up ? ROLE.buying : ROLE.loss;
+  return (
+    <div style={{display: 'inline-block', marginTop: 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '0% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: 44, color: col, textShadow: `0 0 24px ${col}77`}}>
+      {same ? '•' : up ? '▲' : '▼'} #{from} → #{to}{same ? '' : ` (${up ? '+' : '−'}${Math.abs(from - to)})`}
+    </div>
+  );
+};
+
 export const Twist: React.FC = () => {
   const f = useDesignFrame();
   const {g, tBadge, tHou, tDC, tNY, tMia, tPill} = twistBeats();
@@ -184,8 +197,15 @@ export const Twist: React.FC = () => {
   const hou = byRank(1), dc = byRank(7), ny = byRank(8), phl = byRank(3), mia = byRank(10);
   const featured: Metro[] = stage === 1 ? [hou] : stage === 2 ? [dc] : stage === 3 ? [ny, phl] : stage >= 4 ? [mia] : [];
   const maxV = 65000, minV = 38000;
+  const pulse = 0.5 + 0.5 * Math.sin(f / 7);
+  const changed = Math.round(METROS.filter((m) => m.twistRank !== m.rank).length * tween(f, tHou, 60, glide));
+  const cardAt = (i: number) => (stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia);
   return (
     <>
+      <Enter at={tHou} style={{left: 1280, top: 150}}><Label size={26}>RANKS CHANGED</Label></Enter>
+      <Enter at={tHou} style={{left: 1600, top: 128}}>
+        <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage, fontVariantNumeric: 'tabular-nums'}}>{changed}/10</div>
+      </Enter>
       <Enter at={4} style={{left: 160, top: 70}}>
         <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title * 0.8, color: ROLE.wage}}>
           {f >= tHou ? 'Paycheck after prices' : 'Same ranking…'}
@@ -203,7 +223,7 @@ export const Twist: React.FC = () => {
         const shownRank = p > 0.5 ? m.twistRank : m.rank;
         const w = ((value - minV) / (maxV - minV)) * 560;
         return (
-          <div key={m.rank} style={{position: 'absolute', left: 160, top: y, height: rowH - 10, width: 1000, display: 'flex', alignItems: 'center', borderRadius: 14, padding: '0 16px', background: lit ? `${col}22` : 'rgba(255,255,255,0.05)', border: `1.5px solid ${lit ? col : 'rgba(255,255,255,0.08)'}`}}>
+          <div key={m.rank} style={{position: 'absolute', left: 160, top: y, height: rowH - 10, width: 1000, display: 'flex', alignItems: 'center', borderRadius: 14, padding: '0 16px', background: lit ? `${col}22` : 'rgba(255,255,255,0.05)', border: `1.5px solid ${lit ? col : 'rgba(255,255,255,0.08)'}`, boxShadow: lit ? `0 0 ${16 + pulse * 22}px ${col}77` : 'none'}}>
             <div style={{width: 60, fontFamily: FONT.num, fontWeight: 700, fontSize: 36, color: col}}>{shownRank}</div>
             <div style={{width: 300, fontFamily: FONT.text, fontWeight: 600, fontSize: 32, color: C.text}}>{shownName(m)}</div>
             <div style={{width: Math.max(10, w) * 0.7, height: 22, borderRadius: 11, background: col, opacity: 0.9}} />
@@ -218,8 +238,8 @@ export const Twist: React.FC = () => {
             <Label color={ROLE.wage}>MEDIAN WAGE</Label>
             <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
             <Label color={ROLE.buying}>AFTER PRICES</Label>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.buying}}>{money(m.wageAfterPrices)}</div>
-            <Label>#{m.rank} → #{m.twistRank}</Label>
+            <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={cardAt(i) + 20} dur={36} color={ROLE.buying} size={64} /></div>
+            <RankChip from={m.rank} to={m.twistRank} at={cardAt(i) + 60} />
           </div>
         </Enter>
       ))}
@@ -252,7 +272,7 @@ export const Takeaway: React.FC = () => {
         <Enter at={rel[1]} style={{left: 160, top: 120}}><Label color={ROLE.rent} size={TYPE.title * 0.6}>RULE 2 · put rent next to your pay</Label></Enter>
         {[...METROS].sort((a, b) => b.rentShareOfWagePct - a.rentShareOfWagePct).map((m, i) => (
           <Enter key={m.rank} at={rel[1] + 30 + i * 4} style={{left: 160 + (i % 5) * 340, top: 300 + Math.floor(i / 5) * 260}}>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 80, color: m.rentShareOfWagePct > 40 ? ROLE.rent : C.muted}}>{m.rentShareOfWagePct.toFixed(0)}%</div>
+            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 80, fontVariantNumeric: 'tabular-nums', color: m.rentShareOfWagePct > 40 ? ROLE.rent : C.muted, textShadow: m.rentShareOfWagePct > 40 ? `0 0 ${10 + 14 * tween(f, rel[1] + 90, 20, slam)}px ${ROLE.rent}88` : 'none'}}>{(m.rentShareOfWagePct * tween(f, rel[1] + 30 + i * 4, 30, glide)).toFixed(0)}%</div>
             <Label color={C.text} size={30}>{shownName(m)}</Label>
           </Enter>
         ))}
@@ -263,10 +283,14 @@ export const Takeaway: React.FC = () => {
         <Enter at={rel[2] + 20} style={{left: 160, top: 330}}>
           <Label>WASHINGTON vs HOUSTON</Label>
           <div style={{display: 'flex', gap: 120, marginTop: 20}}>
-            <div><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 150, color: ROLE.wage}}>+{wageUp.toFixed(0)}%</div><Label color={ROLE.wage}>median wage</Label></div>
-            <div><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 150, color: ROLE.rent}}>+{priceUp.toFixed(0)}%</div><Label color={ROLE.rent}>prices</Label></div>
+            <div><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 150, color: ROLE.wage, fontVariantNumeric: 'tabular-nums'}}>+{(wageUp * tween(f, rel[2] + 40, 36, glide)).toFixed(0)}%</div><Label color={ROLE.wage}>median wage</Label></div>
+            <div><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 150, color: ROLE.rent, fontVariantNumeric: 'tabular-nums'}}>+{(priceUp * tween(f, rel[2] + 90, 36, glide)).toFixed(0)}%</div><Label color={ROLE.rent}>prices</Label></div>
           </div>
         </Enter>
+        {[{v: wageUp, c: ROLE.wage, at: rel[2] + 40, y: 690}, {v: priceUp, c: ROLE.rent, at: rel[2] + 90, y: 740}].map((b) => (
+          <div key={b.y} style={{position: 'absolute', left: 160, top: b.y, height: 26, width: Math.max(8, (b.v / Math.max(wageUp, priceUp)) * 900 * tween(f, b.at, 36, glide)), borderRadius: 13, background: b.c, boxShadow: `0 0 22px ${b.c}88`}} />
+        ))}
+        <Enter at={rel[2] + 150} style={{left: 160, top: 830}}><Pill text={`Pay grows ${wageUp > priceUp ? 'faster' : 'slower'} than prices: ${Math.abs(wageUp - priceUp).toFixed(0)} points`} color={wageUp > priceUp ? ROLE.buying : ROLE.loss} size={34} /></Enter>
       </div>
       <div style={{position: 'absolute', inset: 0, ...card(3)}}>
         <Enter at={rel[3]} style={{left: 160, top: 300}}>
@@ -287,22 +311,22 @@ export const Outro: React.FC = () => {
   const hou = byRank(1), dc = byRank(7), mia = byRank(10);
   const endAt = g.frames - d(END_SCREEN_SECONDS);
   const cards = [
-    {title: 'Cheapest prices', city: shownName(hou), value: money(hou.buyingPower50k), col: ROLE.buying},
-    {title: 'Best paycheck after prices', city: shownName(dc), value: money(dc.wageAfterPrices), col: ROLE.wage},
-    {title: 'Hardest on your wallet', city: shownName(mia), value: 'last in both', col: ROLE.loss},
+    {title: 'Cheapest prices', city: shownName(hou), value: money(hou.buyingPower50k), num: hou.buyingPower50k, col: ROLE.buying},
+    {title: 'Best paycheck after prices', city: shownName(dc), value: money(dc.wageAfterPrices), num: dc.wageAfterPrices, col: ROLE.wage},
+    {title: 'Hardest on your wallet', city: shownName(mia), value: 'last in both', num: 0, col: ROLE.loss},
   ];
   return (
     <>
       {cards.map((c, i) => (
-        <Enter key={c.title} at={rel[0] + 30 + i * 70} style={{left: 160 + i * 570, top: 200, width: 520}}>
+        <Enter key={c.title} at={rel[0] + 30 + i * 70} style={{left: 160 + i * 570, top: 200 + Math.sin(f / 20 + i * 2) * 6, width: 520}}>
           <div style={{borderRadius: 24, padding: 32, height: 330, boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: `2px solid ${c.col}`}}>
             <Label color={c.col}>{c.title.toUpperCase()}</Label>
             <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 50, color: C.text, margin: '12px 0', whiteSpace: 'nowrap'}}>{c.city}</div>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: c.col}}>{c.value}</div>
+            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: c.col, fontVariantNumeric: 'tabular-nums'}}>{c.num ? money(c.num * tween(f, rel[0] + 50 + i * 70, 36, glide)) : c.value}</div>
           </div>
         </Enter>
       ))}
-      <Enter at={rel[1]} style={{left: 160, top: 620}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title, color: C.text}}>Which city surprised you most?</div></Enter>
+      <Enter at={rel[1]} style={{left: 160, top: 620}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title, color: C.text, textShadow: `0 0 ${14 + 14 * (0.5 + 0.5 * Math.sin(f / 9))}px ${ROLE.wage}66`}}>Which city surprised you most?</div></Enter>
       <Enter at={rel[1] + 80} style={{left: 160, top: 760}}><Label>New price data is due in December. If it covers metro areas, this ranking may be updated.</Label></Enter>
       <Enter at={rel[1] + 100} style={{left: 160, top: 840}}><Label size={30}>General information, not financial advice.</Label></Enter>
       {f >= endAt && (
