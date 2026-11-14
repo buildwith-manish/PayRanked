@@ -5,7 +5,7 @@ Every Short now has three versions. Only the end card differs; picture, voice, m
 | Platform | Composition | End line | Where the link goes |
 |---|---|---|---|
 | YouTube | `ShortN-Vertical` | Related video button demo | Related video button + pinned comment |
-| Facebook | `ShortN-Vertical-Social` | link in comments (chevron down) | pinned first comment with the Facebook long-video link |
+| Facebook | `ShortN-Vertical-Social` | tap demo: comment bar -> pinned comment with the link -> long video opens | pinned first comment with the Facebook long-video link |
 | Instagram | `ShortN-Vertical-Instagram` | link in bio (arrow up, "tap my profile") | link in bio; pinned comment says "full video, link in bio" |
 
 - `CtaVariant` is now `'youtube' | 'social' | 'instagram'` (`src/shots/Short1.tsx`). `social` keeps meaning Facebook so existing ids do not change.
@@ -31,3 +31,13 @@ full render instead of 3x. Run it from the `feat/short-1-vertical` branch ("Use 
 - **Join check:** exact frame count AND video/audio duration within 50 ms of TOTAL/60. Verified: passes the new join, fails the old one.
 - Tested locally (Short 6, quarter scale, 2 cores): 4 body chunks + end cards joined to the right frame count, no seam gaps, audio and video 13.5 s for a 3-piece join.
   Not tested: the GitHub Actions run itself (actionlint is clean; the job logic was run step by step on this machine).
+
+## Facebook end card: tap demo (`FacebookEndCard`, `src/shots/Short1.tsx`)
+Same idea as the YouTube card, for how Facebook really works (no Related video button; the link is in the pinned comment). One dark panel, two taps:
+1. page row (avatar, PayRanked, Follow) + a "Write a comment..." bar; a touch point taps the bar (rings, press, click).
+2. the comments open: pinned comment "Full ranking + #1:" with the link in blue; a second touch point taps the link.
+3. the link stretches into the long video's thumbnail (play button, duration, caption with the title), a small bounce, a slow drift.
+Timeline `FB_T` (design frames, 4 s card); sound cues `FB_CUES`; camera pushes in on each tap. `FB_LINK_TEXT` is cosmetic: edit it to match your real comment.
+Checked: typecheck, and the card rendered as a frame sequence and looked at stage by stage (bar tap, comments open, link tap, video open, hold).
+Not checked: a full render with sound, Shorts 2-7 (same component). Needs the real pinned comment on every Reel, or the demo promises something that is not there.
+The Instagram card (`link in bio`) is still the static version.

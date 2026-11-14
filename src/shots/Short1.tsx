@@ -309,16 +309,144 @@ const YouTubeEndCard: React.FC = () => {
   );
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Facebook end card: a demo of what the viewer does. Facebook Reels have no "Related video" button, so the link lives in a pinned first
+// comment. The card shows that path in one dark panel: (1) the page row and a comment bar, a touch point taps the bar; (2) the comments
+// open with the pinned comment "Full ranking + #1:" and the link in blue, a second tap lands on the link; (3) the link stretches into the
+// long video's thumbnail (same morph as the YouTube card). About 3 s of demo inside the 4 s card.
+// ---------------------------------------------------------------------------------------------------------------------
+/** What the link looks like in the pinned comment. Cosmetic: the real link is whatever you paste into the real comment. Edit to match it. */
+export const FB_LINK_TEXT = 'facebook.com/PayRanked/videos';
+
+const FB_T = {head: 4, hero: 20, panel: 22, ui: 28, bar: 32, finger: 34, push: 36, tap: 46, sheet: 48, sheetEnd: 58, finger2: 54, push2: 56, tap2: 68, open: 71, openEnd: 90, end: 120};
+const FB_CUES: Cue[] = [
+  {sfx: 'hit_big', at: FB_T.hero, gain: 0.35, hero: true}, // the low thud on the "#1" slam
+  {sfx: 'whoosh_s', at: FB_T.panel + 2, gain: 0.22, hero: true},
+  {sfx: 'pop', at: FB_T.bar + 2, gain: 0.28, hero: true},
+  {sfx: 'tap_0', at: FB_T.tap, gain: 0.4, hero: true}, // tap 1: the comment bar
+  {sfx: 'click', at: FB_T.tap, gain: 0.25, hero: true},
+  {sfx: 'pop', at: FB_T.sheet + 6, gain: 0.3, hero: true}, // the comment appears
+  {sfx: 'tap_1', at: FB_T.tap2, gain: 0.4, hero: true}, // tap 2: the link
+  {sfx: 'click', at: FB_T.tap2, gain: 0.25, hero: true},
+  {sfx: 'whoosh_m', at: FB_T.open, gain: 0.3, hero: true}, // the video opening
+  {sfx: 'shimmer', at: FB_T.openEnd + 2, gain: 0.22, hero: true},
+];
+const FB = {bg: '#18191a', bubble: '#3a3b3c', bubblePressed: '#55565a', text: '#e4e6eb', muted: '#b0b3b8', link: '#4599ff', blue: '#0866ff'};
+const FB_PH0 = 330; // page row + comment bar
+const FB_PH1 = 400; // comments open
+const FB_PH2 = 600; // video open: 450 px thumbnail + caption row
+const FB_BAR_TOP = FB_PH0 - 40 - 84;
+const FB_LINK = {l: 172, t: 216, w: 560, h: 52}; // where the link sits inside the pinned comment (panel coordinates)
+
+const FacebookEndCard: React.FC = () => {
+  const f = useDesignFrame();
+  const fade = ramp(f, 0, 8);
+  const panelIn = tween(f, FB_T.panel, 22, settle);
+  const uiIn = ramp(f, FB_T.ui, FB_T.ui + 8);
+  const barIn = tween(f, FB_T.bar, 16, settle);
+  const finger1 = ramp(f, FB_T.finger, FB_T.tap, glide);
+  const tapP1 = ramp(f, FB_T.tap, FB_T.tap + 8);
+  const tapS1 = Math.sin(Math.PI * tapP1);
+  const sheet = ramp(f, FB_T.sheet, FB_T.sheetEnd, glide); // panel grows: bar -> comments
+  const s1 = uiIn * (1 - ramp(f, FB_T.tap + 2, FB_T.tap + 7)); // page row + bar: gone before the comments show
+  const finger2 = ramp(f, FB_T.finger2, FB_T.tap2, glide);
+  const tapP2 = ramp(f, FB_T.tap2, FB_T.tap2 + 8);
+  const tapS2 = Math.sin(Math.PI * tapP2);
+  const open = ramp(f, FB_T.open, FB_T.openEnd, glide); // the link stretches into the thumbnail
+  const s2 = ramp(f, FB_T.sheet + 5, FB_T.sheet + 13) * (1 - ramp(f, FB_T.open - 2, FB_T.open + 8)); // the comments, in once the bar is gone
+  const land = f - FB_T.openEnd;
+  const bounce = land >= 0 ? 0.03 * Math.exp(-land / 5) * Math.sin(land * 1.15) : 0;
+  const panelH = FB_PH0 + (FB_PH1 - FB_PH0) * sheet + (FB_PH2 - FB_PH1) * open;
+  const PILL_W = PANEL_W - 80;
+  const THUMB_H = (PILL_W * 9) / 16;
+  const drift = ramp(f, FB_T.openEnd, FB_T.end);
+  const badge = ramp(f, FB_T.openEnd - 6, FB_T.openEnd + 4) * (1 + 0.06 * Math.sin(f / 6));
+  const wake1 = ramp(f, FB_T.bar + 6, FB_T.bar + 18) * (1 - ramp(f, FB_T.tap, FB_T.tap + 6)) * (0.5 + 0.5 * Math.sin(f / 6));
+  const wake2 = ramp(f, FB_T.sheet + 8, FB_T.sheet + 18) * (1 - ramp(f, FB_T.tap2, FB_T.tap2 + 6)) * (0.5 + 0.5 * Math.sin(f / 6));
+  const barPressed = tapS1 > 0.05 && f < FB_T.sheet + 4;
+  const linkPressed = tapS2 > 0.05 && f < FB_T.open;
+  // camera: push in on the bar, ease back as the comments open, push in on the link, pull back as the video opens, then a slow drift
+  const cam = 1 + 0.08 * ramp(f, FB_T.push, FB_T.tap, glide) - 0.08 * ramp(f, FB_T.tap + 4, FB_T.sheetEnd, glide) + 0.08 * ramp(f, FB_T.push2, FB_T.tap2, glide) - 0.1 * ramp(f, FB_T.open, FB_T.openEnd, glide) + 0.02 * drift;
+  const ring = (d: number, at: number, x: number, y: number, w: number, h: number) => {
+    const r = ramp(f, at + d, at + d + 16);
+    return <div key={`${at}-${d}`} style={{position: 'absolute', left: x - r * 30, top: y - r * 30, width: w + r * 60, height: h + r * 60, borderRadius: 999, border: `4px solid ${C.mint}`, opacity: r > 0 && r < 1 ? 0.8 * (1 - r) : 0}} />;
+  };
+  const touch = (x: number, y: number, tapS: number, vis: number) => (
+    <div style={{position: 'absolute', left: x, top: y, width: 68, height: 68, marginLeft: -34, marginTop: -34, borderRadius: 34, background: 'rgba(255,255,255,0.5)', border: '4px solid rgba(255,255,255,0.92)', boxShadow: `0 ${16 - 10 * tapS}px ${30 - 18 * tapS}px rgba(0,0,0,${0.5 + 0.2 * tapS})`, opacity: vis, transform: `scale(${1 - 0.28 * tapS})`}} />
+  );
+  return (
+    <AbsoluteFill style={{background: `linear-gradient(160deg, ${C.navy1} 0%, ${C.navy2} 55%, ${C.navy3} 100%)`, opacity: fade}}>
+      <div style={{position: 'absolute', inset: 0, transform: `scale(${cam})`, transformOrigin: `540px ${640 + 260}px`}}>
+        <div style={{position: 'absolute', left: 40, right: 40, top: 200, textAlign: 'center'}}>
+          <Headline start={FB_T.head} />
+        </div>
+
+        <div style={{position: 'absolute', left: (1080 - PANEL_W) / 2, top: 640, width: PANEL_W, height: panelH, borderRadius: 40, background: FB.bg, border: '2px solid rgba(232,238,247,0.14)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', opacity: ramp(f, FB_T.panel, FB_T.panel + 6), transform: `translateY(${(1 - panelIn) * 120}px) scale(${0.92 + 0.08 * panelIn})`, overflow: 'hidden'}}>
+          {/* stage 1: the page row (avatar, name, Follow) and the comment bar */}
+          <div style={{position: 'absolute', left: 40, right: 40, top: 40, display: 'flex', alignItems: 'center', gap: 22, opacity: s1}}>
+            <Img src={staticFile('profile.png')} style={{width: 96, height: 96, borderRadius: 48, objectFit: 'cover', flex: 'none'}} />
+            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 44, color: FB.text}}>PayRanked</div>
+            <div style={{padding: '16px 34px', borderRadius: 14, background: FB.blue, fontFamily: F.body, fontWeight: 700, fontSize: 36, color: '#fff'}}>Follow</div>
+          </div>
+          <div style={{position: 'absolute', left: 40, top: FB_BAR_TOP, width: PILL_W, height: 84, borderRadius: 42, background: barPressed ? FB.bubblePressed : FB.bubble, display: 'flex', alignItems: 'center', gap: 22, padding: '0 34px', opacity: barIn * (1 - ramp(f, FB_T.tap + 2, FB_T.tap + 7)), boxShadow: `0 0 ${8 + 18 * wake1}px rgba(255,255,255,${0.1 + 0.2 * wake1})`, transform: `translateY(${(1 - barIn) * 36}px) scale(${1 - 0.06 * tapS1})`}}>
+            <div style={{position: 'relative', width: 40, height: 32, borderRadius: 12, border: `5px solid ${FB.muted}`, flex: 'none'}} />
+            <div style={{fontFamily: F.body, fontWeight: 500, fontSize: 36, color: FB.muted}}>Write a comment…</div>
+          </div>
+
+          {/* stage 2: the comments, with the pinned comment and the link */}
+          <div style={{position: 'absolute', left: 0, top: 0, width: PANEL_W, height: FB_PH1, opacity: s2}}>
+            <div style={{position: 'absolute', left: PANEL_W / 2 - 44, top: 20, width: 88, height: 8, borderRadius: 4, background: '#5a5c60'}} />
+            <Img src={staticFile('profile.png')} style={{position: 'absolute', left: 40, top: 90, width: 84, height: 84, borderRadius: 42, objectFit: 'cover'}} />
+            <div style={{position: 'absolute', left: 148, top: 90, width: 692, height: 202, borderRadius: 36, background: FB.bubble}}>
+              <div style={{position: 'absolute', left: 24, top: 22, display: 'flex', alignItems: 'baseline', gap: 14, fontFamily: F.body}}>
+                <span style={{fontWeight: 700, fontSize: 34, color: FB.text}}>PayRanked</span>
+                <span style={{fontWeight: 500, fontSize: 26, color: FB.muted}}>· Pinned</span>
+              </div>
+              <div style={{position: 'absolute', left: 24, top: 74, fontFamily: F.body, fontWeight: 500, fontSize: 38, color: FB.text}}>Full ranking + #1:</div>
+              <div style={{position: 'absolute', left: FB_LINK.l - 148, top: FB_LINK.t - 90, width: FB_LINK.w, height: FB_LINK.h, borderRadius: 10, background: linkPressed ? 'rgba(69,153,255,0.28)' : `rgba(69,153,255,${0.12 * wake2})`, fontFamily: F.body, fontWeight: 500, fontSize: 38, color: FB.link, lineHeight: `${FB_LINK.h}px`, whiteSpace: 'nowrap'}}>{FB_LINK_TEXT}</div>
+            </div>
+            <div style={{position: 'absolute', left: 172, top: 304, fontFamily: F.body, fontWeight: 600, fontSize: 28, color: FB.muted, display: 'flex', gap: 28}}>
+              <span>Like</span><span>Reply</span><span style={{fontWeight: 400}}>Just now</span>
+            </div>
+          </div>
+
+          {/* stage 3: ONE element, the link, that stretches into the long video's thumbnail (corners 10 -> 18) */}
+          <div style={{position: 'absolute', left: FB_LINK.l + (40 - FB_LINK.l) * open, top: FB_LINK.t + (40 - FB_LINK.t) * open, width: FB_LINK.w + (PILL_W - FB_LINK.w) * open, height: FB_LINK.h + (THUMB_H - FB_LINK.h) * open, borderRadius: 10 + 8 * open, background: '#111', overflow: 'hidden', opacity: ramp(f, FB_T.open, FB_T.open + 3), transform: `scale(${1 + bounce})`, transformOrigin: '50% 50%'}}>
+            <Img src={staticFile('thumbnail.jpg')} style={{position: 'absolute', left: 0, top: 0, width: '100%', height: THUMB_H, objectFit: 'cover', opacity: ramp(open, 0.1, 0.55), transform: `scale(${1.02 + 0.05 * drift}) translate(${-6 * drift}px, ${-4 * drift}px)`}} />
+            <div style={{position: 'absolute', left: '50%', top: THUMB_H / 2, width: 130, height: 130, marginLeft: -65, marginTop: -65, borderRadius: 65, background: 'rgba(0,0,0,0.55)', border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: Math.min(1, badge), transform: `scale(${badge})`}}>
+              <div style={{width: 0, height: 0, marginLeft: 10, borderTop: '28px solid transparent', borderBottom: '28px solid transparent', borderLeft: '46px solid #fff'}} />
+            </div>
+            <div style={{position: 'absolute', right: 16, top: THUMB_H - 52, padding: '4px 12px', borderRadius: 8, background: 'rgba(0,0,0,0.8)', fontFamily: F.body, fontWeight: 700, fontSize: 28, color: '#fff', ...tabular, opacity: ramp(f, FB_T.openEnd - 4, FB_T.openEnd + 4)}}>{mmss(VIDEO_FRAMES)}</div>
+          </div>
+          {/* the caption under the video: page avatar and the long video's title */}
+          <div style={{position: 'absolute', left: 40, right: 40, top: 40 + THUMB_H + 20, display: 'flex', alignItems: 'center', gap: 20, opacity: ramp(f, FB_T.openEnd - 6, FB_T.openEnd + 4)}}>
+            <Img src={staticFile('profile.png')} style={{width: 60, height: 60, borderRadius: 30, objectFit: 'cover', flex: 'none'}} />
+            <div style={{fontFamily: F.body, fontWeight: 600, fontSize: 30, color: FB.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{LONG_VIDEO_TITLE}</div>
+          </div>
+
+          {/* tap rings and the touch point, for both taps */}
+          {[0, 5].map((d) => ring(d, FB_T.tap, 40, FB_BAR_TOP, PILL_W, 84))}
+          {[0, 5].map((d) => ring(d, FB_T.tap2, FB_LINK.l - 12, FB_LINK.t - 8, FB_LINK.w + 24, FB_LINK.h + 16))}
+          {touch(PANEL_W * 0.5 + (1 - finger1) * 260, FB_BAR_TOP + 42 + (1 - finger1) * 210, tapS1, ramp(f, FB_T.finger, FB_T.finger + 6) * (1 - ramp(f, FB_T.tap + 10, FB_T.tap + 16)))}
+          {touch(FB_LINK.l + FB_LINK.w * 0.5 + (1 - finger2) * 200, FB_LINK.t + FB_LINK.h / 2 + (1 - finger2) * 170, tapS2, ramp(f, FB_T.finger2, FB_T.finger2 + 6) * (1 - ramp(f, FB_T.tap2 + 10, FB_T.tap2 + 16)))}
+        </div>
+      </div>
+      <Flash at={FB_T.hero} duration={8} peak={0.2} />
+      <SfxTrack cues={FB_CUES} offset={10_000_000} />
+    </AbsoluteFill>
+  );
+};
+
 /** Shorts loop: the last frames fade to the navy the Short starts on, so the card cuts cleanly back to the first frame. */
 const LoopFade: React.FC = () => {
   const f = useDesignFrame();
   return <AbsoluteFill style={{background: C.navy3, opacity: ramp(f, 110, 119), pointerEvents: 'none'}} />;
 };
 
-/** The end card of every Short: the YouTube demo, or the comment bubble for Instagram and Facebook. */
+/** The end card of every Short: the YouTube demo, the Facebook comment-and-link demo, or the "link in bio" card for Instagram. */
 export const Short1EndCard: React.FC<{variant?: CtaVariant}> = ({variant = 'youtube'}) => (
   <AbsoluteFill>
-    {variant === 'youtube' ? <YouTubeEndCard /> : <SocialEndCard variant={variant} />}
+    {variant === 'youtube' ? <YouTubeEndCard /> : variant === 'social' ? <FacebookEndCard /> : <SocialEndCard variant={variant} />}
     <LoopFade />
   </AbsoluteFill>
 );
