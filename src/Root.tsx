@@ -330,18 +330,19 @@ const common = {width: W, height: H, fps: FPS};
 export const Root: React.FC = () => (
   <>
     <Composition id="Video1" component={Video1} durationInFrames={toReal(VIDEO_FRAMES)} {...common} />
-    {/* Two renders of every Short: YouTube ("on my channel") and -Social for Instagram and Facebook ("link in comments"). Only the end card differs. */}
+    {/* Three versions of every Short, only the end card differs: YouTube (Related video button), -Social = Facebook ("link in comments"), -Instagram ("link in bio"). */}
     <Composition id="Short1-Vertical" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'youtube' as CtaVariant}} />
     <Composition id="Short1-Vertical-Social" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'social' as CtaVariant}} />
+    <Composition id="Short1-Vertical-Instagram" component={Short1} durationInFrames={toReal(SHORT1_FRAMES)} width={VW} height={VH} fps={FPS} defaultProps={{cta: 'instagram' as CtaVariant}} />
     {/* Thumbnails as single stills: npx remotion still src/index.ts Short3-Thumbnail out/short3-thumb.png */}
     {[1, 2, 3, 4, 5, 6, 7].map((n) => (
       <Composition key={`thumb-${n}`} id={`Short${n}-Thumbnail`} component={Thumbnail} durationInFrames={1} width={THUMB_W} height={THUMB_H} fps={FPS} defaultProps={{id: n}} />
     ))}
     {SHORTS_2_TO_7.flatMap((spec) =>
-      (['youtube', 'social'] as CtaVariant[]).map((cta) => (
+      (['youtube', 'social', 'instagram'] as CtaVariant[]).map((cta) => (
         <Composition
           key={`${spec.id}-${cta}`}
-          id={`Short${spec.id}-Vertical${cta === 'social' ? '-Social' : ''}`}
+          id={`Short${spec.id}-Vertical${cta === 'social' ? '-Social' : cta === 'instagram' ? '-Instagram' : ''}`}
           component={ShortSegment}
           durationInFrames={toReal(sec(spec.seconds + SHORT_END_SECONDS))}
           width={VW}

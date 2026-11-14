@@ -8,17 +8,17 @@ on:
         required: true
         default: 'feat/short-1-vertical'
       variant:
-        description: 'End card: youtube = on my channel; social = Instagram and Facebook, link in comments'
+        description: 'End card: youtube = Related video button; social = Facebook, link in comments; instagram = link in bio'
         required: true
         default: youtube
         type: choice
-        options: [youtube, social]
+        options: [youtube, social, instagram]
 
 jobs:
   render-chunk:
     env:
-      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
-      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || inputs.variant == 'instagram' && '-Instagram' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || inputs.variant == 'instagram' && '-instagram' || '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -80,8 +80,8 @@ jobs:
 
   concatenate:
     env:
-      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || '' }}
-      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || '' }}
+      COMP_SUFFIX: ${{ inputs.variant == 'social' && '-Social' || inputs.variant == 'instagram' && '-Instagram' || '' }}
+      FILE_SUFFIX: ${{ inputs.variant == 'social' && '-social' || inputs.variant == 'instagram' && '-instagram' || '' }}
     needs: render-chunk
     runs-on: ubuntu-latest
     steps:

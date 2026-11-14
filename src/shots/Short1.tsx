@@ -24,8 +24,10 @@ export const SHORT1_FRAMES = sec(27 + SHORT1_METHOD_SECONDS + SHORT1_CTA_SECONDS
 
 /** Which end line a render carries: 'youtube' = a button that looks like YouTube's "Related video" button, with a tap animation (the real
  *  button, set in Studio, does the linking); 'social' = Instagram and Facebook, which have no such button, so the card says "link in comments". */
-export type CtaVariant = 'youtube' | 'social';
-export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'Related video', social: 'link in comments'};
+export type CtaVariant = 'youtube' | 'social' | 'instagram';
+/** 'social' is now Facebook only (link in the pinned first comment). 'instagram' is its own version: comment links are not tappable on
+ *  Instagram, so the link lives in the bio and the card says so. */
+export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'Related video', social: 'link in comments', instagram: 'link in bio'};
 
 /**
  * The end card, shared by every Short (1-7), so each one ends the same way. Design frames (30 fps) local to the card
@@ -35,7 +37,7 @@ export const CTA_LINE: Record<CtaVariant, string> = {youtube: 'Related video', s
  *   34-52  the #1 row lights up as a locked "???" (the Shorts never give away the winner) and a progress line sweeps the card
  *   44-72  headline: "Full", "ranking", "+" land with an overshoot, "#1" slams in larger (flash, hit), a light sweeps across once
  *   64-90  the button: YouTube = a "Related video" button that rises, a touch point glides in and taps it at 86 (rings, click);
- *          social = a "link in comments" bubble. An arrow bobs toward where the real button / the comments are.
+ *          social (Facebook) = a "link in comments" bubble; instagram = a "link in bio" bubble. An arrow bobs toward where the real button / the comments are.
  */
 const CTA_T = {card: 6, rows: 12, rowStep: 5, mystery: 38, title: 44, hero: 56, pill: 64, tap: 86, pulse: 90};
 // Sound cues are local to the card. The offset is far past the voice-over envelope, so the voice ducking never touches them.
@@ -157,9 +159,21 @@ const SocialEndCard: React.FC<{variant: CtaVariant}> = ({variant}) => {
               <span>tap the button below</span>
             </div>
           </>
+        ) : variant === 'instagram' ? (
+          <>
+            {/* Instagram: the link lives in the bio, so the bubble says "link in bio" and the arrow points up at the profile, not down at the comments */}
+            <div style={{position: 'relative', margin: '34px auto 0', width: 700, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * (1 + 0.04 * pulse)})`}}>
+              <div style={{position: 'absolute', inset: 0, borderRadius: 40, border: `5px solid ${C.mint}`, background: `${C.mint}1F`, boxShadow: `0 0 ${22 + 30 * pulse}px ${C.mint}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.mint}}>{CTA_LINE.instagram}</div>
+              <div style={{position: 'absolute', left: 64, top: -20, width: 36, height: 36, borderLeft: `5px solid ${C.mint}`, borderTop: `5px solid ${C.mint}`, background: C.navy2, transform: 'rotate(45deg) skew(8deg, 8deg)'}} />
+            </div>
+            <div style={{marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22, fontFamily: F.body, fontWeight: 600, fontSize: 46, color: C.text, opacity: ramp(f, CTA_T.pill + 14, CTA_T.pill + 26)}}>
+              <div style={{width: 30, height: 30, borderLeft: `9px solid ${C.mint}`, borderTop: `9px solid ${C.mint}`, borderRadius: 3, transform: `translateY(${-6 * Math.sin(f / 5)}px) rotate(45deg)`}} />
+              <span>tap my profile</span>
+            </div>
+          </>
         ) : (
           <>
-            {/* Instagram / Facebook: a comment bubble that says where the link is, with a chevron pointing down at the comments */}
+            {/* Facebook: a comment bubble that says where the link is, with a chevron pointing down at the comments */}
             <div style={{position: 'relative', margin: '34px auto 0', width: 700, height: 118, opacity: ramp(f, CTA_T.pill, CTA_T.pill + 6), transform: `translateY(${(1 - pillIn) * 70}px) scale(${(0.8 + 0.2 * pillIn) * (1 + 0.04 * pulse)})`}}>
               <div style={{position: 'absolute', inset: 0, borderRadius: 40, border: `5px solid ${C.mint}`, background: `${C.mint}1F`, boxShadow: `0 0 ${22 + 30 * pulse}px ${C.mint}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.display, fontWeight: 700, fontSize: 58, color: C.mint}}>{CTA_LINE.social}</div>
               <div style={{position: 'absolute', left: 64, bottom: -20, width: 36, height: 36, borderRight: `5px solid ${C.mint}`, borderBottom: `5px solid ${C.mint}`, background: C.navy2, transform: 'rotate(45deg) skew(8deg, 8deg)'}} />
