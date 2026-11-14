@@ -109,7 +109,7 @@ export const CityScene: React.FC<{rank: number}> = ({rank}) => {
       <Ladder revealed={revealed} active={rank} />
       <div style={{position: 'absolute', left: 500, top: 100}}><RankSlam text={`#${rank}`} at={0} /></div>
       <Enter at={10} style={{left: 500, top: 300}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: shownName(m).length > 10 ? 56 : TYPE.title, color: C.text, whiteSpace: 'nowrap'}}>{shownName(m)}</div></Enter>
-      <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={560} top={450} />
+      <Stack dollars={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} left={625} top={450} />
       <Enter at={tPower} style={{left: 1000, top: 110}}><Label>BUYING POWER OF $50,000</Label></Enter>
       <div style={{position: 'absolute', left: 1000, top: 160}}>
         <CountMoney from={50000} to={power} at={tPower} color={good ? ROLE.buying : ROLE.loss} size={TYPE.number * 0.82} />
@@ -167,7 +167,7 @@ export const RentBreak: React.FC = () => {
         const at = i === 0 ? tMiami : tLA + (i - 1) * 8;
         const p = tween(f, at, 24, glide);
         return (
-          <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 82, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
+          <div key={m.rank} style={{position: 'absolute', left: 160, top: 200 + i * 78, width: 1400, opacity: tween(f, at, 8), display: 'flex', alignItems: 'center'}}>
             <div style={{width: 360, fontFamily: FONT.text, fontWeight: 600, fontSize: 34, color: C.text}}>{shownName(m)}</div>
             <div style={{flex: 1, height: 36, borderRadius: 18, background: 'rgba(255,255,255,0.08)', position: 'relative'}}>
               <div style={{width: `${(m.rentShareOfWagePct / 60) * 100 * p}%`, height: '100%', borderRadius: 18, background: m.rentShareOfWagePct > 40 ? ROLE.rent : `${ROLE.rent}99`, boxShadow: `0 0 20px ${ROLE.rent}66`}} />
@@ -177,20 +177,20 @@ export const RentBreak: React.FC = () => {
           </div>
         );
       })}
-      <Enter at={tNote} style={{left: 1010, top: 1030}}><Label size={30}>white tick = 40% of the paycheck</Label></Enter>
+      <Enter at={tNote} style={{left: 520, top: 985}}><Label size={30}>white tick = 40% of the paycheck</Label></Enter>
     </>
   );
 };
 
 /* ------------------------------------------------------------------ the twist */
 /** Rank change chip: slams in, green up-arrow for a climb, red down-arrow for a drop. */
-const RankChip: React.FC<{from: number; to: number; at: number}> = ({from, to, at}) => {
+const RankChip: React.FC<{from: number; to: number; at: number; size?: number}> = ({from, to, at, size = 44}) => {
   const f = useDesignFrame();
   const p = tween(f, at, 14, slam);
   const up = to < from, same = to === from;
   const col = same ? C.muted : up ? ROLE.buying : ROLE.loss;
   return (
-    <div style={{display: 'inline-block', marginTop: 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '0% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: 44, color: col, textShadow: `0 0 24px ${col}77`}}>
+    <div style={{display: 'inline-block', marginTop: size < 44 ? 0 : 10, opacity: tween(f, at, 6), transform: `scale(${1 + (1 - p) * 0.6})`, transformOrigin: '100% 50%', fontFamily: FONT.num, fontWeight: 700, fontSize: size, color: col, textShadow: `0 0 24px ${col}77`}}>
       {same ? '•' : up ? '▲' : '▼'} #{from} → #{to}{same ? '' : ` (${up ? '+' : '−'}${Math.abs(from - to)})`}
     </div>
   );
@@ -207,7 +207,6 @@ export const Twist: React.FC = () => {
   const maxV = 65000, minV = 38000;
   const pulse = 0.5 + 0.5 * Math.sin(f / 7);
   const changed = Math.round(METROS.filter((m) => m.twistRank !== m.rank).length * tween(f, tHou, 60, glide));
-  const cardAt = (i: number) => (stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia);
   return (
     <>
       <Enter at={tHou} style={{left: 1280, top: 150}}><Label size={26}>RANKS CHANGED</Label></Enter>
@@ -239,19 +238,44 @@ export const Twist: React.FC = () => {
           </div>
         );
       })}
-      {featured.map((m, i) => (
-        <Enter key={`${stage}-${m.rank}`} at={stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia} style={{left: 1280, top: 250 + i * 270, width: 540}}>
-          <div style={{borderRadius: 20, padding: 24, background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${ROLE.wage}`}}>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 48, color: C.text}}>{shownName(m)}</div>
-            <Label color={ROLE.wage}>MEDIAN WAGE</Label>
-            <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
-            <Label color={ROLE.buying}>AFTER PRICES</Label>
-            <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={cardAt(i) + 20} dur={36} color={ROLE.buying} size={64} /></div>
-            <RankChip from={m.rank} to={m.twistRank} at={cardAt(i) + 60} />
-          </div>
-        </Enter>
-      ))}
-      <Enter at={tPill} style={{left: 1180, top: 900}}>
+      {featured.map((m, i) => {
+        const two = featured.length > 1;
+        const at0 = stage === 1 ? tHou + 10 : stage === 2 ? tDC : stage === 3 ? tNY + i * 40 : tMia;
+        return (
+          <Enter key={`${stage}-${m.rank}`} at={at0} style={{left: 1280, top: two ? 235 + i * 255 : 250, width: 540}}>
+            <div style={{borderRadius: 20, padding: two ? '16px 24px' : 24, background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${ROLE.wage}`}}>
+              {two ? (
+                <>
+                  <div style={{display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
+                    <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 40, color: C.text}}>{shownName(m)}</div>
+                    <RankChip from={m.rank} to={m.twistRank} at={at0 + 60} size={34} />
+                  </div>
+                  <div style={{display: 'flex', gap: 28, marginTop: 6}}>
+                    <div>
+                      <Label color={ROLE.wage} size={24}>MEDIAN WAGE</Label>
+                      <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 46, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
+                    </div>
+                    <div>
+                      <Label color={ROLE.buying} size={24}>AFTER PRICES</Label>
+                      <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={at0 + 20} dur={36} color={ROLE.buying} size={46} /></div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 48, color: C.text}}>{shownName(m)}</div>
+                  <Label color={ROLE.wage}>MEDIAN WAGE</Label>
+                  <div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: 64, color: ROLE.wage}}>{money(m.wage.medianAnnual)}</div>
+                  <Label color={ROLE.buying}>AFTER PRICES</Label>
+                  <div><CountMoney from={m.wage.medianAnnual} to={m.wageAfterPrices} at={at0 + 20} dur={36} color={ROLE.buying} size={64} /></div>
+                  <RankChip from={m.rank} to={m.twistRank} at={at0 + 60} />
+                </>
+              )}
+            </div>
+          </Enter>
+        );
+      })}
+      <Enter at={tPill} style={{left: 1220, top: 735}}>
         <Pill text="Cheapest isn't automatically best" color="#FFD25A" size={34} />
       </Enter>
     </>
@@ -325,6 +349,7 @@ export const Outro: React.FC = () => {
   ];
   return (
     <>
+      <div style={{position: 'absolute', inset: 0, opacity: 1 - tween(f, endAt, 14)}}>
       {cards.map((c, i) => (
         <Enter key={c.title} at={rel[0] + 30 + i * 70} style={{left: 160 + i * 570, top: 200 + Math.sin(f / 20 + i * 2) * 6, width: 520}}>
           <div style={{borderRadius: 24, padding: 32, height: 330, boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: `2px solid ${c.col}`}}>
@@ -335,10 +360,11 @@ export const Outro: React.FC = () => {
         </Enter>
       ))}
       <Enter at={rel[1]} style={{left: 160, top: 620}}><div style={{fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title, color: C.text, textShadow: `0 0 ${14 + 14 * (0.5 + 0.5 * Math.sin(f / 9))}px ${ROLE.wage}66`}}>Which city surprised you most?</div></Enter>
-      <Enter at={rel[1] + 80} style={{left: 160, top: 760}}><Label>New price data is due in December. If it covers metro areas, this ranking may be updated.</Label></Enter>
-      <Enter at={rel[1] + 100} style={{left: 160, top: 840}}><Label size={30}>General information, not financial advice.</Label></Enter>
+      <Enter at={rel[1] + 80} style={{left: 160, top: 760, width: 1500}}><Label style={{textWrap: 'balance'}}>New price data is due in December. If it covers metro areas, this ranking may be updated.</Label></Enter>
+      <Enter at={rel[1] + 100} style={{left: 160, top: 915}}><Label size={30}>General information, not financial advice.</Label></Enter>
+      </div>
       {f >= endAt && (
-        <div style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080, background: 'rgba(5,14,29,0.9)', opacity: tween(f, endAt, 14)}}>
+        <div style={{position: 'absolute', left: 0, top: 0, width: 1920, height: 1080, background: 'rgba(5,14,29,0.96)', opacity: tween(f, endAt, 14)}}>
           <div style={{position: 'absolute', left: 160, top: 220, width: 800, height: 450, borderRadius: 24, border: `3px dashed ${ROLE.buying}`}} />
           <div style={{position: 'absolute', left: 1040, top: 220, width: 450, height: 450, borderRadius: 225, border: `3px dashed ${ROLE.wage}`}} />
           <div style={{position: 'absolute', left: 160, top: 760, fontFamily: FONT.num, fontWeight: 700, fontSize: TYPE.title, color: C.text}}>Subscribe for the December update</div>
