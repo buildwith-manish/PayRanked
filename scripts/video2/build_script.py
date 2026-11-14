@@ -113,7 +113,7 @@ add('Cold open', 's01_cold_open_d', "I ranked ten big American metro areas by ex
 add('Cold open', 's01_cold_open_e', "Let's start at the bottom.")
 
 # ------------------------------------------------------------------ 2. METHOD
-add('Method', 's02_method_a', 'First, the method. The Bureau of Economic Analysis, or B E A, measures how expensive every metro area is, with the national average set at one hundred.')
+add('Method', 's02_method_a', 'First, the method. The Bureau of Economic Analysis, or BEA, measures how expensive every metro area is, with the national average set at one hundred.')
 add('Method', 's02_method_b', 'Above one hundred means prices run higher than average. Below, lower. Multiply your salary by one hundred, divide by that number, and you get what your pay is really worth at average American prices.')
 add('Method', 's02_method_c', 'That price level covers everything: rent, goods, and services, each with its own index. All the data is from twenty twenty-four, and these are metro areas, not just city limits.')
 add('Method', 's02_method_d', "Later, I'll add the actual rent in dollars from the Census Bureau, and wages from the Bureau of Labor Statistics. That's where it gets interesting.")
@@ -134,7 +134,7 @@ add('#8 New York', 'r08_ny_b', f'Everyday goods here cost about {pct(above(goods
 add('#8 New York', 'r08_ny_c', "Number seven is expensive too. But keep an eye on that city. It comes back at the end.")
 
 # 5-clip cities (#7 to #1): name, number, reason, rent, bridge
-add('#7 Washington', 'r07_dc_a', 'Number seven. Washington, D.C.')
+add('#7 Washington', 'r07_dc_a', 'Number seven. Washington, DC.')
 add('#7 Washington', 'r07_dc_b', f'{usd(bp["Washington"])} of buying power. Prices run about {pct(above(lvl["Washington"]))} above average.')
 add('#7 Washington', 'r07_dc_c', f'The culprit is rent: {pct(above(rentidx["Washington"]))} above the national average.')
 add('#7 Washington', 'r07_dc_d', f'Median rent: {usd(rent["Washington"])} a month. But look at the median wage: {usd(wage["Washington"])}. By far the highest of the ten. Remember that number.')

@@ -4,7 +4,7 @@ s01_cold_open_b,voice,"In one city, that buys what fifty thousand seven hundred 
 s01_cold_open_c,voice,"A gap of six thousand nine hundred dollars, just from where they live."
 s01_cold_open_d,voice,I ranked ten big American metro areas by exactly this. And the winner of the countdown stops winning once I add one more number.
 s01_cold_open_e,voice,Let's start at the bottom.
-s02_method_a,voice,"First, the method. The Bureau of Economic Analysis, or B E A, measures how expensive every metro area is, with the national average set at one hundred."
+s02_method_a,voice,"First, the method. The Bureau of Economic Analysis, or BEA, measures how expensive every metro area is, with the national average set at one hundred."
 s02_method_b,voice,"Above one hundred means prices run higher than average. Below, lower. Multiply your salary by one hundred, divide by that number, and you get what your pay is really worth at average American prices."
 s02_method_c,voice,"That price level covers everything: rent, goods, and services, each with its own index. All the data is from twenty twenty-four, and these are metro areas, not just city limits."
 s02_method_d,voice,"Later, I'll add the actual rent in dollars from the Census Bureau, and wages from the Bureau of Labor Statistics. That's where it gets interesting."
@@ -17,7 +17,7 @@ r09_la_c,voice,Next: the city where even everyday goods cost ten percent more.
 r08_ny_a,voice,Number eight. New York. Your fifty thousand buys what forty-four thousand four hundred dollars would.
 r08_ny_b,voice,"Everyday goods here cost about ten percent more than the national average, the highest of the ten. Median rent: one thousand eight hundred fifty-one dollars a month."
 r08_ny_c,voice,Number seven is expensive too. But keep an eye on that city. It comes back at the end.
-r07_dc_a,voice,"Number seven. Washington, D.C."
+r07_dc_a,voice,"Number seven. Washington, DC."
 r07_dc_b,voice,Forty-five thousand nine hundred dollars of buying power. Prices run about nine percent above average.
 r07_dc_c,voice,The culprit is rent: fifty-one percent above the national average.
 r07_dc_d,voice,Median rent: two thousand thirty-seven dollars a month. But look at the median wage: sixty-eight thousand four hundred thirty dollars. By far the highest of the ten. Remember that number.
